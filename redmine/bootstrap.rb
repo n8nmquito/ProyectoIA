@@ -9,7 +9,9 @@ unless File.exist?(marker)
       # Conservar tipos de tickets, estados y roles existentes.
     end
 
-    admin = User.find_or_initialize_by(login: 'admin')
+    login = ENV.fetch('REDMINE_ADMIN_USER', 'admin')
+    admin = User.find_by(login: login) || User.find_by(login: 'admin') || User.new
+    admin.login = login
     admin.firstname = 'Administrador'
     admin.lastname = 'Redmine'
     admin.mail = ENV.fetch('REDMINE_ADMIN_EMAIL')

@@ -18,7 +18,7 @@ Desde n8n, Redmine se conecta mediante `http://redmine:3000`.
 
 ## 🚀 Inicio rápido
 
-Requisitos: servidor Linux, Docker Engine y Docker Compose v2.
+Requisitos: servidor Linux, Python 3, Docker Engine y Docker Compose v2.
 
 ```bash
 git clone https://github.com/jpinero-dev/mquito-ticket.git
@@ -26,12 +26,13 @@ cd mquito-ticket
 cp .env.example .env
 ```
 
-Completar `.env` siguiendo sus comentarios: dirección del servidor, correo,
-contraseñas, hash bcrypt y claves. Si ya tenés el `.env` preparado para esta
+Completar `.env`: dirección del servidor, puertos, usuarios y contraseñas.
+Si ya tenés el `.env` preparado para esta
 instalación, copialo de forma privada en lugar de reemplazarlo con el ejemplo.
 
 ```bash
 chmod 600 .env
+python3 configurar.py
 docker compose config --quiet
 docker compose build --pull
 docker compose up -d
@@ -44,6 +45,10 @@ docker compose ps
 | Redmine | `http://IP_SERVIDOR:3000` | `admin` |
 
 Las contraseñas se configuran en `.env`. Ese archivo **no se publica en Git**.
+El configurador genera el hash y las claves internas en `.secrets/`, también
+excluida de Git. Usa un contenedor temporal de httpd solo para generar bcrypt;
+al finalizar siguen siendo tres servicios. Si la instalación ya tiene datos,
+conservar y copiar también `.secrets/` antes de ejecutar el configurador.
 HTTP está pensado para red privada o VPN; para acceso público, configurar HTTPS.
 
 ## 📖 Documentación

@@ -3,20 +3,22 @@
 El diseño funcional, los pendientes, las etapas de implementación y las pruebas
 están en [PROCESO_AUTOMATIZACION.md](PROCESO_AUTOMATIZACION.md).
 
-Estructura para copiar a un servidor Linux con Docker Engine y Docker Compose v2.
+Estructura para copiar a un servidor Linux con Python 3, Docker Engine y Docker Compose v2.
 Incluye n8n, Redmine y un único contenedor PostgreSQL con dos bases independientes
 (`n8n` y `redmine`), cada una con su propio usuario. Los tres servicios
 comparten la red `correo-tickets_automatizacion`. Las bases no publican puertos.
 
 ## Instalación en el servidor
 
-1. Copiar esta carpeta completa, incluyendo el archivo oculto `.env`.
+1. Copiar esta carpeta completa, incluyendo `.env` y `.secrets/` si ya existen.
+   Para una instalación nueva desde Git, copiar `.env.example` a `.env`.
 2. Editar `.env`: cambiar `SERVER_HOST=localhost` por la IP o DNS del servidor,
    sin protocolo ni puerto. Cambiar `ADMIN_EMAIL` por un correo propio si corresponde.
 3. Desde la carpeta copiada, ejecutar:
 
 ```bash
 chmod 600 .env
+python3 configurar.py
 docker compose config --quiet
 docker compose build --pull
 docker compose up -d
@@ -29,14 +31,17 @@ El primer arranque puede tardar varios minutos por las migraciones.
 
 PostgreSQL crea ambas bases y sus usuarios mediante `postgres/init-databases.sh`
 solo cuando el volumen `postgres_data` está vacío. Las aplicaciones usan el host
-`postgres` y no tienen permisos de superusuario. `POSTGRES_ADMIN_PASSWORD` en
-`.env` corresponde a la cuenta administrativa de PostgreSQL.
+`postgres` y no tienen permisos de superusuario. `POSTGRES_USER` y
+`POSTGRES_PASSWORD` en `.env` corresponden a la cuenta administrativa de PostgreSQL.
+Las cuentas de aplicación son `n8n` y `redmine`, con sus claves respectivas
+`N8N_DB_PASSWORD` y `REDMINE_DB_PASSWORD`. El puerto interno es 5432;
+PostgreSQL no publica un puerto hacia Internet.
 
 **Si ya desplegaste la configuración anterior con dos contenedores de bases:**
 este cambio no migra sus datos automáticamente. Antes de reemplazarla, detener
 las aplicaciones y respaldar ambas bases con `pg_dump`. Conservar los volúmenes
 anteriores `correo-tickets_n8n_db` y `correo-tickets_redmine_db`, el volumen de n8n,
-los adjuntos y `.env`. Iniciar solo el nuevo servicio `postgres`, restaurar cada
+los adjuntos, `.env` y `.secrets/`. Iniciar solo el nuevo servicio `postgres`, restaurar cada
 respaldo en su base correspondiente y verificar los datos antes de iniciar las
 aplicaciones. No eliminar los volúmenes anteriores hasta comprobar la migración.
 Los comandos de instalación de arriba están destinados a una instalación nueva.
@@ -49,16 +54,21 @@ Los comandos de instalación de arriba están destinados a una instalación nuev
 | Redmine | `http://IP_SERVIDOR:3000` | `admin` | Definida en `.env` |
 
 n8n requiere un email como identificador. Se aprovisiona el propietario mediante
-las variables oficiales de n8n y un hash bcrypt de la contraseña solicitada.
-Ese hash está entre comillas simples en `.env`: conservarlas para que Compose
-no interprete los signos `$`. No se usa la autenticación básica antigua.
-Los datos del propietario se aplican en cada inicio y se administran desde `.env`.
+las variables oficiales de n8n y un hash bcrypt generado desde `ADMIN_PASSWORD`.
+`python3 configurar.py` prepara ese hash y las claves internas en `.secrets/`.
+Para actualizar la clave de n8n, editar `.env`, ejecutar el configurador y luego
+`docker compose up -d`. Las claves de cifrado existentes se conservan.
+Al migrar desde el formato anterior, el configurador también puede recuperar las
+claves internas del viejo `.env`; no borrarlas antes de ejecutar esa migración.
+El parser admite líneas `CLAVE=valor` y valores entre comillas, sin expansión
+de variables. Para contraseñas con `$` o `#`, usar comillas simples en `.env`.
 
 Redmine configura el administrador, los datos iniciales en español y la API REST
 antes de iniciar el servidor web. La marca `files/.admin-bootstrap-v1` evita
 restablecer la contraseña en cada reinicio. Cambiar `ADMIN_PASSWORD` posteriormente
 no modifica una cuenta de Redmine ya inicializada; usar su interfaz para eso.
-Tampoco cambia el hash independiente de n8n.
+El usuario inicial de Redmine se define con `REDMINE_ADMIN_USER`; modificarlo
+en `.env` tampoco renombra una cuenta ya inicializada.
 
 Esta configuración publica HTTP para una red privada o VPN. Para acceso desde
 Internet, configurar HTTPS con un proxy y ajustar en Compose `N8N_PROTOCOL`,
@@ -103,8 +113,8 @@ docker compose down         # retirar contenedores conservando datos
 ```
 
 No usar `docker compose down -v` si se necesitan los datos: elimina los volúmenes.
-Respaldar ambas bases con `pg_dump`, los adjuntos, el volumen de n8n y `.env`.
-Conservar `N8N_ENCRYPTION_KEY`: se necesita para descifrar las credenciales de n8n.
+Respaldar ambas bases con `pg_dump`, los adjuntos, el volumen de n8n, `.env` y `.secrets/`.
+Conservar `.secrets/n8n.env`: contiene la clave para descifrar las credenciales de n8n.
 Las contraseñas de PostgreSQL en `.env` se aplican al inicializar `postgres_data`; editarlas
 después requiere también cambiar la contraseña dentro de PostgreSQL.
 
