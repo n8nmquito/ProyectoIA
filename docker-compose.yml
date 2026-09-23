@@ -1,0 +1,97 @@
+name: correo-tickets
+
+services:
+  postgres:
+    build: ./postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?Configurar .env}
+      N8N_DB_PASSWORD: ${N8N_DB_PASSWORD:?Configurar .env}
+      REDMINE_DB_PASSWORD: ${REDMINE_DB_PASSWORD:?Configurar .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [automatizacion]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U postgres -d postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  n8n:
+    build: ./n8n
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '${BIND_ADDRESS:-0.0.0.0}:${N8N_PORT:-5678}:5678'
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: '5432'
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: n8n
+      DB_POSTGRESDB_PASSWORD: ${N8N_DB_PASSWORD:?Configurar .env}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Configurar .env}
+      N8N_INSTANCE_OWNER_MANAGED_BY_ENV: 'true'
+      N8N_INSTANCE_OWNER_EMAIL: ${ADMIN_EMAIL:?Configurar .env}
+      N8N_INSTANCE_OWNER_FIRST_NAME: Admin
+      N8N_INSTANCE_OWNER_LAST_NAME: Automatizacion
+      N8N_INSTANCE_OWNER_PASSWORD_HASH: ${N8N_OWNER_PASSWORD_HASH:?Configurar .env}
+      N8N_HOST: ${SERVER_HOST:-localhost}
+      N8N_PORT: '5678'
+      N8N_PROTOCOL: http
+      N8N_EDITOR_BASE_URL: http://${SERVER_HOST:-localhost}:${N8N_PORT:-5678}/
+      WEBHOOK_URL: http://${SERVER_HOST:-localhost}:${N8N_PORT:-5678}/
+      N8N_SECURE_COOKIE: 'false'
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: 'true'
+      GENERIC_TIMEZONE: America/Argentina/Buenos_Aires
+      TZ: America/Argentina/Buenos_Aires
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks: [automatizacion]
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:5678/healthz/readiness').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
+
+  redmine:
+    build: ./redmine
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '${BIND_ADDRESS:-0.0.0.0}:${REDMINE_PORT:-3000}:3000'
+    environment:
+      RAILS_ENV: production
+      REDMINE_DB_POSTGRES: postgres
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_DB_USERNAME: redmine
+      REDMINE_DB_PASSWORD: ${REDMINE_DB_PASSWORD:?Configurar .env}
+      SECRET_KEY_BASE: ${REDMINE_SECRET_KEY_BASE:?Configurar .env}
+      REDMINE_ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Configurar .env}
+      REDMINE_ADMIN_EMAIL: ${ADMIN_EMAIL:?Configurar .env}
+      TZ: America/Argentina/Buenos_Aires
+    volumes:
+      - redmine_files:/usr/src/redmine/files
+    networks: [automatizacion]
+    healthcheck:
+      test: [CMD, ruby, -rnet/http, -e, "exit(Net::HTTP.get_response(URI('http://127.0.0.1:3000/login')).code == '200' ? 0 : 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+networks:
+  automatizacion:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  n8n_data:
+  redmine_files:

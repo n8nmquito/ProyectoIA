@@ -1,0 +1,64 @@
+# 📬 Mquito Ticket
+
+Automatización de soporte: **correo → n8n + IA → Redmine**.
+
+Base Docker lista para desplegar en un servidor. La integración de correo e IA
+está planificada y todavía no está implementada.
+
+## 🧩 Qué incluye
+
+| Contenedor | Función | Puerto |
+|---|---|---|
+| **n8n** | Orquestación de automatizaciones | `5678` |
+| **Redmine** | Tickets, con API REST habilitada | `3000` |
+| **PostgreSQL** | Bases `n8n` y `redmine`, con usuarios separados | Solo red interna |
+
+Los tres servicios comparten una red Docker y conservan sus datos en volúmenes.
+Desde n8n, Redmine se conecta mediante `http://redmine:3000`.
+
+## 🚀 Inicio rápido
+
+Requisitos: servidor Linux, Docker Engine y Docker Compose v2.
+
+```bash
+git clone https://github.com/jpinero-dev/mquito-ticket.git
+cd mquito-ticket
+cp .env.example .env
+```
+
+Completar `.env` siguiendo sus comentarios: dirección del servidor, correo,
+contraseñas, hash bcrypt y claves. Si ya tenés el `.env` preparado para esta
+instalación, copialo de forma privada en lugar de reemplazarlo con el ejemplo.
+
+```bash
+chmod 600 .env
+docker compose config --quiet
+docker compose build --pull
+docker compose up -d
+docker compose ps
+```
+
+| Aplicación | Acceso | Usuario |
+|---|---|---|
+| n8n | `http://IP_SERVIDOR:5678` | Correo de `ADMIN_EMAIL` |
+| Redmine | `http://IP_SERVIDOR:3000` | `admin` |
+
+Las contraseñas se configuran en `.env`. Ese archivo **no se publica en Git**.
+HTTP está pensado para red privada o VPN; para acceso público, configurar HTTPS.
+
+## 📖 Documentación
+
+- [Despliegue y mantenimiento](DESPLIEGUE.md): instalación, credenciales,
+  persistencia, migración desde dos PostgreSQL y comandos de operación.
+- [Proceso de automatización](PROCESO_AUTOMATIZACION.md): arquitectura,
+  clasificación con IA, asignación, duplicados y pruebas de aceptación.
+
+## 🛠️ Próximos pasos
+
+- Conectar el buzón de soporte.
+- Crear proyecto, categorías y equipos en Redmine.
+- Implementar correo a ticket con control de duplicados.
+- Incorporar IA, asignación por reglas y seguimiento de respuestas.
+
+**Validación:** configuración revisada estáticamente. El arranque y las pruebas
+de integración se realizarán en el servidor de destino.

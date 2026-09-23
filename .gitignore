@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+*.zip
+*.dump
+*.sql
+backups/
