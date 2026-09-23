@@ -6,7 +6,8 @@ están en [PROCESO_AUTOMATIZACION.md](PROCESO_AUTOMATIZACION.md).
 Estructura para copiar a un servidor Linux con Python 3, Docker Engine y Docker Compose v2.
 Incluye n8n, Redmine y un único contenedor PostgreSQL con dos bases independientes
 (`n8n` y `redmine`), cada una con su propio usuario. Los tres servicios
-comparten la red `correo-tickets_automatizacion`. Las bases no publican puertos.
+comparten la red `correo-tickets_automatizacion`. PostgreSQL publica el puerto
+`POSTGRES_PORT` (5432 por defecto) para acceso externo en esta demo.
 
 ## Instalación en el servidor
 
@@ -34,8 +35,10 @@ solo cuando el volumen `postgres_data` está vacío. Las aplicaciones usan el ho
 `postgres` y no tienen permisos de superusuario. `POSTGRES_USER` y
 `POSTGRES_PASSWORD` en `.env` corresponden a la cuenta administrativa de PostgreSQL.
 Las cuentas de aplicación son `n8n` y `redmine`, con sus claves respectivas
-`N8N_DB_PASSWORD` y `REDMINE_DB_PASSWORD`. El puerto interno es 5432;
-PostgreSQL no publica un puerto hacia Internet.
+`N8N_DB_PASSWORD` y `REDMINE_DB_PASSWORD`. El puerto interno es 5432.
+Para DBeaver o pgAdmin, usar la IP del servidor, el puerto `POSTGRES_PORT`,
+el usuario `POSTGRES_USER`, su `POSTGRES_PASSWORD` y la base `n8n` o `redmine`.
+El firewall del servidor/proveedor debe permitir conexiones TCP al puerto publicado.
 
 **Si ya desplegaste la configuración anterior con dos contenedores de bases:**
 este cambio no migra sus datos automáticamente. Antes de reemplazarla, detener

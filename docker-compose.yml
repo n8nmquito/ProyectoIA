@@ -4,6 +4,8 @@ services:
   postgres:
     build: ./postgres
     restart: unless-stopped
+    ports:
+      - '${BIND_ADDRESS:-0.0.0.0}:${POSTGRES_PORT:-5432}:5432'
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: ${POSTGRES_USER:-postgres}

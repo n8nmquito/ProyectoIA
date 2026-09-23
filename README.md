@@ -11,7 +11,7 @@ está planificada y todavía no está implementada.
 |---|---|---|
 | **n8n** | Orquestación de automatizaciones | `5678` |
 | **Redmine** | Tickets, con API REST habilitada | `3000` |
-| **PostgreSQL** | Bases `n8n` y `redmine`, con usuarios separados | Solo red interna |
+| **PostgreSQL** | Bases `n8n` y `redmine`, con usuarios separados | `5432` |
 
 Los tres servicios comparten una red Docker y conservan sus datos en volúmenes.
 Desde n8n, Redmine se conecta mediante `http://redmine:3000`.
