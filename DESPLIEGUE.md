@@ -122,6 +122,24 @@ Las imágenes de aplicación están fijadas en sus Dockerfiles: n8n `2.40.5` y
 Redmine `6.1.4-bookworm`; PostgreSQL usa la rama `16-bookworm`.
 Actualizar versiones deliberadamente y con respaldo previo.
 
+## Error 429 al descargar n8n
+
+Si `docker.n8n.io` responde `429 Too Many Requests`, el registro está limitando
+las solicitudes. El Dockerfile usa ahora `docker.io/n8nio/n8n:2.40.5`, cuya
+disponibilidad se verificó en Docker Hub, conservando la versión de n8n.
+
+Actualizar y volver a construir en el servidor:
+
+```bash
+git pull --ff-only
+docker compose build --pull
+docker compose up -d
+```
+
+Docker Hub también puede aplicar límites. Si ese registro devuelve 429,
+autenticarse con `docker login` y reintentar cuando permita nuevas solicitudes.
+No hace falta borrar volúmenes ni bases de datos para resolver este error.
+
 ## Validación realizada
 
 Se verificó la sintaxis YAML, las referencias a variables y Dockerfiles, la red

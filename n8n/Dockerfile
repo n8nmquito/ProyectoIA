@@ -1,1 +1,1 @@
-FROM docker.n8n.io/n8nio/n8n:2.40.5
+FROM docker.io/n8nio/n8n:2.40.5
