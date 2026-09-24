@@ -66,7 +66,8 @@ HTTP está pensado para red privada o VPN; para acceso público, configurar HTTP
 - Conectar el buzón de soporte.
 - Crear proyecto, categorías y equipos en Redmine.
 - Probar el flujo con un correo real y sus adjuntos; la prueba manual con Gemini ya pasó.
-- Incorporar control de duplicados, asignación por reglas y seguimiento de respuestas.
+- Incorporar control de duplicados y seguimiento de respuestas; ajustar las reglas
+  de asignación por proyecto y rol ya implementadas.
 
 **Validación:** flujo probado en el servidor con datos ficticios, Gemini y Redmine,
 incluyendo adjuntos y respaldo ante un PDF ilegible. Ver el detalle en la guía del flujo.

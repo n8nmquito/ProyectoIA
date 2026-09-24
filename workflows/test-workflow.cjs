@@ -23,7 +23,9 @@ assert.equal(run('Normalizar correo', { text: 'x'.repeat(17000) }).cuerpo.length
 assert.equal(run('Normalizar correo', { text: 'x'.repeat(17000) }).texto_recortado, true);
 
 const valid = { resumen: 'Acceso bloqueado', descripcion: 'Un usuario no puede entrar.',
-  categoria: 'accesos', prioridad: 'alta', requiere_revision: false, datos_faltantes: [] };
+  categoria: 'accesos', prioridad: 'alta', requiere_revision: false, datos_faltantes: [],
+  project_id: 1, tracker_id: 3, assigned_to_id: 6, membership_id: 2, role_id: 4,
+  motivo_asignacion: 'Rol técnico consultado en la API.' };
 const result = run('Preparar ticket - Intaco', { output: valid }, email);
 assert.equal(result.issue.project_id, 1);
 assert.equal(result.issue.tracker_id, 3);
@@ -35,8 +37,9 @@ assert.match(review.issue.subject, /^\[REVISAR\]/);
 assert.throws(() => run('Preparar ticket - Intaco', { output: { ...valid, prioridad: '__proto__' } }, email), /fuera del catálogo/);
 assert.throws(() => run('Preparar ticket - Intaco', { output: 'not-json' }, email), /JSON válido/);
 const injected = run('Preparar ticket - Intaco', { output: { ...valid, project_id: 999, url: 'http://invalid' } }, email);
-assert.equal(injected.issue.project_id, 1);
+assert.equal(injected.issue.project_id, 999); // Se valida después con GET del proyecto real.
 assert.equal(injected.issue.url, undefined);
+assert.equal(injected.issue.assigned_to_id, undefined); // Solo se aplica tras validar membresía y rol.
 assert.throws(() => run('Resultado del ticket', {}), /no devolvió el ID/);
 assert.equal(run('Resultado del ticket', { issue: { id: 42, subject: 'Prueba' } }).url, 'http://185.208.207.203:3000/issues/42');
 
@@ -44,4 +47,4 @@ assert.equal(wf.active, false);
 assert.ok(wf.nodes.every(n => !n.credentials));
 for (const links of Object.values(wf.connections)) for (const outputs of Object.values(links))
   for (const output of outputs) for (const link of output) assert.ok(byName[link.node]);
-console.log('OK: normalización, límites, validación IA, revisión, mapeos fijos y conexiones.');
+console.log('OK: normalización, límites, validación IA, revisión y conexiones.');
