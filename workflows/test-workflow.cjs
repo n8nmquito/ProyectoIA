@@ -6,7 +6,7 @@ const wf = JSON.parse(fs.readFileSync(path.join(__dirname, 'correo-ia-redmine.js
 const byName = Object.fromEntries(wf.nodes.map(n => [n.name, n]));
 const run = (name, input, previous) => vm.runInNewContext(
   `(function(){${byName[name].parameters.jsCode}\n})()`,
-  { $json: input, $: () => ({ item: { json: previous } }) },
+  { $json: input, $input: { item: { json: input, binary: {} } }, $: () => ({ item: { json: previous } }) },
   { timeout: 1000 },
 ).json;
 

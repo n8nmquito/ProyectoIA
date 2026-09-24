@@ -3,8 +3,10 @@
 Estado: diseño completo del proceso y primera demo creada en n8n, pendiente de credenciales y prueba integral.
 
 Actualización: el [flujo de demostración](workflows/README.md) implementa lectura
-IMAP, análisis con OpenAI y alta en Redmine. Está inactivo y no implementa aún
-deduplicación persistente, asignación, adjuntos ni seguimiento de conversaciones.
+IMAP, análisis con Gemini, descarga y carga de adjuntos, y alta en Redmine.
+Está inactivo y no implementa aún deduplicación persistente, asignación ni
+seguimiento de conversaciones. Los PDF e imágenes compatibles se analizan con IA;
+el resto se adjunta directamente. Ante fallo de IA, crea un ticket para revisión.
 Las tablas y etapas siguientes describen el plan completo original.
 Fecha: 23 de septiembre de 2026.
 
