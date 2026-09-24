@@ -1,6 +1,11 @@
 # Automatización de correos de soporte con n8n, IA y Redmine
 
-Estado: diseño del proceso; automatización pendiente de implementar.
+Estado: diseño completo del proceso y primera demo creada en n8n, pendiente de credenciales y prueba integral.
+
+Actualización: el [flujo de demostración](workflows/README.md) implementa lectura
+IMAP, análisis con OpenAI y alta en Redmine. Está inactivo y no implementa aún
+deduplicación persistente, asignación, adjuntos ni seguimiento de conversaciones.
+Las tablas y etapas siguientes describen el plan completo original.
 Fecha: 23 de septiembre de 2026.
 
 ## 1. Objetivo y alcance

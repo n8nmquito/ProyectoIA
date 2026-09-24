@@ -2,8 +2,8 @@
 
 Automatización de soporte: **correo → n8n + IA → Redmine**.
 
-Base Docker lista para desplegar en un servidor. La integración de correo e IA
-está planificada y todavía no está implementada.
+Base Docker y flujo de demostración de correo con IA, guardado en n8n y listo
+para completar las credenciales y realizar la prueba de integración.
 
 ## 🧩 Qué incluye
 
@@ -52,6 +52,9 @@ conservar y copiar también `.secrets/` antes de ejecutar el configurador.
 HTTP está pensado para red privada o VPN; para acceso público, configurar HTTPS.
 
 ## 📖 Documentación
+
+- [Configurar el flujo de n8n](workflows/README.md): credenciales pendientes,
+  prueba manual y activación; incluye el JSON importable sin secretos.
 
 - [Despliegue y mantenimiento](DESPLIEGUE.md): instalación, credenciales,
   persistencia, migración desde dos PostgreSQL y comandos de operación.
