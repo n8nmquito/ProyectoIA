@@ -53,6 +53,8 @@ HTTP está pensado para red privada o VPN; para acceso público, configurar HTTP
 
 ## 📖 Documentación
 
+- [Guía simple de nodos y parámetros](workflows/GUIA_CONFIGURACION.md): cómo
+  configurar correo, Gemini, clave API, adjuntos, asignación y activación.
 - [Configurar el flujo de n8n](workflows/README.md): credenciales pendientes,
   prueba manual y activación; incluye el JSON importable sin secretos.
 

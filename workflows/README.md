@@ -2,6 +2,9 @@
 
 [**Abrir el flujo en n8n**](http://185.208.207.203:5678/workflow/opxBwpGpRDrbQeHn)
 
+[**Guía simple de configuración:** parámetros de los nodos, credenciales,
+activación y solución de errores](GUIA_CONFIGURACION.md).
+
 El flujo está guardado **sin activar**. La copia `correo-ia-redmine.json` es
 importable y no incluye credenciales. La instancia usa Gemini; el antiguo nodo
 OpenAI permanece desconectado y no participa.
