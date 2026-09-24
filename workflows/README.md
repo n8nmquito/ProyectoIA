@@ -15,9 +15,12 @@ servidor, sin activar:
    este acceso IMAP, reemplazar el disparador por el conector de Gmail/Microsoft.
 2. **OpenAI - Cargar API key:** crear/seleccionar una credencial OpenAI y pegar
    la API key. El modelo configurado es `gpt-4.1-mini`, editable.
-3. **Crear ticket en Redmine:** crear/seleccionar una credencial **Basic Auth**
-   con un usuario de Redmine que pueda crear peticiones en el proyecto Intaco.
-   El flujo no contiene contraseñas. La API REST ya respondió durante la revisión.
+3. **Crear ticket en Redmine:** crear/seleccionar una credencial **Header Auth**:
+   - **Name:** `X-Redmine-API-Key`
+   - **Value:** pegar la clave API de Redmine, disponible en **Mi cuenta → Clave
+     de acceso de la API**, de un usuario que pueda crear peticiones en Intaco.
+   Guardar y seleccionar esa credencial en el nodo. La clave queda en el almacén
+   de credenciales de n8n; no pegarla en el JSON ni en un encabezado de texto fijo.
 
 La URL de creación es `http://redmine:3000/issues.json`, accesible desde la red
 Docker de esta instalación. La URL para las personas es

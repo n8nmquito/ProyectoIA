@@ -158,7 +158,7 @@
         "method": "POST",
         "url": "http://redmine:3000/issues.json",
         "authentication": "genericCredentialType",
-        "genericAuthType": "httpBasicAuth",
+        "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
@@ -177,7 +177,7 @@
           }
         }
       },
-      "notes": "Cargar credencial Basic Auth de Redmine. URL interna de la red Docker; acceso web: http://185.208.207.203:3000. Sin reintento automático del POST para evitar duplicados ante un timeout.",
+      "notes": "Crear o seleccionar credencial Header Auth. Name: X-Redmine-API-Key. Value: pegar la clave API de Redmine (Mi cuenta → Clave de acceso de la API). La clave se guarda en la credencial, no en el cuerpo JSON. URL interna: http://redmine:3000/issues.json. Sin reintentos automáticos del POST.",
       "notesInFlow": true,
       "retryOnFail": false
     },
@@ -205,7 +205,7 @@
         -120
       ],
       "parameters": {
-        "content": "## Correo → IA → Redmine\n**Borrador: completar 3 credenciales antes de ejecutar/publicar.**\n1. IMAP del buzón.\n2. API key en el modelo OpenAI.\n3. Basic Auth en el nodo Redmine.\nProyecto: **Intaco**, tipo: **Soporte**.\nUsar Prueba manual para un correo ficticio ([DEMO]).",
+        "content": "## Correo → IA → Redmine\n**Borrador: completar 3 credenciales antes de ejecutar/publicar.**\n1. IMAP del buzón.\n2. API key en el modelo OpenAI.\n3. Header Auth en Redmine: Name = X-Redmine-API-Key; Value = tu clave API.\nProyecto: **Intaco**, tipo: **Soporte**.\nUsar Prueba manual para un correo ficticio ([DEMO]).",
         "height": 260,
         "width": 610,
         "color": 5
