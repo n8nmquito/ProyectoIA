@@ -101,24 +101,6 @@ al finalizar siguen siendo tres servicios. Si la instalación ya tiene datos,
 conservar y copiar también `.secrets/` antes de ejecutar el configurador.
 HTTP está pensado para red privada o VPN; para acceso público, configurar HTTPS.
 
-## Documentación
-
-- [Datos y restricciones de uso](python/data/README.md): corpus de 300 y
-  datasets por tamaño. Los 100 iniciales y sus derivados se mantienen sin
-  publicar mientras no se confirme su autorización de redistribución.
-- [Clasificador Python TF-IDF + SVM calibrada](python/README.md): cuatro modelos,
-  datasets, consola, Streamlit, API y evidencias. `classifier/` conserva el
-  experimento anterior y no es el clasificador activo del flujo.
-- [Guía simple de nodos y parámetros](workflows/GUIA_CONFIGURACION.md): cómo
-  configurar correo, API Python, OpenAI, adjuntos, asignación y activación.
-- [Flujo de n8n](workflows/README.md): versión integrada y JSON importable
-  inactivo sin credenciales; el flujo existente en el servidor está activo.
-
-- [Despliegue y mantenimiento](DESPLIEGUE.md): instalación, credenciales,
-  persistencia, migración desde dos PostgreSQL y comandos de operación.
-- [Proceso de automatización](PROCESO_AUTOMATIZACION.md): arquitectura,
-  clasificación con IA, asignación, duplicados y pruebas de aceptación.
-
 ## Próximos pasos
 
 - Completar la revisión humana de etiquetas de los mismos 25 casos conocidos.
