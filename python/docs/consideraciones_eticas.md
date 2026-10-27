@@ -30,10 +30,10 @@ No se debe denegar atención por una categoría o confianza automática.
 
 ## 3. Privacidad, servicios externos y redistribución
 
-La autorización para redistribuir los 100 correos
-iniciales no está confirmada. Se mantienen sin publicar. La licencia MIT del
-código no autoriza por sí sola el corpus ni sus derivados. El .gitignore excluye
-raw, processed, datasets de entrenamiento, hoja de revisión y modelos; también
+La responsable del proyecto indicó incluir en Git el corpus maestro y los
+cuatro datasets de entrenamiento. La licencia MIT del código no se extiende
+automáticamente al corpus ni sus derivados. El .gitignore mantiene excluidos
+las particiones procesadas, la hoja de revisión y los modelos; también
 resultados que contienen texto original. Antes de publicar notebooks, capturas,
 informes o paquetes debe revisarse que no reproduzcan registros no autorizados.
 

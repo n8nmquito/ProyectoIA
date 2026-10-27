@@ -44,5 +44,5 @@ presentarse como evidencia de generalización a entradas nuevas.
 
 OpenAI puede recibir texto, adjuntos seleccionados y respuestas de herramientas.
 La limpieza de Python no anonimiza esas entradas. No hay auditoría de privacidad
-ni cumplimiento normativo demostrado del sistema completo. El corpus inicial
-no se publica porque su autorización no está confirmada.
+ni cumplimiento normativo demostrado del sistema completo. El corpus maestro y los cuatro datasets de entrenamiento se incluyen en Git
+por indicación de la responsable del proyecto; los modelos siguen excluidos.

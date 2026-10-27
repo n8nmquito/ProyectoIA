@@ -1,0 +1,502 @@
+[
+  {
+    "titulo": "Otra vez la clave... no me deja trabajar",
+    "cuerpo": "Cambié la contraseña esta mañana como pedía el sistema y ahora no la acepta. Probé escribirla a mano y sigue igual. Esto ya me pasó la semana pasada. Tengo clientes esperando cotización y necesito una solución, no volver a reiniciar por tercera vez. ¿Me confirman quién lo ve?\n\nLo que más preocupa es que después del cambio apareció primero «clave inválida» y luego «cuenta bloqueada». No sé si el bloqueo es consecuencia de los intentos o si la clave nunca se actualizó. Por favor, revisen ambas cosas.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "La sesión se vence cada cinco minutos",
+    "cuerpo": "Desde ayer JDE me expulsa y vuelve a pedir usuario mientras estoy cargando asientos. El resto de las páginas funciona. No sé si guarda lo que estaba haciendo y temo duplicarlo cuando vuelvo a entrar. ¿Pueden revisar la sesión y decirme cómo continuar sin repetir datos?\n\nSucede especialmente cuando paso varios minutos completando líneas antes de guardar. No podemos afirmar que se haya perdido la operación: necesitamos distinguir entre una sesión vencida y una transacción confirmada cuya respuesta no llegó al navegador.\n\nAdjunto secuencia_sesion.log para apoyar la revisión.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Cuenta de prueba deshabilitada antes de terminar",
+    "cuerpo": "La cuenta del entorno de pruebas quedó deshabilitada hoy. Nos faltan validar dos escenarios de compras y la vigencia acordada era hasta fin de semana. Producción no está afectada. ¿Pueden revisar la fecha de vencimiento y gestionar la extensión con quien corresponda?\n\nLa solicitud es extender el acceso existente, no copiar permisos de producción. Si la extensión requiere otra autorización, podemos reprogramar las validaciones; preferimos no cambiar de usuario a mitad de la prueba porque perderíamos trazabilidad.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Usuario nuevo sin acceso a la sucursal correcta",
+    "cuerpo": "La cuenta nueva ingresa a JDE, pero solo muestra la sucursal de capacitación. Necesitamos operar en la unidad [referencia omitida]. No hemos registrado movimientos porque podrían quedar en una unidad incorrecta. Solicito revisar la asociación del perfil antes de comenzar las tareas.\n\nLa diferencia entre sucursales también cambia el depósito disponible. No sabemos si el problema está en el perfil o en una preferencia guardada del usuario; solicitamos revisar ambas posibilidades sin registrar movimientos de prueba en la unidad equivocada.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "JDE reconoce mi usuario pero no mi rol",
+    "cuerpo": "Después del cambio de turno puedo iniciar sesión, pero JDE muestra un rol distinto al habitual y no permite confirmar consumos. Todavía no registré ninguna operación. Solicito revisar el perfil asignado a mi cuenta antes de continuar con la producción de prueba.\n\nAlgunos menús siguen visibles, lo que hace difícil saber si estamos usando el rol correcto. Antes de habilitar opciones nuevas, necesitamos confirmar el rol esperado para este turno y retirar cualquier asignación que no corresponda.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "NO puedo ingresar y nadie me confirma nada",
+    "cuerpo": "Llevo desde el comienzo del turno intentando entrar a JDE. El mensaje es «cuenta inactiva», no un problema de conexión. Ya avisé por el canal de soporte y sigo sin confirmación. Necesito saber quién toma el caso y cuándo habrá una actualización; el despacho está esperando mi registro.\n\nSé que un bloqueo individual no significa que todo el sistema esté caído, pero necesitamos una respuesta concreta para repartir las tareas. Si falta autorización del área, díganlo de una vez y la gestionamos por el canal correspondiente.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Factura con descuento calculado dos veces",
+    "cuerpo": "En la factura de prueba [referencia omitida] el descuento parece aplicarse dos veces. El subtotal se ve correcto, pero el total final no coincide con el cálculo esperado. Ocurre con el mismo tipo de descuento en dos documentos. Detuvimos la emisión para evitar nuevos comprobantes incorrectos.\n\nEl precio unitario y la cantidad están bien antes de confirmar. La diferencia aparece al recalcular el documento. Necesitamos separar descuento, impuesto y redondeo para identificar en qué paso se duplica el efecto, sin modificar el comprobante ya registrado.\n\nAdjunto revision_calculo.txt para apoyar la revisión.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "No deja guardar el proveedor nuevo",
+    "cuerpo": "Cargué los datos del proveedor [referencia omitida] y al guardar dice que falta un dato obligatorio, pero no señala cuál. Revisé los campos marcados y están completos. ¿Pueden indicar qué validación está fallando? Llevo bastante tiempo cargando lo mismo.\n\nEl aviso aparece al final y no resalta ningún campo. Si hay una validación dependiente del país o del tipo de proveedor, necesitamos que se informe antes de perder la carga. Podemos reproducirlo con datos sin información personal.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "El informe del cierre sale vacío",
+    "cuerpo": "Los movimientos se ven en JDE, pero el informe del cierre no trae filas para el período 2026-09. Probamos con dos usuarios y distintos filtros. Necesitamos entregar el cierre esta tarde. Por favor revisen la generación del informe; no solicitamos cambiar los movimientos.\n\nLa selección del período parece correcta, aunque no sabemos si el reporte aplica una fecha distinta a la de la consulta. Necesitamos comparar los criterios y la versión ejecutada; mientras tanto conservaremos el resultado vacío como evidencia del caso.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "error al ingresar decimales en el costo",
+    "cuerpo": "buen dia, si pongo 12,50 en el costo el sistema toma 1250. si uso punto me rechaza el campo. me pasa en dos articulos y no se cual formato espera despues del cambio de pantalla. pare la carga para no dejar importes equivocados.\n\nno cambie la configuracion regional del equipo. si el formato depende del navegador o del perfil de jde, necesitamos una indicacion clara antes de continuar. no vamos a probar valores distintos sobre articulos ya usados en operaciones.\n\nAdjunto formatos_ingreso.txt para apoyar la revisión.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "JDE no acepta el lote aunque existe",
+    "cuerpo": "Al confirmar un consumo el sistema informa «lote inexistente», pero el lote [referencia omitida] aparece en consulta y tiene saldo. Verificamos artículo y sucursal. No hicimos ajustes de inventario. Solicitamos revisar la validación del lote en esa operación.\n\nTambién revisamos que el lote no esté seleccionado desde otra sucursal. No descartamos una diferencia de estado o ubicación, pero preferimos que soporte confirme la restricción exacta antes de liberar o cambiar el lote manualmente.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "orden de compra queda pendiente y no avansa",
+    "cuerpo": "hola, la orden [referencia omitida] ya tiene las aprobaciones que vemos en pantalla pero sigue pendiente. no sale error y no se mueve al siguiente estado. me paso con otras dos hoy. pueden revisar el proceso? no quiero duplicar las ordenes para salir del paso.\n\nen el historial vemos una aprobacion, pero no podemos asegurar que sea la ultima requerida. si falta otra instancia queremos saber cual; si el proceso quedo trabado, necesitamos que revisen antes de forzar un estado manualmente.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Recepción parcial queda como completa",
+    "cuerpo": "Recibimos 6 unidades de una orden de 10 en el entorno de prueba y JDE la marca como completa. Quedan 4 pendientes según el proveedor. Solicitamos revisar el estado antes de registrar más recepciones; no queremos cerrar una orden que todavía tiene saldo.\n\nEl saldo pendiente no coincide con el estado de cierre. Si el cierre es automático por una tolerancia configurada, necesitamos conocer esa regla; si no corresponde, revisar la transición sin alterar las cantidades que ya fueron recibidas.\n\nAdjunto recepcion_parcial.json para apoyar la revisión.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Error al anular un documento de prueba",
+    "cuerpo": "Al intentar anular [referencia omitida] mediante la opción habitual aparece una excepción. El documento sigue visible y no sabemos si se generó alguna reversión. Suspendimos nuevos intentos. Solicitamos revisar el resultado de la transacción y confirmar los pasos para continuar.\n\nLa consulta no muestra una reversión nueva, pero podría existir un retraso de actualización. Necesitamos revisar los movimientos relacionados antes de repetir la anulación. También hace falta confirmar si la excepción ocurrió antes o después de la confirmación de la transacción.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Carga duplicada de novedades por interfaz",
+    "cuerpo": "La interfaz procesó dos veces una misma novedad de prueba con referencia [referencia omitida]. Los dos mensajes tienen la misma referencia de negocio. Solicitamos revisar la idempotencia y el tratamiento del reintento; por ahora pausamos el envío del lote para no generar más duplicados.\n\nLos mensajes tienen referencias de negocio iguales, pero identificadores de transporte distintos. Necesitamos saber qué clave usa el receptor para reconocer duplicados y qué ocurrió cuando el primer envío perdió su respuesta. La pausa evita repetir el problema con el resto del lote.\n\nAdjunto secuencia_reintento.log para apoyar la revisión.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Necesito corregir una unidad de medida",
+    "cuerpo": "Cargamos una línea en cajas cuando debía registrarse en unidades. Es la recepción [referencia omitida]. Todavía no hubo consumo del material. Solicito el procedimiento de corrección y las validaciones de saldo que debemos realizar después.\n\nAdemás de corregir el documento, necesitamos comprobar la conversión en stock y el costo asociado. Si corresponde anular y volver a cargar, solicitamos conservar ambas referencias y revisar que no queden reservas o saldos intermedios.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "El proceso nocturno dejó registros pendientes",
+    "cuerpo": "Al revisar la ejecución nocturna encontramos varias novedades en estado pendiente y una finalización con advertencias. No hay caída visible del sistema. Las referencias son del lote [referencia omitida]. Necesitamos identificar qué se procesó antes de relanzar el lote.\n\nEl estado final del proceso no alcanza para decidir qué reenviar. Necesitamos separar registros confirmados, rechazados y no iniciados. Por favor indiquen si existe un punto de recuperación y cómo evitar que los confirmados se vuelvan a registrar.\n\nAdjunto estados_lote.txt para apoyar la revisión.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "No se guarda el comentario de aprobación",
+    "cuerpo": "El estado de aprobación cambia correctamente, pero el comentario que escribimos desaparece al consultar de nuevo. Se reproduce con dos usuarios en QA. La observación es necesaria para justificar una excepción. Solicitamos revisar el guardado del comentario y su trazabilidad.\n\nLa aprobación sin comentario complica justificar por qué se aceptó la excepción. No queremos registrar otra aprobación solo para agregar el texto. Necesitamos una corrección trazable y verificar si el comentario se pierde antes o después de guardar.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Falla al ingresar una devolución parcial",
+    "cuerpo": "La devolución de una sola línea del pedido [referencia omitida] intenta revertir el importe de todo el pedido. No confirmamos la operación. El cliente de prueba solicita devolver solo un artículo. Necesitamos revisar la pantalla antes de completar la devolución.\n\nLa pantalla selecciona una línea, pero el resumen parece tomar el total del encabezado. Necesitamos validar qué importe se enviaría realmente al confirmar. Hasta tener respuesta no vamos a completar la devolución ni compensarla con otro documento.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Validación de dirección demasiado corta",
+    "cuerpo": "El formulario rechaza una dirección por longitud, aunque la pantalla permite escribirla completa. No queremos abreviar datos sin un criterio definido. ¿Pueden confirmar la longitud admitida y revisar que el mensaje indique claramente el límite antes de guardar?\n\nLa longitud parece contarse distinto cuando hay caracteres acentuados. Necesitamos que el límite se aplique de manera consistente entre pantalla y servicio. Si existe una restricción de negocio, pedimos una pauta de abreviación validada por el área.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "El servicio cambia el separador decimal",
+    "cuerpo": "El consumidor envía el importe 125.50, pero la respuesta de la interfaz muestra 12550. La captura del mensaje de prueba confirma el valor original. El error se reproduce solo en una operación BSSV. Solicitamos revisar la transformación del campo y su formato.\n\nQueremos confirmar si el servicio está interpretando el valor como texto con una configuración regional diferente. El control debe cubrir entrada y salida. Corregir solo la visualización dejaría abierta la posibilidad de guardar un importe incorrecto.\n\nAdjunto transformacion_importe.json para apoyar la revisión.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Fecha contable cambia al confirmar",
+    "cuerpo": "Seleccionamos la fecha del período abierto, pero al confirmar el asiento se muestra el día siguiente. Lo detectamos en QA antes de continuar las pruebas. Necesitamos revisar la conversión de fecha y hora, porque afecta en qué período queda registrado el movimiento.\n\nLa operación se realiza cerca del cambio de día y el navegador y el servidor podrían usar zonas horarias distintas. Necesitamos comparar el valor enviado con el registrado, sin modificar las fechas de otros documentos que sí están correctos.\n\nAdjunto control_fechas.txt para apoyar la revisión.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Corrección de sucursal en pedido ya registrado",
+    "cuerpo": "El pedido [referencia omitida] quedó registrado en una sucursal equivocada. No se despachó ni facturó. Necesitamos saber si corresponde anular y volver a cargar o aplicar una corrección autorizada. Solicitamos mantener la referencia entre ambos documentos para auditoría.\n\nLa sucursal afecta el depósito y la posterior facturación. Necesitamos revisar esas dependencias antes de cualquier corrección. Si se anula el pedido, también confirmar el efecto sobre reservas y mantener la referencia necesaria para el seguimiento comercial.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "BSSV caído, no responde ninguna operación",
+    "cuerpo": "Desde las 10:15 no responde el endpoint de BSSV del entorno QA. También falla la consulta del WSDL y los consumidores terminan por timeout. No tenemos una respuesta funcional de error. Solicitamos revisar disponibilidad del servicio y conectividad antes de reenviar mensajes pendientes.\n\nLa pausa de consumidores evitó nuevos envíos, pero hay operaciones anteriores sin respuesta confirmada. Recuperar disponibilidad no autoriza reenviarlas automáticamente. Necesitamos primero revisar qué solicitudes llegaron a JDE y acordar una reanudación que evite duplicados.\n\nAdjunto disponibilidad_bssv.log para apoyar la revisión.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "No abre JDE en toda la oficina",
+    "cuerpo": "Desde el corte de energía nadie del área puede abrir JDE ni el servidor de archivos. Tampoco funciona la red por cable en esos puestos. En otra oficina sí acceden. Necesitamos revisar el segmento de red; no parece un bloqueo de usuarios individuales.\n\nAlgunos puestos conservan una sesión abierta, pero ninguna consulta nueva termina. Eso podría confundirse con que JDE sigue disponible. Necesitamos que la revisión incluya conectividad, no solo la pantalla que quedó abierta antes del corte.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Timeout hacia BSSV desde un solo servidor",
+    "cuerpo": "El servidor consumidor [referencia omitida] no consigue conexión al puerto publicado de BSSV. Desde otro servidor de pruebas el mismo endpoint responde. Solicitamos revisar ruta y reglas de red entre ambos equipos. No se observó una excepción de negocio en la aplicación.\n\nEl mismo consumidor llega a otros servicios, por lo que no parece una pérdida total de red. Necesitamos revisar la ruta específica y comparar desde ambos orígenes. No vamos a sustituir la dirección por una IP fija sin confirmar el cambio.\n\nAdjunto comparacion_conectividad.json para apoyar la revisión.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El servidor se quedó sin espacio",
+    "cuerpo": "La monitorización del entorno QA indica espacio disponible casi agotado en el volumen de registros. Los servicios comenzaron a responder lentamente. Solicitamos revisar capacidad y retención según el procedimiento; no hemos borrado archivos ni reiniciado servicios por nuestra cuenta.\n\nTambién necesitamos revisar si los registros dejan de escribirse cuando se agota el espacio. Si se aplica limpieza, debe respetar retención y evidencias del incidente. La acción inmediata debería acompañarse de una medida para evitar que el volumen vuelva a llenarse.\n\nAdjunto revision_capacidad.txt para apoyar la revisión.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "No prende el equipo donde cargamos recepciones",
+    "cuerpo": "Al comenzar el turno la computadora no encendió. No hay luces ni ventilador y ya probamos el enchufe con otro equipo. No llegamos a abrir JDE. Necesitamos un puesto alternativo o revisión del equipo para no seguir demorando las recepciones.\n\nSi nos asignan otro puesto, necesitaremos confirmar que tenga el acceso y la impresora correctos antes de comenzar. No queremos trasladar el problema a una carga hecha bajo otro usuario ni perder la referencia de los movimientos pendientes.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Servicio BSSV reinicia y vuelve a caer",
+    "cuerpo": "El servicio de pruebas vuelve a estar indisponible pocos minutos después de recuperar respuesta. El registro operativo informa varios reinicios y aumento de memoria. Solicitamos revisar la estabilidad del proceso y su capacidad, sin asumir que otro reinicio resuelve la causa.\n\nNo alcanza con observar que el puerto abrió unos segundos. Necesitamos una ventana de estabilidad y confirmar si quedaron procesos anteriores activos. Mientras se investiga, los consumidores seguirán pausados para no aumentar la carga ni multiplicar reintentos.\n\nAdjunto estabilidad_servicio.log para apoyar la revisión.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Conexión VPN cae a los pocos minutos",
+    "cuerpo": "La VPN conecta correctamente, pero se desconecta a los pocos minutos en varios equipos remotos. Las credenciales son aceptadas. JDE queda inaccesible hasta volver a conectar. Solicitamos revisar estabilidad del enlace; evitamos confirmar operaciones mientras se interrumpe la comunicación.\n\nLa desconexión no ocurre siempre al mismo tiempo y algunos usuarios vuelven a conectarse de inmediato. Necesitamos comparar estabilidad del enlace y del servicio de acceso remoto. También indicar cómo comprobar una operación interrumpida sin repetirla automáticamente.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Consulta por la próxima capacitación de JDE",
+    "cuerpo": "Buen día. Queremos coordinar una capacitación para el equipo que comenzará a usar JDE el mes próximo. No reportamos una falla ni pedimos cambios de acceso en este correo. ¿Pueden indicar fechas disponibles y qué información debemos enviar para organizarla?\n\nNos gustaría cubrir ingreso de datos, correcciones autorizadas y cómo reconocer que una operación no terminó. No necesitamos acceso a información de clientes para la capacitación. Podemos trabajar con casos preparados y definir previamente qué roles debe tener cada participante.\n\nAdjunto temario_capacitacion.txt para apoyar la revisión.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "¿Nos confirman la ventana de mantenimiento?",
+    "cuerpo": "Necesitamos confirmar el horario del mantenimiento anunciado para el entorno de pruebas y qué servicios estarán incluidos. Por ahora funcionan normalmente. Queremos organizar las validaciones de JDE y BSSV para no iniciarlas durante la interrupción prevista.\n\nTambién necesitamos saber qué hacer con los procesos automáticos durante la ventana y quién confirma la recuperación. Una hora de fin estimada no alcanza para reanudar interfaces si no se validó que el servicio y sus dependencias estén disponibles.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Información sobre el cambio que viene",
+    "cuerpo": "¿Podrían compartir el alcance del próximo cambio en la pantalla de recepción y el calendario de validación? El entorno actual funciona. Queremos preparar los escenarios antes de que esté disponible la nueva versión y saber dónde registrar las observaciones.\n\nNecesitamos conocer qué campos y validaciones cambian para preparar casos positivos y negativos. Si también se modifica una interfaz, debemos coordinar las versiones. Preferimos aclarar estas dependencias antes de aprobar la actualización y no durante la puesta en marcha.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Necesito rol de consulta para auditoría",
+    "cuerpo": "Me incorporé al equipo auditor y puedo iniciar sesión, pero no tengo habilitada la consulta del libro mayor. Mi responsable aprobó un rol de lectura sin permisos para contabilizar. Por favor tramiten esa autorización y confirmen la vigencia que quedará registrada.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Baja de cuenta de proveedor al finalizar contrato",
+    "cuerpo": "Terminó el período de trabajo del consultor externo. El responsable del servicio solicita deshabilitar su usuario y retirar las sesiones activas conforme al procedimiento de bajas. No es una falla del sistema; necesitamos evitar que conserve permisos una vez terminado el contrato.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Mi sesión fue cerrada y pide revalidar la identidad",
+    "cuerpo": "El inicio de sesión informa que mi cuenta necesita una nueva comprobación después de un cambio de contraseña. La aplicación está disponible para el resto del equipo. ¿Pueden indicarme el canal para completar la validación y recuperar mis sesiones de trabajo?",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "No puedo conectar la VPN con mi usuario",
+    "cuerpo": "El cliente de VPN alcanza el servidor y presenta la pantalla de autenticación, pero rechaza mi cuenta con el mensaje usuario no habilitado. El administrador confirmó que el servicio está operativo. Solicito revisar la pertenencia de mi usuario al grupo de conexión remota.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Alta de usuario temporal para inventario",
+    "cuerpo": "El sábado participará una persona de apoyo en el conteo. Necesita una cuenta individual que permita consultar y registrar cantidades durante esa jornada, con vencimiento al finalizar. El supervisor está disponible para aprobarla. No queremos utilizar las credenciales de otro colaborador.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "El enlace compartido exige una autorización adicional",
+    "cuerpo": "Un compañero me compartió el tablero de indicadores. Puedo abrir la plataforma, pero el tablero muestra que no tengo permiso para verlo. El propietario indicó que debería acceder como lector. ¿Pueden revisar la asignación sin publicar el tablero para toda la organización?",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Cuenta de servicio sin permiso para consultar el catálogo",
+    "cuerpo": "La integración se autentica correctamente y el endpoint de salud responde. Al consultar el catálogo devuelve forbidden para la cuenta técnica, mientras otra cuenta autorizada completa la operación. Revisen el alcance de sus credenciales y los permisos concedidos; no incluyo secretos en este mensaje.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "El entorno de pruebas no reconoce mi cuenta",
+    "cuerpo": "Puedo entrar a producción con mi usuario, pero el entorno de pruebas informa que la identidad no está registrada. El responsable del ambiente indicó que el alta debe aprobarse por separado. Necesito esa cuenta para validar cambios sin utilizar usuarios compartidos.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Solicitud de acceso a un buzón de equipo",
+    "cuerpo": "Ingresé al equipo de compras y debo atender su buzón compartido. Mi correo personal funciona, pero el buzón del área no está entre los recursos autorizados. El responsable puede aprobar lectura y respuesta en nombre del equipo, sin compartir una contraseña común.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "La contraseña inicial del alta ya venció",
+    "cuerpo": "Recibí una cuenta nueva y no alcancé a completar el primer ingreso dentro del plazo. Ahora el enlace de activación indica expirado. Necesito que se reemita siguiendo el procedimiento de identidad; el portal sí está disponible y otras personas están ingresando.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Error de usuario deshabilitado al abrir el escritorio remoto",
+    "cuerpo": "El servidor acepta conexiones y mis compañeros entran normalmente. Cuando uso mi identidad aparece que la cuenta no tiene permitido iniciar sesión remota. ¿Pueden revisar el grupo autorizado y la vigencia de mi usuario? Necesito el permiso correspondiente a mi puesto.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Guardar una recepción genera dos registros",
+    "cuerpo": "Al confirmar una recepción una sola vez aparecen dos movimientos con el mismo detalle. Ya lo reprodujimos con un usuario autorizado en pruebas y sin interrupciones de red. Detuvimos las confirmaciones para no duplicar stock. Solicitamos revisar la lógica de guardado y la idempotencia de la operación.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Conexión inalámbrica se pierde en la sala de reuniones",
+    "cuerpo": "Las computadoras y los teléfonos se desconectan al entrar a la sala, aunque siguen funcionando en el pasillo. El punto de acceso reinicia sus luces cada pocos minutos. No cambia al usar otra cuenta. Pedimos revisar cobertura, alimentación y estabilidad del equipo inalámbrico.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Servicios lentos por saturación del enlace",
+    "cuerpo": "Varios sistemas tardan en responder desde la sucursal durante las transferencias grandes. El monitoreo muestra el enlace de salida al máximo de su capacidad, sin errores funcionales en los servidores. Necesitamos revisar el tráfico y la capacidad de red para recuperar tiempos de respuesta normales.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El servicio de base de datos quedó detenido",
+    "cuerpo": "Varias aplicaciones informan que no pueden conectar con la base. En el servidor se observa que el servicio está detenido tras el reinicio de mantenimiento. No hubo cambios de contraseñas ni de permisos. Necesitamos recuperar el servicio y verificar su disponibilidad con el procedimiento operativo.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Disco del servidor reporta errores de hardware",
+    "cuerpo": "El arreglo de discos indica estado degradado y uno de los dispositivos muestra fallas de lectura. Los servicios todavía están disponibles. Solicitamos intervención preventiva, revisión de los respaldos y reemplazo según el procedimiento del fabricante antes de que se pierda la redundancia.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El escáner no es detectado por ningún puesto",
+    "cuerpo": "Al conectar el escáner a dos computadoras no aparece como dispositivo disponible. Probamos cables distintos y otras conexiones funcionan. El panel del equipo muestra un error al iniciar. Solicitamos revisión del hardware y de su interfaz, sin modificar permisos de los usuarios.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El equipo pierde conexión al mover el cable",
+    "cuerpo": "La conexión de red del puesto cae cuando se mueve el conector. El mismo usuario funciona por inalámbrico y el problema se repite con otra computadora en esa toma. Pido revisar el punto de red y reemplazar el cable defectuoso antes de volver a conectar el puesto.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El respaldo existe pero falla la restauración de prueba",
+    "cuerpo": "En la prueba programada, el software no logra leer bloques del dispositivo donde están las copias. La tarea de respaldo había terminado sin alertas. Necesitamos comprobar integridad del medio y disponer de una copia verificable; no queremos asumir que los archivos son recuperables solo porque figuran en el catálogo.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Propuesta para agregar un filtro por proveedor",
+    "cuerpo": "El listado actual cumple con el proceso, pero sería útil contar con un filtro adicional por proveedor. Solicitamos evaluar esa mejora para una versión futura. No hay información incorrecta ni un defecto que impida trabajar; buscamos reducir pasos en la consulta habitual.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Presupuesto para renovar equipos el próximo año",
+    "cuerpo": "Estamos preparando el presupuesto y necesitamos una estimación de costos para renovar los puestos del área durante el siguiente ejercicio. Los equipos actuales están operativos. Queremos conocer alternativas de compra y criterios de dimensionamiento antes de presentar la solicitud formal.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Coordinar una demostración del módulo nuevo",
+    "cuerpo": "El área comercial quiere conocer las funciones del módulo antes de decidir si lo incorpora al proceso. Solicitamos una reunión de demostración con casos generales y una persona que pueda responder preguntas funcionales. Todavía no necesitamos cuentas ni tenemos un incidente abierto.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Qué canal se utiliza para pedir un cambio",
+    "cuerpo": "Queremos proponer una modificación del circuito de aprobación, pero no sabemos qué formulario ni qué responsables corresponden. El circuito actual funciona como fue definido. Por favor indíquennos el procedimiento para registrar y evaluar la propuesta antes de cambiar la operación.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Pedir una guía de buenas prácticas de contraseña",
+    "cuerpo": "Queremos material para explicar al equipo cómo elegir contraseñas y reconocer solicitudes sospechosas. Nadie está bloqueado y no pedimos cambiar credenciales. Necesitamos una guía aprobada que podamos utilizar en la próxima charla de concientización de seguridad.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Confirmar qué incluye la licencia del producto",
+    "cuerpo": "Estamos revisando el contrato y queremos saber si nuestra licencia actual incluye el módulo de reportes avanzados o si requiere una compra adicional. El software está funcionando. Solicitamos información comercial y de licenciamiento antes de planificar el uso de esa función.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Actualizar un instructivo del proceso interno",
+    "cuerpo": "El procedimiento de devolución cambió por decisión del negocio y el instructivo publicado todavía describe la secuencia anterior. La aplicación hace lo esperado. Solicitamos coordinar con el dueño del proceso una actualización de la documentación para que todos sigan la nueva política.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Evaluar un tablero de indicadores para gerencia",
+    "cuerpo": "Queremos estudiar si se puede construir un tablero con indicadores semanales de atención. Hoy recibimos los reportes acordados y no hay errores en ellos. Necesitamos relevar requerimientos, responsables y esfuerzo estimado antes de aprobar un desarrollo.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Podemos tener una explicación del proceso de respaldo",
+    "cuerpo": "El responsable del área quiere entender con qué frecuencia se realizan las copias, cuánto se conservan y cómo solicitar una recuperación si fuera necesaria. No se perdió información y no pedimos restaurar nada ahora. Buscamos conocer el procedimiento y sus límites.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Seguimiento administrativo de una compra aprobada",
+    "cuerpo": "La solicitud de adquisición de portátiles ya fue aprobada. Queremos saber si hay una fecha estimada de entrega y a quién consultar la orden de compra. Los equipos actuales funcionan; este mensaje no corresponde a una reparación ni a una nueva instalación.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Consulta sobre conservación de documentos",
+    "cuerpo": "¿Qué política interna define durante cuánto tiempo debemos conservar los informes exportados del sistema? No queremos borrar archivos sin autorización y no existe un problema de espacio. Necesitamos el enlace al procedimiento y el contacto del responsable de gestión documental.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Definir el responsable de aprobar requerimientos",
+    "cuerpo": "Dos áreas están preparando una solicitud de mejora y no saben quién debe actuar como dueño funcional. El sistema actual opera normalmente. Solicitamos orientación sobre el circuito de aprobación y las responsabilidades antes de registrar el requerimiento de desarrollo.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Consultar el catálogo de servicios tecnológicos",
+    "cuerpo": "Estamos revisando qué pedidos atiende cada equipo de tecnología. ¿Dónde podemos encontrar el catálogo de servicios y sus condiciones? No hay un incidente activo. Queremos que las próximas solicitudes lleguen al responsable adecuado y con la información requerida.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Explicación de estados de una orden",
+    "cuerpo": "Puedo consultar las órdenes y sus estados, pero no sé qué diferencia hay entre pendiente, validada y cerrada según el procedimiento del área. Los datos son correctos. Necesito una explicación funcional o el instructivo para saber cuándo corresponde intervenir.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Revisar una idea de automatización administrativa",
+    "cuerpo": "Cada viernes copiamos datos de dos reportes a una planilla y queremos estudiar si conviene automatizar esa tarea. Los reportes funcionan. Pedimos una conversación inicial para revisar viabilidad, esfuerzo y controles; todavía no hay una especificación aprobada para desarrollar.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Orientación sobre trabajo remoto",
+    "cuerpo": "El equipo quiere conocer las recomendaciones para trabajar desde casa y los canales de ayuda disponibles. No tenemos una conexión fallando ni una cuenta bloqueada. Buscamos material de orientación sobre buenas prácticas y el procedimiento para solicitar los recursos necesarios.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Necesitamos un glosario de términos del sistema",
+    "cuerpo": "En las reuniones aparecen siglas del módulo que el personal nuevo no conoce. Las operaciones funcionan, pero queremos un glosario con definiciones y ejemplos para facilitar el aprendizaje. ¿Existe algún documento aprobado o podemos coordinar su preparación con el referente funcional?",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "El interruptor de notificaciones se vuelve a activar solo",
+    "cuerpo": "Desactivo los avisos de una tarea, guardo y la pantalla confirma el cambio. Al abrirla nuevamente, el interruptor aparece activo y vuelve a enviar avisos. El servidor conserva correctamente la preferencia desactivada. Ocurre con todas las cuentas habilitadas, por lo que pedimos revisar cómo la interfaz recupera y representa ese valor.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "La tecla Enter envía dos veces el formulario",
+    "cuerpo": "Al completar el último campo y pulsar Enter, se dispara el envío por el teclado y también el del botón principal. El registro de la aplicación muestra dos llamadas para una sola acción. La comunicación funciona y no hay reintentos del navegador. Solicitamos revisar los manejadores del formulario para evitar operaciones repetidas.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "El botón Guardar queda deshabilitado después de corregir un dato",
+    "cuerpo": "Ingreso un valor inválido, aparece la advertencia y lo corrijo. El mensaje desaparece, pero Guardar no vuelve a habilitarse aunque todos los campos sean válidos. Una ficha nueva sí permite guardar. Solicitamos revisar cuándo se recalcula la validez del formulario; no faltan permisos de edición.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "El contador de resultados no cambia al quitar un filtro",
+    "cuerpo": "La lista se actualiza correctamente cuando quitamos el filtro de estado, pero el encabezado sigue mostrando el recuento anterior. Los documentos están completos y se pueden consultar. Solicito revisar la sincronización del contador con los criterios activos para que el total mostrado corresponda al listado actual.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "El cálculo ignora una cantidad con tres decimales",
+    "cuerpo": "El detalle acepta cantidades con tres posiciones decimales, pero el total utiliza solo dos sin avisar. La cantidad original permanece almacenada. Lo reproducimos en el entorno de validación y no depende de la cuenta. Solicitamos revisar la precisión empleada por el cálculo para respetar la definición del campo.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "El permiso está concedido pero la pantalla oculta el botón por un defecto",
+    "cuerpo": "La revisión de perfiles y la auditoría confirman que el rol permite la operación. El botón desaparece solo al elegir un tipo específico de documento porque el código compara mal ese tipo. Otros documentos funcionan con el mismo usuario. Solicitamos corregir la condición de visibilidad de la interfaz; no agregar privilegios.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "La validación de correo acepta espacios internos",
+    "cuerpo": "El formulario confirma una dirección que contiene espacios dentro del nombre y la notificación posterior no puede entregarse. La regla documentada exige rechazar ese formato antes de guardar. Pido revisar la validación del campo y mostrar un mensaje de corrección al usuario; el servicio de envío está disponible.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "El token alcanza el servicio pero no puede modificar el recurso",
+    "cuerpo": "La identidad de integración puede consultar, pero cualquier intento de actualizar devuelve falta de alcance. La revisión del directorio confirma que el token fue emitido solo para lectura. Solicitamos aprobar el alcance de escritura de ese recurso concreto o mantener el proceso como consulta hasta tener autorización.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Las pantallas de varias herramientas quedan esperando por una caída del proxy",
+    "cuerpo": "Distintas aplicaciones se detienen al pedir recursos externos. El proxy corporativo no acepta conexiones y sus servicios están detenidos. Los servidores de negocio responden directamente desde la red técnica. Solicitamos recuperar el servicio de comunicación compartido antes de investigar cada pantalla por separado.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El botón de enviar espera porque se cortó el enlace de salida",
+    "cuerpo": "El navegador intenta transmitir la solicitud, pero no logra establecer conexión con el destino. Los registros del equipo de red muestran que el circuito está fuera de servicio y afecta a todas las herramientas de la sede. Necesitamos restablecer el enlace; no se alcanzó a ejecutar ninguna validación de negocio.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Las operaciones fallan cuando el almacenamiento se desconecta",
+    "cuerpo": "En el mismo momento varias aplicaciones dejan de leer sus archivos y el sistema operativo registra pérdida del volumen compartido. Los datos reaparecen al volver el enlace del almacenamiento. Necesitamos revisar la conectividad y disponibilidad del dispositivo, no cambiar las reglas de los formularios.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El puesto deja de responder por errores de memoria física",
+    "cuerpo": "La computadora se congela al abrir programas distintos y también durante una comprobación fuera del sistema operativo. El diagnóstico de hardware reporta fallos de memoria. Pedimos revisar el módulo defectuoso y disponer de un equipo alternativo; no parece un defecto de una sola aplicación.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El navegador no llega al servicio después de un cambio de firewall",
+    "cuerpo": "Ningún puesto del segmento puede abrir conexión al puerto del servicio. El servidor está disponible desde otro segmento y los registros muestran que la nueva regla de red descarta el tráfico. Solicitamos revisar el cambio de conectividad con el equipo responsable, manteniendo los controles de seguridad aprobados.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "La vista se corta cuando reinicia el host de aplicaciones",
+    "cuerpo": "Los usuarios pierden simultáneamente sesiones en varias herramientas. El registro del sistema operativo confirma reinicios inesperados del host durante esas horas. Necesitamos identificar la causa del reinicio y recuperar la estabilidad de la máquina; no es un problema aislado de los botones o filtros de una pantalla.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Necesito saber qué significa el botón Archivar",
+    "cuerpo": "La opción está disponible y no presenta errores, pero antes de usarla queremos entender qué efecto tiene sobre un documento y si después se puede consultar. Solicitamos una explicación del procedimiento y el instructivo vigente, no una modificación del comportamiento de la pantalla.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Queremos una guía para elegir los criterios de búsqueda",
+    "cuerpo": "La consulta devuelve los datos esperados cuando usamos los criterios correctos. El equipo necesita aprender cómo combinar los campos para encontrar documentos de distintos períodos. Pedimos un ejemplo de uso o una breve capacitación; no hay registros faltantes ni un fallo del filtro.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "El acceso del reemplazante debe vencer este viernes",
+    "cuerpo": "La persona que cubrió una ausencia ya no necesita la delegación temporal. La función opera normalmente. Pido retirar sus autorizaciones al finalizar la jornada acordada, manteniendo su cuenta y los permisos habituales de su puesto.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Mi perfil de compras no incluye la empresa incorporada",
+    "cuerpo": "Puedo iniciar sesión y operar en las empresas anteriores. El área agregó otra entidad y la revisión de seguridad confirma que falta asignarla a mi usuario. Solicito tramitar la autorización con el dueño del proceso antes de comenzar a registrar documentos.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "El usuario técnico perdió su membresía autorizada",
+    "cuerpo": "El proceso automático se identifica, pero ya no puede consultar el recurso. El directorio muestra que la cuenta quedó fuera del grupo aprobado durante una revisión. Pedimos validar con el propietario si corresponde restituir esa pertenencia, sin compartir credenciales ni ampliar funciones.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Solicitar lectura de expedientes del área nueva",
+    "cuerpo": "Cambié de equipo y debo consultar sus expedientes. La plataforma responde que mi cuenta no pertenece al grupo autorizado. La jefatura está disponible para aprobar acceso solo de lectura. No solicitamos alterar los expedientes ni modificar el funcionamiento del buscador.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Revocar una invitación enviada al colaborador equivocado",
+    "cuerpo": "Se invitó a una persona a un espacio privado por error. El dueño pide retirar esa invitación y revisar si llegó a habilitar una membresía. El contenido debe conservarse y las autorizaciones del equipo correcto deben seguir vigentes. Es una gestión de acceso al recurso.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "La consulta protegida exige un rol que no tengo",
+    "cuerpo": "El administrador reprodujo que la función opera con el rol autorizado y mi usuario solo tiene el perfil general. Necesito tramitar la consulta de información restringida para una tarea aprobada. No corresponde desactivar la protección ni copiar los datos a un espacio público.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Habilitar la cuenta aprobada del nuevo supervisor",
+    "cuerpo": "El alta quedó creada pero desactivada hasta verificar la incorporación. La jefatura confirmó que la persona comenzó hoy. Necesitamos completar la activación y asignar los roles aprobados, evitando copiar de manera indiscriminada todos los privilegios de un supervisor anterior.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "La estación muestra errores del disco antes de cargar el sistema",
+    "cuerpo": "El arranque se detiene con alertas de lectura del dispositivo y la comprobación del fabricante informa sectores defectuosos. No se llega a abrir ninguna aplicación. Pido revisión del almacenamiento local y recuperación conforme al procedimiento, sin seguir escribiendo en el dispositivo afectado.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El servicio de resolución alternativo no responde",
+    "cuerpo": "Cuando se consulta el segundo servidor de nombres, las solicitudes expiran y varias estaciones pierden intermitentemente la resolución. El primero responde. Solicitamos revisar disponibilidad y conectividad del secundario para recuperar el funcionamiento redundante del servicio.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "La cámara corporativa pierde alimentación por el puerto",
+    "cuerpo": "El dispositivo se apaga cada pocos minutos y el switch registra que el puerto no puede entregar la energía necesaria. El enlace vuelve cuando reinicia el equipo. Pedimos revisar el presupuesto de alimentación y el estado del puerto, sin cambiar usuarios o permisos.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El host no inicia servicios después de un error del sistema de archivos",
+    "cuerpo": "Durante el arranque, el volumen se monta como solo lectura por errores detectados en su estructura. Las aplicaciones no logran escribir sus registros. Necesitamos revisar integridad y respaldo del almacenamiento antes de recuperar la operación normal del sistema operativo.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "El almacenamiento tarda por una reconstrucción degradada",
+    "cuerpo": "Todas las aplicaciones que usan el volumen presentan demoras al leer. El controlador informa reconstrucción del arreglo y múltiples errores en otro disco. Solicitamos revisar el estado físico y los respaldos antes de continuar, evitando atribuir la lentitud a una consulta particular.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Pedir orientación sobre niveles de prioridad del soporte",
+    "cuerpo": "Queremos explicar a los nuevos integrantes cuándo corresponde registrar una solicitud como urgente y qué información justifica esa prioridad. No hay una falla activa. Solicitamos la definición de niveles y ejemplos del procedimiento de atención.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Consultar la política de uso de dispositivos personales",
+    "cuerpo": "El equipo quiere saber si se permite utilizar dispositivos propios y qué requisitos se deben cumplir. No necesitamos configurar un equipo ni reportamos una avería. Pedimos la política vigente y el contacto del responsable que puede aclarar sus condiciones.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "Consulta administrativa sobre renovación del contrato",
+    "cuerpo": "Debemos preparar la documentación de renovación del soporte y necesitamos confirmar el período cubierto y el contacto comercial responsable. Los sistemas están operativos. Solicitamos orientación administrativa, sin cambiar la configuración ni el alcance técnico del servicio por este ticket.",
+    "clasificacion": "otros"
+  }
+]

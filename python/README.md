@@ -57,10 +57,11 @@ confianza; al no tener respuestas esperadas, no calcula accuracy ni F1.
 Esos casos ya fueron analizados durante el desarrollo y sirven como regresión,
 no como una evaluación ciega nueva de las mejoras posteriores.
 
-La autorización de redistribución de los 100 correos iniciales no está
-confirmada: se mantienen sin publicar. Tampoco se publican
-automáticamente los datasets derivados ni los modelos. No hay un
-enlace público al dataset verificado. Ver [análisis de datos](docs/analisis_datos.md).
+El [corpus maestro](data/raw/correos.json) y los [datasets de entrenamiento](data/train/)
+se incluyen en Git por indicación de la responsable del proyecto. Los modelos
+`.pkl`, las particiones procesadas y la hoja de revisión siguen excluidos.
+La licencia MIT del código no se extiende automáticamente a los datos.
+Ver [análisis de datos](docs/analisis_datos.md).
 
 ## Metodología
 

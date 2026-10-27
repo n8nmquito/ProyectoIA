@@ -164,15 +164,15 @@ atributos demográficos para medir fairness poblacional. Los marcadores como
 actuar como pistas espurias; no se ha demostrado que expliquen un error concreto.
 No hay una evaluación independiente por empresa, conversación o plantilla.
 
-La licencia de publicación del material inicial no está confirmada. Antes de
+La licencia de uso del dataset no se ha especificado por separado. Antes de
 usar o publicar correos reales, revisar permisos, anonimización y retención.
 Ver [consideraciones éticas](consideraciones_eticas.md).
 
 ## Fuente licencia y disponibilidad
 
 El origen es el aporte inicial de 100 correos y la ampliación con 200 ejemplos
-ficticios descritos arriba. No hay una licencia de redistribución confirmada
-para el corpus original ni un enlace público autorizado. La [licencia MIT del
-código](../LICENSE) no concede permisos sobre los datos ni los modelos derivados.
-Los archivos restringidos se mantienen fuera de Git; los pasos que los utilizan
-requieren sus copias privadas.
+ficticios descritos arriba. Por indicación de la responsable del proyecto, se
+incluyen el [corpus maestro](../data/raw/correos.json) y los cuatro datasets
+de [entrenamiento](../data/train/). La [licencia MIT del código](../LICENSE)
+no se extiende automáticamente a los datos. Los modelos, las particiones
+procesadas y la hoja de revisión continúan excluidos de Git.

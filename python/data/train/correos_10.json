@@ -1,0 +1,52 @@
+[
+  {
+    "titulo": "orden de compra queda pendiente y no avansa",
+    "cuerpo": "hola, la orden [referencia omitida] ya tiene las aprobaciones que vemos en pantalla pero sigue pendiente. no sale error y no se mueve al siguiente estado. me paso con otras dos hoy. pueden revisar el proceso? no quiero duplicar las ordenes para salir del paso.\n\nen el historial vemos una aprobacion, pero no podemos asegurar que sea la ultima requerida. si falta otra instancia queremos saber cual; si el proceso quedo trabado, necesitamos que revisen antes de forzar un estado manualmente.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "No se guarda el comentario de aprobación",
+    "cuerpo": "El estado de aprobación cambia correctamente, pero el comentario que escribimos desaparece al consultar de nuevo. Se reproduce con dos usuarios en QA. La observación es necesaria para justificar una excepción. Solicitamos revisar el guardado del comentario y su trazabilidad.\n\nLa aprobación sin comentario complica justificar por qué se aceptó la excepción. No queremos registrar otra aprobación solo para agregar el texto. Necesitamos una corrección trazable y verificar si el comentario se pierde antes o después de guardar.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Timeout hacia BSSV desde un solo servidor",
+    "cuerpo": "El servidor consumidor [referencia omitida] no consigue conexión al puerto publicado de BSSV. Desde otro servidor de pruebas el mismo endpoint responde. Solicitamos revisar ruta y reglas de red entre ambos equipos. No se observó una excepción de negocio en la aplicación.\n\nEl mismo consumidor llega a otros servicios, por lo que no parece una pérdida total de red. Necesitamos revisar la ruta específica y comparar desde ambos orígenes. No vamos a sustituir la dirección por una IP fija sin confirmar el cambio.\n\nAdjunto comparacion_conectividad.json para apoyar la revisión.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Baja de cuenta de proveedor al finalizar contrato",
+    "cuerpo": "Terminó el período de trabajo del consultor externo. El responsable del servicio solicita deshabilitar su usuario y retirar las sesiones activas conforme al procedimiento de bajas. No es una falla del sistema; necesitamos evitar que conserve permisos una vez terminado el contrato.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "El enlace compartido exige una autorización adicional",
+    "cuerpo": "Un compañero me compartió el tablero de indicadores. Puedo abrir la plataforma, pero el tablero muestra que no tengo permiso para verlo. El propietario indicó que debería acceder como lector. ¿Pueden revisar la asignación sin publicar el tablero para toda la organización?",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Servicios lentos por saturación del enlace",
+    "cuerpo": "Varios sistemas tardan en responder desde la sucursal durante las transferencias grandes. El monitoreo muestra el enlace de salida al máximo de su capacidad, sin errores funcionales en los servidores. Necesitamos revisar el tráfico y la capacidad de red para recuperar tiempos de respuesta normales.",
+    "clasificacion": "infraestructura"
+  },
+  {
+    "titulo": "Revisar una idea de automatización administrativa",
+    "cuerpo": "Cada viernes copiamos datos de dos reportes a una planilla y queremos estudiar si conviene automatizar esa tarea. Los reportes funcionan. Pedimos una conversación inicial para revisar viabilidad, esfuerzo y controles; todavía no hay una especificación aprobada para desarrollar.",
+    "clasificacion": "otros"
+  },
+  {
+    "titulo": "La tecla Enter envía dos veces el formulario",
+    "cuerpo": "Al completar el último campo y pulsar Enter, se dispara el envío por el teclado y también el del botón principal. El registro de la aplicación muestra dos llamadas para una sola acción. La comunicación funciona y no hay reintentos del navegador. Solicitamos revisar los manejadores del formulario para evitar operaciones repetidas.",
+    "clasificacion": "aplicaciones"
+  },
+  {
+    "titulo": "Solicitar lectura de expedientes del área nueva",
+    "cuerpo": "Cambié de equipo y debo consultar sus expedientes. La plataforma responde que mi cuenta no pertenece al grupo autorizado. La jefatura está disponible para aprobar acceso solo de lectura. No solicitamos alterar los expedientes ni modificar el funcionamiento del buscador.",
+    "clasificacion": "accesos"
+  },
+  {
+    "titulo": "Pedir orientación sobre niveles de prioridad del soporte",
+    "cuerpo": "Queremos explicar a los nuevos integrantes cuándo corresponde registrar una solicitud como urgente y qué información justifica esa prioridad. No hay una falla activa. Solicitamos la definición de niveles y ejemplos del procedimiento de atención.",
+    "clasificacion": "otros"
+  }
+]

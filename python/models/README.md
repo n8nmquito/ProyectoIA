@@ -41,8 +41,8 @@ equivale a demostrar superioridad en un test externo común a los cuatro.
 
 ## Disponibilidad y regeneración
 
-Los `.pkl` se excluyen de Git mientras no se confirme la autorización de
-redistribución del corpus y sus derivados. Solo cargar archivos propios o de
+Los `.pkl` siguen excluidos de Git. El corpus y los datasets de entrenamiento
+sí se incluyen por indicación de la responsable del proyecto. Solo cargar archivos propios o de
 una fuente confiable: pickle puede ejecutar código. Con las copias privadas
 del corpus y el manifiesto de particiones, desde `python/`:
 

@@ -10,11 +10,16 @@ venv/
 # Los datos y modelos necesitan revisión antes de publicarse.
 data/raw/*
 !data/raw/README.md
+!data/raw/correos.json
 data/processed/*
 models/*.pkl
 *.log
 
 data/train/*
+!data/train/correos_10.json
+!data/train/correos_100.json
+!data/train/correos_200.json
+!data/train/correos_300.json
 data/evaluation/*
 results/archive/
 results/metrics/errors.csv

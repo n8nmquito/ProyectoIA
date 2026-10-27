@@ -29,10 +29,12 @@ test/correos_test_25.json contiene únicamente titulo y cuerpo. Los 25 no se
 usaron en fit; su ejecución solo muestra predicciones y confianza. La carpeta
 test no contiene README, etiquetas ni metadatos adicionales.
 
-Los datos son simulados. La licencia de redistribución de los 100 originales no
-está confirmada y el usuario indicó mantenerlos sin publicar; no se presume que
-MIT cubra el dataset ni sus derivados. Revisar privacidad y
-permisos antes de usar datos reales. Más detalle en docs/analisis_datos.md.
+Los datos son simulados. Por indicación de la responsable del proyecto se
+incluyen en Git el [corpus maestro](raw/correos.json) y los cuatro datasets
+de [entrenamiento](train/). Las particiones procesadas, la hoja de revisión
+y los modelos `.pkl` continúan excluidos. La licencia MIT del código no se
+extiende automáticamente al dataset. Revisar privacidad y permisos antes de
+usar datos reales. Más detalle en [análisis de datos](../docs/analisis_datos.md).
 
 La hoja `evaluation/correos_para_revision.json` reutiliza los mismos 25 correos,
 fuera de la carpeta test, con etiquetas vacías. Debe revisarla una persona antes

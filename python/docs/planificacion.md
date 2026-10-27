@@ -145,7 +145,8 @@ demuestra por sí sola una operación prolongada ni una evaluación externa.
 - Conjunto de 25 correos sin etiquetas, separado del entrenamiento, para
   comparar predicciones y revisar regresiones; no permite calcular aciertos.
 - Etiquetado humano y autorización de uso para una futura evaluación con
-  correos reales. La redistribución de los 100 correos iniciales no está confirmada.
+  correos reales. El corpus y los datasets se incluyen en Git por indicación
+  de la responsable del proyecto; su licencia de uso se distingue de la del código.
 
 ### Hardware
 

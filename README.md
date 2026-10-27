@@ -56,9 +56,9 @@ Se conservan datasets anidados de 10, 100, 200 y 300 registros y un modelo para 
 
 ### Fuente y licencia
 
-Los 100 correos iniciales fueron aportados por el usuario y se añadieron 200 ejemplos ficticios para ampliar el corpus. No se presentan como solicitudes reales. La autorización de redistribución de los 100 originales no está confirmada; el corpus y sus modelos derivados se mantienen fuera de Git.
+Los 100 correos iniciales fueron aportados por el usuario y se añadieron 200 ejemplos ficticios para ampliar el corpus. No se presentan como solicitudes reales. El corpus maestro y los cuatro datasets de entrenamiento se incluyen en Git por indicación de la responsable del proyecto; los modelos `.pkl` siguen excluidos.
 
-La [licencia MIT del código Python](python/LICENSE) no se extiende automáticamente a los datos. **No hay un enlace público autorizado al dataset**. Para reproducir el entrenamiento o ejecutar los modelos se necesitan las copias privadas correspondientes. Consultar el [análisis de datos](python/docs/analisis_datos.md) y la [descripción de los datasets](python/data/README.md).
+La [licencia MIT del código Python](python/LICENSE) no se extiende automáticamente a los datos. El [corpus maestro](python/data/raw/correos.json) y los [datasets de entrenamiento](python/data/train/) están incluidos en el repositorio. Los modelos y los archivos de particiones procesadas siguen requiriendo copias locales. Consultar el [análisis de datos](python/docs/analisis_datos.md) y la [descripción de los datasets](python/data/README.md).
 
 ## Metodología
 
@@ -125,7 +125,7 @@ Los 25 correos adicionales no tienen respuestas esperadas: producen predicciones
 ### Requisitos del sistema
 
 - Git y Python 3.10 o 3.11 para consola y Streamlit; CPU y almacenamiento para dependencias, datos y modelos. No se requiere GPU y no hay mínimos medidos de RAM o disco.
-- Copias privadas de los modelos en `python/models/` y de los datasets para las operaciones que los utilicen. Un clon del repositorio no incluye esos artefactos.
+- Copias locales de los modelos en `python/models/` y del manifiesto de particiones para las operaciones que lo utilicen. El corpus y los cuatro datasets de entrenamiento sí están incluidos en Git.
 - Para la automatización: servidor Linux con Docker Engine y Docker Compose v2, acceso al buzón y credenciales de OpenAI y Redmine.
 
 ### Instalación local en Windows
@@ -145,7 +145,7 @@ Los 25 correos adicionales no tienen respuestas esperadas: producen predicciones
    python -m pip install -r requirements.txt
    ```
 
-3. Colocar las copias privadas `modelo_clasificador_10.pkl`, `modelo_clasificador_100.pkl`, `modelo_clasificador_200.pkl` y `modelo_clasificador_300.pkl` en `models/`. Para las pruebas por consola, colocar también el JSON de 25 correos en `data/test/correos_test_25.json`.
+3. Colocar las copias privadas `modelo_clasificador_10.pkl`, `modelo_clasificador_100.pkl`, `modelo_clasificador_200.pkl` y `modelo_clasificador_300.pkl` en `models/`. El JSON de 25 correos ya está incluido en `data/test/correos_test_25.json`.
 4. Ejecutar la interfaz:
 
    ```cmd
@@ -476,7 +476,7 @@ Streamlit **no tiene un despliegue público**. La automatización está desplega
 | `python/src/` | Preparación de datos, entrenamiento, optimización y evaluación |
 | `python/app/` | Interfaz Streamlit, presentación y estilos |
 | `python/deploy/` | API Python, contenedor e instrucciones de despliegue |
-| `python/data/` | Datos crudos, particiones, datasets por tamaño y casos de prueba; los datos restringidos permanecen fuera de Git |
+| `python/data/` | Corpus maestro, datasets por tamaño y casos de prueba incluidos; particiones procesadas y hoja de revisión excluidas de Git |
 | `python/models/` | Cuatro modelos guardados y documentación; los archivos `.pkl` permanecen fuera de Git |
 | `python/notebooks/` | Notebooks de análisis y experimentación |
 | `python/results/` | Métricas, informes y resultados de evaluación |
@@ -496,7 +496,7 @@ En la raíz, `docker-compose.yml` configura los servicios de base, `docker-compo
 
 ## Consideraciones éticas
 
-- **Privacidad y permisos:** el corpus original y sus derivados se mantienen sin publicar mientras no exista autorización. Las credenciales se guardan fuera del código y de las exportaciones del flujo.
+- **Privacidad y permisos:** el corpus y los datasets de entrenamiento se incluyen por indicación de la responsable del proyecto. La licencia de uso de los datos debe distinguirse de la licencia MIT del código. Las credenciales se guardan fuera del código y de las exportaciones del flujo.
 - **Sesgos y equidad:** el corpus es pequeño, simulado y de un dominio limitado. Puede representar mal abreviaturas, estilos de redacción y problemas poco frecuentes. No se ha evaluado equidad demográfica.
 - **Transparencia:** se muestran probabilidades y advertencias; la confianza no garantiza que una categoría sea correcta. La coincidencia entre Python y el agente tampoco demuestra exactitud.
 - **Servicios externos:** el agente OpenAI puede recibir texto del correo, adjuntos seleccionados y respuestas de herramientas de Redmine. La limpieza del clasificador Python no anonimiza el mensaje original enviado al agente.
