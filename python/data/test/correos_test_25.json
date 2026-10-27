@@ -1,0 +1,102 @@
+[
+  {
+    "titulo": "La cuenta del turno noche funciona solo durante el día",
+    "cuerpo": "Puedo identificarme en el portal, pero al comenzar el turno nocturno aparece que mi usuario está fuera del horario permitido. En la mañana entra normalmente. El responsable confirmó mi nueva jornada. Solicito revisar la restricción horaria de la cuenta y tramitar la autorización para mi turno, sin ampliar los permisos de las operaciones."
+  },
+  {
+    "titulo": "El lector reconoce la tarjeta pero rechaza mi identidad",
+    "cuerpo": "Me entregaron una nueva tarjeta de identificación. El lector la detecta, aunque el inicio de sesión informa que el certificado no está vinculado a un usuario habilitado. La tarjeta de otro empleado funciona en ese mismo puesto. Necesito completar el registro de mi identidad por el circuito autorizado, no reemplazar el lector."
+  },
+  {
+    "titulo": "Puedo ver el tablero pero no descargar sus datos",
+    "cuerpo": "Las visualizaciones abren bien. Al exportarlas, mi usuario recibe una denegación y el dueño del tablero confirma que tengo un perfil de visualización sin exportación. La descarga sí funciona con el perfil autorizado de la supervisora. Necesito solicitar ese permiso si corresponde a mi función; no parece una avería del exportador."
+  },
+  {
+    "titulo": "El directorio dejó activa mi cuenta de una empresa anterior",
+    "cuerpo": "Al identificarme en la plataforma compartida se selecciona una organización a la que ya no pertenezco. Mi nueva organización aprobó el alta con mi identidad actual. Pido revisar las membresías, retirar la asociación anterior y habilitar únicamente la vigente después de validar la solicitud con ambos responsables."
+  },
+  {
+    "titulo": "Consulta SQL rechazada para el usuario del informe",
+    "cuerpo": "El usuario técnico logra conectarse a la base y consultar las tablas permitidas. Una vista nueva devuelve privilegios insuficientes. El administrador verificó que falta conceder lectura de esa vista a la identidad del informe. Solicitamos gestionar esa autorización limitada, sin otorgar permisos de escritura ni cambiar el programa."
+  },
+  {
+    "titulo": "No tengo habilitado enviar cambios a la rama del proyecto",
+    "cuerpo": "Puedo clonar el repositorio y leer el historial. Al publicar mis cambios, el servidor indica que mi rol es lector; el referente confirmó que todavía no se aprobó el rol de colaborador. Necesito tramitar el permiso de contribución. Las revisiones obligatorias de la rama deben mantenerse."
+  },
+  {
+    "titulo": "El acceso de la pasante sigue vigente al terminar su práctica",
+    "cuerpo": "Hoy finalizó la práctica y el supervisor solicita revocar las membresías y el ingreso de esa identidad. Los documentos que creó deben conservarse con su responsable. Necesitamos ejecutar la baja por el procedimiento de cuentas, con confirmación del área, sin eliminar información del proyecto."
+  },
+  {
+    "titulo": "Las citas aparecen un día antes en la agenda",
+    "cuerpo": "Al registrar una cita para el lunes a primera hora, la agenda la muestra el domingo por la noche. La fecha almacenada es correcta, pero la pantalla aplica dos veces la conversión de zona horaria. Sucede con distintos usuarios y equipos. Necesitamos corregir la presentación de fechas sin modificar las citas originales."
+  },
+  {
+    "titulo": "El importador interpreta mal los separadores decimales",
+    "cuerpo": "Subimos una planilla en el formato documentado con importes como 1.250,75. La vista previa del módulo los convierte en 1,25 y confirma importes incorrectos. Dos operadores con el mismo archivo reproducen el resultado. Suspendimos la carga y pedimos revisar la conversión numérica del importador."
+  },
+  {
+    "titulo": "Entre la segunda y la tercera página faltan pedidos",
+    "cuerpo": "La consulta encuentra ciento veinte pedidos, pero al avanzar de página omite varios del centro del listado. Si busco esos pedidos por número aparecen. Los filtros y permisos son iguales y la base conserva todos los registros. El problema se reproduce al navegar; solicito revisar la paginación y su ordenamiento."
+  },
+  {
+    "titulo": "Dos ediciones simultáneas pisan las observaciones",
+    "cuerpo": "Dos personas autorizadas abrieron la misma solicitud. La primera guardó una observación y la segunda guardó después sin verla; el sistema reemplazó el texto sin avisar del conflicto. Reprodujimos la secuencia en pruebas. Necesitamos revisar el control de concurrencia para evitar perder cambios de un operador."
+  },
+  {
+    "titulo": "El servicio convierte un campo vacío en la palabra null",
+    "cuerpo": "Cuando no enviamos la segunda línea de la dirección, la integración escribe literalmente null en el documento generado. El contrato del servicio indica que debe omitir ese dato opcional. La respuesta es exitosa y no hay fallos de conexión. Pido corregir el tratamiento de valores vacíos en la transformación."
+  },
+  {
+    "titulo": "Cancelar el diálogo también confirma la operación",
+    "cuerpo": "En el cuadro de cierre, elegir Cancelar ejecuta la misma acción que Aceptar. Lo verificamos con dos solicitudes ficticias del entorno de pruebas y ambas terminaron cerradas. Todos los botones se ven, la conexión es estable y los usuarios están habilitados. Necesitamos revisar el evento asociado al botón antes de continuar."
+  },
+  {
+    "titulo": "Los puestos nuevos no reciben una dirección de red",
+    "cuerpo": "Los equipos que ya estaban conectados funcionan, pero los que se incorporan hoy quedan con una dirección automática y no alcanzan la puerta de enlace. El servidor de asignación indica que su rango de direcciones está agotado. Necesitamos revisar las concesiones y la capacidad del servicio de red."
+  },
+  {
+    "titulo": "La batería de la UPS no sostiene la carga",
+    "cuerpo": "En la prueba de alimentación, el equipo de energía se apagó de inmediato al desconectar la entrada, aunque el panel indicaba carga. La alarma registra reemplazo de batería. Los servidores siguen operando con suministro normal. Solicitamos revisar la UPS y recuperar la autonomía antes de otra interrupción eléctrica."
+  },
+  {
+    "titulo": "El volumen tiene espacio pero no permite crear archivos",
+    "cuerpo": "El servidor muestra espacio libre en gigabytes, pero todas las tareas que crean archivos pequeños fallan. El diagnóstico del sistema de archivos señala que se agotaron los inodos disponibles. Pido revisar la ocupación y el esquema de almacenamiento con respaldo previo; no parece una validación de las aplicaciones."
+  },
+  {
+    "titulo": "El portátil se apaga cuando aumenta la temperatura",
+    "cuerpo": "Después de unos minutos de trabajo el ventilador deja de girar, la carcasa se calienta y el equipo se apaga por protección. Ocurre también antes de iniciar sesión. Solicitamos revisión del sistema de refrigeración del portátil y un puesto de reemplazo mientras se realiza la reparación."
+  },
+  {
+    "titulo": "Las transferencias grandes se traban al cruzar el túnel",
+    "cuerpo": "Las consultas pequeñas pasan entre las sedes, pero los envíos grandes quedan esperando. El diagnóstico de red muestra paquetes que exceden la unidad máxima de transmisión del túnel y se descartan al no poder fragmentarse. Necesitamos revisar MTU y el enlace, no ampliar los permisos de las cuentas."
+  },
+  {
+    "titulo": "Pérdida de paquetes en el circuito de la delegación",
+    "cuerpo": "Las llamadas tienen cortes y las sesiones de varias herramientas se interrumpen al mismo tiempo. Desde el equipo de borde observamos pérdida de paquetes hacia el proveedor incluso sin usuarios conectados. En la red local las pruebas son estables. Pedimos revisar el circuito de comunicaciones y coordinar el reclamo técnico."
+  },
+  {
+    "titulo": "Consultar hasta cuándo tiene soporte nuestra versión",
+    "cuerpo": "Estamos preparando el plan del próximo año y queremos saber la fecha de fin de soporte de la versión instalada. Todo está funcionando. Necesitamos la información del ciclo de vida y las alternativas de actualización para presupuestar, sin programar una migración todavía."
+  },
+  {
+    "titulo": "Solicitamos una sesión para entender el cierre contable",
+    "cuerpo": "El equipo nuevo puede realizar las operaciones asignadas, pero necesita comprender en qué orden se ejecutan las tareas del cierre y qué controles corresponden a cada una. Queremos coordinar una explicación con el referente funcional usando datos ficticios. No estamos reportando un cálculo incorrecto."
+  },
+  {
+    "titulo": "Estimación para conectar un depósito que se abrirá el año próximo",
+    "cuerpo": "La empresa está evaluando un depósito nuevo y necesita una propuesta preliminar de conectividad, equipamiento y costos. El lugar aún no opera y no hay una conexión caída que reparar. Pedimos información sobre el relevamiento necesario para iniciar la planificación de la infraestructura futura."
+  },
+  {
+    "titulo": "Cuál es el procedimiento para entregar equipos retirados",
+    "cuerpo": "Tenemos equipos fuera de uso y queremos conocer el circuito de devolución, inventario y tratamiento de la información antes de su disposición. No autorizamos borrar ningún dispositivo con este mensaje. Solicitamos la guía y el contacto responsable para iniciar el trámite correctamente."
+  },
+  {
+    "titulo": "No entiendo la diferencia entre dos indicadores del tablero",
+    "cuerpo": "El tablero muestra solicitudes recibidas y solicitudes resueltas, pero no sabemos si ambas cifras corresponden al mismo período o a cohortes diferentes. Los valores concuerdan con los reportes de origen. Necesitamos que nos expliquen la definición de cada indicador para interpretarlos en la reunión de gestión."
+  },
+  {
+    "titulo": "Evaluar un modo de trabajo sin conexión",
+    "cuerpo": "El equipo de campo pregunta si una futura versión podría permitir registrar borradores cuando no hay señal y sincronizarlos después. La versión actual requiere conectividad según su diseño y funciona cuando la tiene. Queremos presentar esta nueva capacidad como propuesta y conocer su viabilidad y controles."
+  }
+]

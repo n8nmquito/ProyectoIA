@@ -24,13 +24,14 @@ assert.equal(run('Normalizar correo', { text: 'x'.repeat(17000) }).texto_recorta
 
 const valid = { resumen: 'Acceso bloqueado', descripcion: 'Un usuario no puede entrar.',
   categoria: 'accesos', prioridad: 'alta', requiere_revision: false, datos_faltantes: [],
-  project_id: 1, tracker_id: 3, assigned_to_id: 6, membership_id: 2, role_id: 4,
+  project_id: 1, tipo_ticket: 'Soporte', assigned_to_id: 6, membership_id: 2, role_id: 4,
   motivo_asignacion: 'Rol técnico consultado en la API.' };
 const result = run('Preparar ticket - Intaco', { output: valid }, email);
 assert.equal(result.issue.project_id, 1);
-assert.equal(result.issue.tracker_id, 3);
+assert.equal(result.issue.tracker_id, undefined);
+assert.equal(result.routing.tracker_name, 'Soporte');
 assert.equal(result.issue.priority_id, 3);
-assert.match(result.issue.description, /Message-ID: mail-123/);
+assert.match(result.issue.description, /Message-ID \| mail-123/);
 const review = run('Preparar ticket - Intaco', { output: { ...valid, requiere_revision: true } }, email);
 assert.equal(review.issue.priority_id, 2);
 assert.match(review.issue.subject, /^\[REVISAR\]/);

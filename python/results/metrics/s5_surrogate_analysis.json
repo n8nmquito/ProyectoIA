@@ -1,0 +1,47 @@
+{
+  "source_sha256": "15dc1654cd06db2da797a29d2ca385a4e308730b1231ded1ef536f72cf2f615a",
+  "family": "svm",
+  "n_trials": 12,
+  "surrogate": "RandomForestRegressor",
+  "surrogate_parameters": {
+    "n_estimators": 300,
+    "max_depth": 3,
+    "random_state": 42
+  },
+  "target": "mean_test_score: F1 macro de validación cruzada",
+  "encoding": {
+    "C": "log10(C)",
+    "class_weight": "None=0, balanced=1",
+    "min_df": "1 o 2"
+  },
+  "loo_mae": 0.0023889416969995747,
+  "loo_r2": 0.4712392826195415,
+  "observed_score_min": 0.9510485564389196,
+  "observed_score_max": 0.9649997945766532,
+  "ranking": [
+    {
+      "parameter": "min_df",
+      "mdi": 0.40354123833779465,
+      "permutation_mae_increase": 0.0021723097942254526,
+      "permutation_std": 0.0006426820308950036
+    },
+    {
+      "parameter": "log10_C",
+      "mdi": 0.5396159919975433,
+      "permutation_mae_increase": 0.002160298473068284,
+      "permutation_std": 0.0005504697669444959
+    },
+    {
+      "parameter": "class_weight_balanced",
+      "mdi": 0.05684276966466217,
+      "permutation_mae_increase": 0.0002059308012433978,
+      "permutation_std": 0.0001063106852946443
+    }
+  ],
+  "limitations": [
+    "Solo 12 configuraciones; el sustituto es una aproximación exploratoria.",
+    "La importancia por permutación se calcula sobre las configuraciones ajustadas, no en una muestra independiente.",
+    "Los PDP explican el rendimiento estimado frente a hiperparámetros, no palabras ni causas de un ticket.",
+    "No se reentrenó ni se modificó ninguno de los cuatro clasificadores."
+  ]
+}

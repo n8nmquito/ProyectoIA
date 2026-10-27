@@ -6,3 +6,13 @@
 *.sql
 backups/
 .secrets/
+
+tmp/
+
+# Corpus original y artefactos derivados pendientes de autorización.
+/correos_simulados/
+/classifier/demo.csv
+/classifier/model.json
+
+# Esquema de la aplicación: código fuente, no un respaldo de datos.
+!/workflows/status-notifications/schema.sql

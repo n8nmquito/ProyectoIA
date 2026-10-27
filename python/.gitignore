@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+.streamlit/secrets.toml
+# Los datos y modelos necesitan revisión antes de publicarse.
+data/raw/*
+!data/raw/README.md
+data/processed/*
+models/*.pkl
+*.log
+
+data/train/*
+data/evaluation/*
+results/archive/
+results/metrics/errors.csv
+results/metrics/test_predictions.csv

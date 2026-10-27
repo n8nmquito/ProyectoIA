@@ -1,0 +1,37 @@
+{
+  "rows": 300,
+  "class_counts": {
+    "aplicaciones": 90,
+    "accesos": 70,
+    "infraestructura": 70,
+    "otros": 70
+  },
+  "missing": {
+    "clasificacion": 0,
+    "cuerpo": 0,
+    "titulo": 0,
+    "texto": 0
+  },
+  "length_characters": {
+    "count": 300.0,
+    "mean": 409.2633333333333,
+    "std": 112.72368615464035,
+    "min": 279.0,
+    "25%": 320.0,
+    "50%": 350.0,
+    "75%": 532.0,
+    "max": 643.0
+  },
+  "length_words": {
+    "count": 300.0,
+    "mean": 63.836666666666666,
+    "std": 18.55057235427322,
+    "min": 42.0,
+    "25%": 49.0,
+    "50%": 55.0,
+    "75%": 85.0,
+    "max": 100.0
+  },
+  "length_outliers_iqr": 0,
+  "length_correlation": 0.9787861135670917
+}

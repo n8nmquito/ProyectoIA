@@ -38,8 +38,9 @@ async function run(name, items, links = {}) {
   assert.match(onlyFiles.json.cuerpo, /sin texto/);
   assert.equal(Object.keys(onlyFiles.binary).length, 4);
   const fallback = await run('Sin análisis IA - Revisión', [{ json: { error: 'PDF corrupto' } }], { 'Normalizar correo': { item: original } });
-  assert.equal(fallback.json.output.requiere_revision, true);
-  assert.equal(fallback.json.output.prioridad, 'normal');
+  assert.equal(fallback.json.estado, 'pendiente_revision');
+  assert.match(fallback.json.motivo, /comprobar si Redmine/);
+  assert.equal(wf.connections['Sin análisis IA - Revisión'].main[0][0].node, 'Preparar aviso - Error de procesamiento');
   const restored = await run('Recuperar adjuntos originales', [{ json: { issue: { subject: 'Uno', description: 'Descripción' } } }], {
     'Normalizar correo': { item: original }, 'Seleccionar adjuntos para IA': { item: selected },
   });

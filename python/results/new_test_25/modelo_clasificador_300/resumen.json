@@ -1,0 +1,11 @@
+{
+  "mode": "predictions_only",
+  "model_refitted": false,
+  "n_training": 300,
+  "n_test": 25,
+  "model_sha256": "2905ce4167d90281106ff7a37f6211114eccf459c1764d8ac5c61f0b81bf6a87",
+  "model_path": "F:\\Maria\\python\\models\\modelo_clasificador_300.pkl",
+  "test_sha256": "d0757418c3eb63f61801ea140b0480a6ad86bd66be0a55d6520c6a0fa49971e6",
+  "exact_training_test_overlap": 0,
+  "predictions_csv": "predicciones.csv"
+}

@@ -1,0 +1,173 @@
+# Manual de usuario
+
+Actualizado: 27 de octubre de 2026.
+
+## Instalar e iniciar
+
+Desde CMD:
+
+```cmd
+cd /d F:\Maria\python
+python -m pip install -r requirements.txt
+python -m streamlit run app/app.py
+```
+
+También puedes hacer doble clic en `Iniciar_clasificador.cmd`. La pantalla se
+abre en http://127.0.0.1:8501. Si Streamlit pregunta un correo de bienvenida,
+deja el campo vacío y pulsa Enter. Detén la aplicación con Ctrl+C en la consola.
+La opción A de la rúbrica admite Streamlit: se ejecuta en tu computadora y usa
+el navegador como pantalla. El procesamiento utiliza el modelo guardado en esta computadora.
+
+## Clasificar y comparar modelos
+
+1. En Clasificar, elige **10, 100, 200 o 300 correos** en el selector. Por defecto se usa 300.
+2. Introduce Título y Descripción. Ambos deben contener letras.
+3. Cargar ejemplo completa el formulario; cada pulsación recorre otro de los cuatro ejemplos.
+4. Pulsa Clasificar. En Resultado aparece el indicador de análisis mientras se procesa.
+5. Revisa el modelo usado, la categoría, la confianza y las cuatro probabilidades.
+6. Ante confianza menor al 60 % o vocabulario desconocido, revisa el caso manualmente.
+7. Para comparar, cambia de modelo y vuelve a clasificar. Se conserva el texto y se limpia el resultado anterior.
+
+La versión de 300 es la elegida para el proyecto. Las menores permiten observar
+cambios de predicción; más ejemplos no garantizan acertar todos los correos.
+La pantalla no reentrena, no almacena un historial y no ejecuta n8n ni crea tickets.
+No ingreses contraseñas, secretos o datos personales innecesarios.
+
+## Modelo y métricas
+
+Esta pestaña identifica la versión elegida y su archivo, lista los cuatro
+modelos y explica el pipeline TF-IDF + SVM calibrada. Detalla titulo, cuerpo y
+la etiqueta clasificacion; limpieza y conversión a variables TF-IDF; cantidad
+de términos, clases y correos; ngram_range, min_df, max_df, sublinear_tf, norm,
+strip_accents, C, class_weight, penalty/loss, max_iter, semilla y calibración.
+Los valores se leen del modelo elegido y el umbral desde config.yaml. La
+distribución de clases se muestra en un desplegable. Muestra las métricas
+registradas para el archivo actual, comprobando su huella SHA-256.
+
+Para 100/200/300 muestra F1 macro y accuracy de CV exploratoria con cuatro
+particiones, más el baseline. Para 10 explica que faltan ejemplos por clase
+para la calibración interna en los folds; no inventa un resultado de CV.
+El F1 sobre entrenamiento mide ajuste a ejemplos conocidos. Las predicciones
+de 25 correos sin etiquetas no producen accuracy ni F1. Las métricas históricas
+del diagnóstico de desarrollo se consultan en un desplegable separado.
+
+Para regenerar la comprobación de las versiones sin cambiar los modelos:
+
+```cmd
+python -m src.evaluate_versions
+```
+
+Actualiza `results/metrics/version_evaluation.json` y `.csv`, repite los 25
+correos con cada modelo y exporta el gráfico de CV. No es un test externo.
+
+## Capturas de la aplicación real
+
+![Formulario con selector](../documentacion/imagenes/01_formulario.png)
+
+El selector centrado superior alterna Clasificar y Modelo y métricas.
+La tarjeta izquierda contiene el selector del modelo, los dos campos y el botón azul.
+La derecha presenta el resultado y el nombre del modelo que lo produjo.
+
+![Entrada inválida](../documentacion/imagenes/02_entrada_invalida.png)
+
+Con los campos vacíos se pide un título con letras. Solo símbolos o números
+también se rechazan. Si falta o falla el modelo, se muestra un mensaje de error
+en lugar de fabricar una predicción; ese escenario se prueba con AppTest.
+
+![Predicción del modelo de 300](../documentacion/imagenes/03_prediccion.png)
+
+La categoría es una sugerencia. El porcentaje pertenece a este correo; no es
+accuracy global. El aviso ámbar solicita revisión cuando corresponde.
+
+![Modelo seleccionado y versiones](../documentacion/imagenes/04_acerca_modelo.png)
+
+La versión elegida actualiza la información del modelo; no se atribuyen a
+los cuatro archivos los resultados de un diagnóstico diferente.
+
+![Evaluación por versión](../documentacion/imagenes/app/metricas_version.png)
+
+Se distinguen CV, ajuste sobre entrenamiento y predicciones sin etiquetas.
+Los resultados exploratorios no demuestran ausencia de sobreajuste.
+
+## Prueba por consola de los mismos 25 correos
+
+```cmd
+python evaluar_nuevos.py --model 10
+python evaluar_nuevos.py --model 100
+python evaluar_nuevos.py --model 200
+python evaluar_nuevos.py --model 300
+```
+
+La entrada es `data/test/correos_test_25.json`, con título y cuerpo únicamente.
+Las salidas son `predicciones.csv`, `resumen.json` y `reporte.md` en
+`results/new_test_25/modelo_clasificador_<tamaño>/`. Sin selector se usa 300 y
+su misma carpeta; no se generan copias sueltas. Los casos de revisión incluyen
+el texto completo en consola. El CSV registra las cuatro probabilidades.
+
+Para probar un JSON diferente con la misma estructura:
+
+```cmd
+python evaluar_nuevos.py --model 300 --data ruta/a/correos.json --output results/mi_prueba
+```
+
+## Entrenar y verificar
+
+```cmd
+python -m src.train
+python -m src.train_versions
+python -m src.export_datasets
+python -m src.evaluate_versions
+python -m pytest -q --junitxml=results/metrics/pytest.xml
+```
+
+Entrenar sustituye los artefactos del mismo nombre. `src.train` compara técnicas
+y optimiza; `src.train_versions` ajusta las cuatro versiones y `export_datasets`
+exporta los registros exactos sin reentrenar. `evaluate_versions` verifica,
+calcula y exporta resultados sin guardar otros modelos. `src.evaluate` conserva
+el diagnóstico histórico de selección como evaluación adicional.
+
+Los datasets están en `data/train/`. Los `.pkl` deben ser de una fuente confiable.
+La hoja de revisión humana está separada en `data/evaluation/`; no se añaden
+etiquetas al JSON de prueba. Ver [evaluación](evaluacion_pruebas.md).
+
+## Problemas comunes
+
+| Problema | Solución |
+|---|---|
+| No module named streamlit u otra dependencia | Ejecuta `python -m pip install -r requirements.txt` con el mismo Python |
+| Streamlit pide un correo | Deja vacío y pulsa Enter |
+| Falta el modelo elegido | Comprueba el archivo en models; para regenerar las cuatro versiones usa `python -m src.train_versions` tras el entrenamiento principal |
+| Archivo incompatible o corrupto | Usa las versiones de requirements y el artefacto original, o reentrena |
+| Puerto ocupado | Cierra la sesión anterior con Ctrl+C o añade `--server.port 8502` |
+| Falta la evaluación o el modelo cambió | Ejecuta `python -m src.evaluate_versions` |
+| El modelo se equivoca con confianza alta | Revisa manualmente; confianza no garantiza exactitud |
+| Campos inválidos | Escribe título y descripción con letras y contexto suficiente |
+
+## Preguntas frecuentes
+
+**¿Cuál es el modelo final?** El de 300; se guardan 10/100/200 para comparar.
+
+**¿El selector reentrena?** No. Carga el archivo elegido y limpia el resultado anterior.
+
+**¿Se envía el formulario a OpenAI o n8n?** No. La aplicación local usa el modelo
+local. El flujo de correo desplegado es un componente separado que sí puede
+enviar texto y adjuntos al agente y crear tickets.
+
+**¿25 casos sin etiquetas miden accuracy?** No. Se necesita una referencia revisada;
+además son casos conocidos del desarrollo, no una evaluación independiente.
+
+**¿Se guardan los textos del formulario?** La aplicación no crea un historial de
+textos ni los escribe como resultados. Evita datos sensibles de todos modos.
+
+## Operación separada de n8n
+
+El flujo del servidor mantiene su propia API de 300 y su agente OpenAI/Redmine.
+El selector local no cambia ese modelo ni dispara ejecuciones del flujo. Las
+pruebas de producción y sus IDs se conservan en `results/n8n_produccion/`.
+No repitas envíos de producción para probar el diseño: pueden crear tickets reales.
+
+## Contacto de soporte
+
+El equipo no ha proporcionado un contacto oficial. Debe completarlo antes de
+publicar la entrega. Mientras tanto, registra el comando y mensaje de error
+para el responsable del proyecto, sin incluir contraseñas ni texto sensible.

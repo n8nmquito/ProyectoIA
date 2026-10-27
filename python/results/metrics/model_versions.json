@@ -1,0 +1,62 @@
+{
+  "source_sha256": "ad36ec355f910610f4caf9f1f8c3184164c346db2314001bcab3b155d3dac7d0",
+  "seed": 42,
+  "algorithm": "TF-IDF + LinearSVC with sigmoid calibration, cv=2",
+  "parameters": {
+    "tfidf__min_df": 1,
+    "classifier__estimator__C": 10.0,
+    "classifier__estimator__class_weight": null
+  },
+  "selection": "Nested per-class random order; same settings for all sizes.",
+  "versions": [
+    {
+      "correos": 10,
+      "archivo": "models\\modelo_clasificador_10.pkl",
+      "sha256": "27e9b667bf4d32199f7631dbd51c4716e0659cd5e1f7c2ab552ce5903c75bd6d",
+      "clases": {
+        "aplicaciones": 3,
+        "accesos": 3,
+        "infraestructura": 2,
+        "otros": 2
+      },
+      "dataset": "data/train/correos_10.json"
+    },
+    {
+      "correos": 100,
+      "archivo": "models\\modelo_clasificador_100.pkl",
+      "sha256": "e0776da695c3a85496133382bcb995d3833465915cdf0d487c6018eab877c34a",
+      "clases": {
+        "accesos": 25,
+        "aplicaciones": 25,
+        "infraestructura": 25,
+        "otros": 25
+      },
+      "dataset": "data/train/correos_100.json"
+    },
+    {
+      "correos": 200,
+      "archivo": "models\\modelo_clasificador_200.pkl",
+      "sha256": "af4ee9435b4be26cb5583e2e3eba543e8d31ac22796cb96cceb8a676e1465b15",
+      "clases": {
+        "accesos": 50,
+        "aplicaciones": 50,
+        "infraestructura": 50,
+        "otros": 50
+      },
+      "dataset": "data/train/correos_200.json"
+    },
+    {
+      "correos": 300,
+      "archivo": "models\\modelo_clasificador_300.pkl",
+      "sha256": "2905ce4167d90281106ff7a37f6211114eccf459c1764d8ac5c61f0b81bf6a87",
+      "clases": {
+        "aplicaciones": 90,
+        "accesos": 70,
+        "infraestructura": 70,
+        "otros": 70
+      },
+      "dataset": "data/train/correos_300.json"
+    }
+  ],
+  "limitation": "10 tickets is a demonstration, not a reliable model."
+}

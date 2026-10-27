@@ -2,8 +2,9 @@
 
 Automatización de soporte: **correo → n8n + IA → Redmine**.
 
-Base Docker y flujo de demostración de correo con IA, guardado en n8n y listo
-para completar las credenciales y realizar la prueba de integración.
+Sistema desplegado con clasificador Python de 300 correos, agente OpenAI y
+validación de tickets en Redmine. La consola y Streamlit permiten probar también
+las versiones de 10, 100 y 200 correos. Ver [proyecto Python](python/README.md).
 
 ## 🧩 Qué incluye
 
@@ -13,7 +14,9 @@ para completar las credenciales y realizar la prueba de integración.
 | **Redmine** | Tickets, con API REST habilitada | `3000` |
 | **PostgreSQL** | Bases `n8n` y `redmine`, con usuarios separados | `5432` |
 
-Los tres servicios comparten una red Docker y conservan sus datos en volúmenes.
+Los tres servicios de la base comparten red Docker y volúmenes. Además existe
+un servicio separado clasificador-python en la misma red, sin puerto publicado,
+con la API del modelo de 300. Ver [despliegue de la API](python/deploy/DESPLIEGUE_REALIZADO.md).
 Desde n8n, Redmine se conecta mediante `http://redmine:3000`.
 
 ## 🚀 Inicio rápido
@@ -21,8 +24,8 @@ Desde n8n, Redmine se conecta mediante `http://redmine:3000`.
 Requisitos: servidor Linux, Python 3, Docker Engine y Docker Compose v2.
 
 ```bash
-git clone https://github.com/jpinero-dev/mquito-ticket.git
-cd mquito-ticket
+git clone https://github.com/n8nmquito/ProyectoIA.git
+cd ProyectoIA
 cp .env.example .env
 ```
 
@@ -53,10 +56,16 @@ HTTP está pensado para red privada o VPN; para acceso público, configurar HTTP
 
 ## 📖 Documentación
 
+- [Datos y restricciones de uso](python/data/README.md): corpus de 300 y
+  datasets por tamaño. Los 100 iniciales y sus derivados se mantienen sin
+  publicar mientras no se confirme su autorización de redistribución.
+- [Clasificador Python TF-IDF + SVM calibrada](python/README.md): cuatro modelos,
+  datasets, consola, Streamlit, API y evidencias. `classifier/` conserva el
+  experimento anterior y no es el clasificador activo del flujo.
 - [Guía simple de nodos y parámetros](workflows/GUIA_CONFIGURACION.md): cómo
-  configurar correo, Gemini, clave API, adjuntos, asignación y activación.
-- [Configurar el flujo de n8n](workflows/README.md): credenciales pendientes,
-  prueba manual y activación; incluye el JSON importable sin secretos.
+  configurar correo, API Python, OpenAI, adjuntos, asignación y activación.
+- [Flujo de n8n](workflows/README.md): versión integrada y JSON importable
+  inactivo sin credenciales; el flujo existente en el servidor está activo.
 
 - [Despliegue y mantenimiento](DESPLIEGUE.md): instalación, credenciales,
   persistencia, migración desde dos PostgreSQL y comandos de operación.
@@ -65,11 +74,18 @@ HTTP está pensado para red privada o VPN; para acceso público, configurar HTTP
 
 ## 🛠️ Próximos pasos
 
-- Conectar el buzón de soporte.
-- Crear proyecto, categorías y equipos en Redmine.
-- Probar el flujo con un correo real y sus adjuntos; la prueba manual con Gemini ya pasó.
+- Completar la revisión humana de etiquetas de los mismos 25 casos conocidos.
+- Mantener sin publicar el corpus inicial mientras no haya autorización.
+- Completar la entrega académica y revisar privacidad antes de utilizar datos reales.
 - Incorporar control de duplicados y seguimiento de respuestas; ajustar las reglas
   de asignación por proyecto y rol ya implementadas.
 
 **Validación:** flujo probado en el servidor con datos ficticios, Gemini y Redmine,
 incluyendo adjuntos y respaldo ante un PDF ilegible. Ver el detalle en la guía del flujo.
+
+## Interfaz web del clasificador
+
+Abrir http://185.208.207.203/. La página clasifica título y descripción con el
+modelo Python de 300 correos y muestra sus probabilidades. No utiliza n8n ni
+OpenAI y no crea tickets. El flujo de correo descrito arriba continúa separado.
+Código y operación: [python/web](python/web/README.md).

@@ -1,0 +1,5 @@
+correos,archivo,sha256,clases
+10,models\modelo_clasificador_10.pkl,27e9b667bf4d32199f7631dbd51c4716e0659cd5e1f7c2ab552ce5903c75bd6d,"{'aplicaciones': 3, 'accesos': 3, 'infraestructura': 2, 'otros': 2}"
+100,models\modelo_clasificador_100.pkl,e0776da695c3a85496133382bcb995d3833465915cdf0d487c6018eab877c34a,"{'accesos': 25, 'aplicaciones': 25, 'infraestructura': 25, 'otros': 25}"
+200,models\modelo_clasificador_200.pkl,af4ee9435b4be26cb5583e2e3eba543e8d31ac22796cb96cceb8a676e1465b15,"{'accesos': 50, 'aplicaciones': 50, 'infraestructura': 50, 'otros': 50}"
+300,models\modelo_clasificador_300.pkl,2905ce4167d90281106ff7a37f6211114eccf459c1764d8ac5c61f0b81bf6a87,"{'aplicaciones': 90, 'accesos': 70, 'infraestructura': 70, 'otros': 70}"

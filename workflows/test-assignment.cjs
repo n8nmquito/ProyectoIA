@@ -9,14 +9,24 @@ function run(file, data, links) {
   }, { timeout: 1000 }).json;
 }
 const proposal = { issue: { project_id: 1, tracker_id: 3, subject: 'Prueba', description: 'Correo' },
-  routing: { user_id: 6, membership_id: 2, role_id: 4, reason: 'Rol técnico consultado en la API.' } };
-const project = { statusCode: 200, body: { project: { id: 1, status: 1, trackers: [{ id: 3 }] } } };
+  routing: { tracker_name: 'Soporte', category: 'accesos', user_id: 6, membership_id: 2, role_id: 4, reason: 'Rol técnico consultado en la API.' } };
+const project = { statusCode: 200, body: { project: { id: 1, status: 1, trackers: [{ id: 3, name: 'Soporte' }], issue_categories: [{id: 71, name: 'Accesos'}] } } };
 const validProject = run('validar-proyecto.js', project, { 'Preparar ticket - Intaco': proposal });
 assert.equal(validProject.routing.user_id, 6);
+assert.equal(validProject.issue.category_id, 71);
+for (const [i, name] of ['Accesos','Aplicaciones','Infraestructura','Otros'].entries()) {
+ const response = structuredClone(project);
+ response.body.project.issue_categories = [{id: 100+i, name}];
+ const input = {...proposal, routing: {...proposal.routing, category: name.toLowerCase()}};
+ assert.equal(run('validar-proyecto.js', response, {'Preparar ticket - Intaco': input}).issue.category_id, 100+i);
+}
+const missing = structuredClone(project); missing.body.project.issue_categories = [];
+assert.throws(() => run('validar-proyecto.js', missing, {'Preparar ticket - Intaco': proposal}), /categoría/);
+assert.equal(run('validar-proyecto.js', project, {'Preparar ticket - Intaco': {...proposal, routing: {...proposal.routing, user_id: 0}}}).issue.category_id, 71);
 for (const bad of [
   { statusCode: 403, body: {} },
-  { statusCode: 200, body: { project: { id: 2, status: 1, trackers: [{ id: 3 }] } } },
-  { statusCode: 200, body: { project: { id: 1, status: 5, trackers: [{ id: 3 }] } } },
+  { statusCode: 200, body: { project: { id: 2, status: 1, trackers: [{ id: 3, name: 'Soporte' }] } } },
+  { statusCode: 200, body: { project: { id: 1, status: 5, trackers: [{ id: 3, name: 'Soporte' }] } } },
   { statusCode: 200, body: { project: { id: 1, status: 1, trackers: [] } } },
 ]) assert.throws(() => run('validar-proyecto.js', bad, { 'Preparar ticket - Intaco': proposal }));
 const noUser = run('validar-proyecto.js', project, { 'Preparar ticket - Intaco': { ...proposal, routing: { ...proposal.routing, user_id: 0 } } });
@@ -49,12 +59,21 @@ for (const mutate of [r => { r.body.role.assignable = false; }, r => { r.body.ro
 }
 const wf = JSON.parse(fs.readFileSync(path.join(__dirname, 'correo-ia-redmine.json'), 'utf8'));
 const tools = wf.nodes.filter(n => n.type === 'n8n-nodes-base.httpRequestTool');
-assert.equal(tools.length, 5);
+assert.equal(tools.length, 6);
 for (const tool of tools) {
-  assert.equal(tool.parameters.method, 'GET');
+  // n8n omits the default method when the editor saves the node.
+  assert.equal(tool.parameters.method ?? 'GET', 'GET');
   assert.equal(tool.parameters.genericAuthType, 'httpHeaderAuth');
   assert.ok(tool.parameters.url.includes('http://redmine:3000/'));
   assert.equal(wf.connections[tool.name].ai_tool[0][0].node, 'Agente IA - Analizar solicitud');
   assert.equal(tool.credentials, undefined);
 }
 console.log('OK: proyecto/tipo, membresía real, roles asignables, rechazo de usuarios/grupos ajenos y herramientas GET.');
+
+
+const guessed = structuredClone(proposal); guessed.issue.tracker_id = 2;
+assert.equal(run('validar-proyecto.js', project, {'Preparar ticket - Intaco': guessed}).issue.tracker_id, 3);
+const duplicate = structuredClone(project); duplicate.body.project.trackers.push({id: 8, name:'Soporte'});
+assert.throws(()=>run('validar-proyecto.js', duplicate, {'Preparar ticket - Intaco': proposal}), /ambiguo/);
+const forbidden = structuredClone(proposal); forbidden.routing.tracker_name='Tareas';
+assert.throws(()=>run('validar-proyecto.js', project, {'Preparar ticket - Intaco': forbidden}), /fuera del catálogo/);

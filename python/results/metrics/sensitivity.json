@@ -1,0 +1,27 @@
+[
+  {
+    "hyperparameter": "param_classifier__C",
+    "range_f1": 0.005064649908157914,
+    "marginal_means": {
+      "0.1": 0.9563986167513032,
+      "1.0": 0.9614632666594611,
+      "10.0": 0.9613608859581462
+    }
+  },
+  {
+    "hyperparameter": "param_tfidf__min_df",
+    "range_f1": 0.00501100084880024,
+    "marginal_means": {
+      "1": 0.9622464235473703,
+      "2": 0.9572354226985701
+    }
+  },
+  {
+    "hyperparameter": "param_classifier__class_weight",
+    "range_f1": 0.001144722156148692,
+    "marginal_means": {
+      "balanced": 0.9603132842010446,
+      "none": 0.9591685620448959
+    }
+  }
+]
