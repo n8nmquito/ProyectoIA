@@ -1,53 +1,29 @@
 # Sistema de clasificación de tickets de soporte TI
 
-![Python 3.10](https://img.shields.io/badge/Python-3.10-blue)
+![Python 3.10 y 3.11](https://img.shields.io/badge/Python-3.10%20%7C%203.11-blue)
 ![Licencia MIT](https://img.shields.io/badge/Licencia-MIT-green)
+![Interfaz Streamlit](https://img.shields.io/badge/Interfaz-Streamlit-red)
 
-Este proyecto recibe el título y el cuerpo de un correo y sugiere a qué equipo
-de soporte corresponde atenderlo. Incluye cuatro modelos entrenados con 10,
-100, 200 y 300 correos, una prueba por consola, Streamlit y una API Python
-integrada con n8n, OpenAI y Redmine.
-Las categorías son accesos, aplicaciones, infraestructura y otros.
+Este proyecto recibe el título y el cuerpo de un correo y sugiere a qué equipo de soporte corresponde atenderlo. Incluye cuatro modelos entrenados con 10, 100, 200 y 300 correos, una prueba por consola, Streamlit y una API Python integrada con n8n, OpenAI y Redmine. Las categorías son accesos, aplicaciones, infraestructura y otros; la versión de 300 es el modelo final elegido.
 
-Documentación revisada el 27 de octubre de 2026. Las cifras de esta versión provienen de los
-archivos actuales de `results/metrics`, no de una estimación de resultados futuros.
+## Tabla de contenidos
 
-## Aplicación local (Streamlit)
+1. [Encabezado y badges](#sistema-de-clasificación-de-tickets-de-soporte-ti)
+2. [Tabla de contenidos](#tabla-de-contenidos)
+3. [Descripción del problema](#descripción-del-problema)
+4. [Dataset](#dataset)
+5. [Metodología](#metodología)
+6. [Resultados](#resultados)
+7. [Instalación y uso](#instalación-y-uso)
+8. [Interfaz de usuario](#interfaz-de-usuario)
+9. [Estructura del proyecto](#estructura-del-proyecto)
+10. [Consideraciones éticas](#consideraciones-éticas)
+11. [Autores y contribuciones](#autores-y-contribuciones)
+12. [Licencia](#licencia)
+13. [Agradecimientos y referencias](#agradecimientos-y-referencias)
+14. [Videos](#videos)
 
-La interfaz principal vuelve a ser `app/app.py`, con Streamlit (opción A de la
-página 4 de la descripción del proyecto). Se abre en el navegador de esta
-computadora y carga directamente el modelo de 10, 100, 200 o 300 elegido
-en el selector; el de 300 es el predeterminado.
-La clasificación se ejecuta directamente en esta computadora. El selector
-permite comparar los modelos de 10, 100, 200 y 300 correos.
-
-Haz doble clic en `Iniciar_clasificador.cmd` o ejecuta:
-
-```cmd
-cd /d F:\Maria\python
-python -m streamlit run app/app.py --server.address 127.0.0.1
-```
-
-Permite introducir título y cuerpo, cargar ejemplos, ver el estado de análisis,
-la categoría y las cuatro probabilidades. Incluye métricas diagnósticas,
-limitaciones y mensajes para entradas inválidas o errores. La automatización
-n8n/OpenAI/Redmine sigue separada.
-
-## Contenido
-
-- [Problema y usuarios](#problema-y-usuarios)
-- [Datos y modelos](#datos-y-modelos)
-- [Modelo final elegido](#pruebas-por-tamaño-y-modelo-final-elegido)
-- [Metodología](#metodología)
-- [Resultados medidos](#resultados-medidos)
-- [Instalación y uso](#instalación-y-uso)
-- [Interfaz](#interfaz)
-- [Documentación y estructura](#documentación-y-estructura)
-- [Uso responsable](#uso-responsable)
-- [Autores y entrega académica](#autores-y-entrega-académica)
-- [Licencia y referencias](#licencia-y-referencias)
-
-## Problema y usuarios
+## Descripción del problema
 
 La mesa de ayuda recibe consultas mezcladas y debe decidir quién las atiende.
 El sistema propone una categoría para apoyar ese primer paso y reducir tareas
@@ -56,7 +32,7 @@ proyecto universitario. En el flujo desplegado, el agente propone la categoría 
 automáticamente después de las validaciones. El equipo de soporte debe supervisarlo;
 no existe una aprobación humana obligatoria antes de cada alta.
 
-## Datos y modelos
+## Dataset
 
 `data/raw/correos.json` es la fuente principal: **300 correos simulados**,
 con título, cuerpo y clasificación. La distribución es 70 accesos, 90 aplicaciones,
@@ -86,7 +62,68 @@ confirmada: se mantienen sin publicar. Tampoco se publican
 automáticamente los datasets derivados ni los modelos. No hay un
 enlace público al dataset verificado. Ver [análisis de datos](docs/analisis_datos.md).
 
-## Pruebas por tamaño y modelo final elegido
+## Metodología
+
+Se validan los campos, se limpian los textos y se combina título con cuerpo.
+TF-IDF representa palabras individuales y pares de palabras. Se comparan una
+referencia mayoritaria, regresión logística y SVM lineal calibrada.
+La elección usa F1 macro y validación cruzada estratificada de cuatro grupos.
+
+Para seleccionar ajustes se usan **280 correos**; se conservan **20 originales**
+como diagnóstico de evaluación. Después se ajusta el modelo final con los 300.
+Las versiones 10/100/200/300 se entrenan con la configuración elegida. La SVM
+usa calibración sigmoide de dos grupos, compatible con el conjunto de 10.
+
+### Integración desplegada y evidencia actual
+
+El flujo principal es [Mquito | Correo → IA → Ticket Redmine](http://185.208.207.203:5678/workflow/opxBwpGpRDrbQeHn).
+Recibe el correo, consulta `http://clasificador-python:8000/predict` en la red
+Docker, ejecuta el modelo de 300, compara con OpenAI y crea el ticket en Redmine.
+El agente externo conserva la decisión de categoría; la predicción Python es una
+comparación operativa. Coincidir no demuestra exactitud.
+
+El agente devuelve el nombre `tipo_ticket` (Errores/Soporte); el código obtiene
+su ID del catálogo habilitado del proyecto. No se acepta un ID supuesto por el
+agente. También se verifican proyecto, categoría, membresía y rol asignable.
+Las copias importables están en `../workflows/` y no incluyen credenciales.
+
+La prueba inicial de 24 correos produjo 20 tickets y cuatro bloqueos por tipo.
+Después de corregirlos se repitieron solo los cuatro casos afectados: 4/4 crearon
+su ticket. No es una nueva medición de accuracy ni una repetición completa de los
+24 con la versión corregida. Evidencia: `results/n8n_produccion/`.
+
+Pruebas actuales: **51 tests Python aprobados**, Ruff sin errores y las tres
+suites JavaScript de normalización, asignación y adjuntos aprobadas. Se verifican también la integridad de los cuatro artefactos, sus probabilidades
+en 25 entradas y la limitación de CV en la versión de 10.
+
+Para reproducir el análisis S5 sin reentrenar:
+
+```cmd
+python -m src.optimization_analysis
+```
+
+Para revisar los mismos 25 correos y medir regresión conocida:
+
+```cmd
+python -m src.evaluate_reviewed --prepare
+python -m src.evaluate_reviewed --reviewer "Nombre de quien revisó"
+```
+
+La hoja `data/evaluation/correos_para_revision.json` ya está creada con etiquetas
+vacías; `--prepare` no la sobrescribe. Una persona debe completar las cuatro
+categorías antes de evaluar. El JSON de `data/test/` conserva solo título/cuerpo.
+Estos casos conocidos no demuestran generalización ni ausencia de sobreajuste.
+Ver [protocolo de evaluación](docs/evaluacion_pruebas.md).
+
+La API requiere clave y no publica su puerto. OpenAI puede recibir texto,
+imágenes/PDF seleccionados y respuestas de herramientas de Redmine. No hay un
+anonimizador general antes del agente ni una auditoría de cumplimiento normativo.
+Ver [privacidad y límites](docs/consideraciones_eticas.md) y
+[operación del servidor](deploy/DESPLIEGUE_REALIZADO.md).
+
+## Resultados
+
+### Modelo final elegido
 
 Se prepararon cuatro versiones para las pruebas: 10, 100, 200 y 300 correos.
 Las de 10, 100 y 200 se conservan para comparar sus predicciones con las de
@@ -100,20 +137,6 @@ de comparación y evidencia del experimento.
 Esta elección del proyecto no se presenta como una superioridad de accuracy
 demostrada frente a los otros tamaños: la prueba de 25 correos muestra
 predicciones y confianza, sin etiquetas para calcular aciertos por versión.
-
-## Metodología
-
-Se validan los campos, se limpian los textos y se combina título con cuerpo.
-TF-IDF representa palabras individuales y pares de palabras. Se comparan una
-referencia mayoritaria, regresión logística y SVM lineal calibrada.
-La elección usa F1 macro y validación cruzada estratificada de cuatro grupos.
-
-Para seleccionar ajustes se usan **280 correos**; se conservan **20 originales**
-como diagnóstico de evaluación. Después se ajusta el modelo final con los 300.
-Las versiones 10/100/200/300 se entrenan con la configuración elegida. La SVM
-usa calibración sigmoide de dos grupos, compatible con el conjunto de 10.
-
-## Resultados medidos
 
 ### Evaluación actual por versión (27 de octubre de 2026)
 
@@ -228,7 +251,9 @@ Los parámetros y rutas se cambian en `config.yaml`. Reentrenar sustituye los
 archivos actuales de los mismos nombres. No se debe incorporar el test conocido
 para después presentar sus resultados como si siguiera siendo independiente.
 
-## Interfaz
+También se puede iniciar la interfaz con `Iniciar_clasificador.cmd`. El [manual de usuario](docs/manual_usuario.md) detalla instalación y uso.
+
+## Interfaz de usuario
 
 ```cmd
 python -m streamlit run app/app.py --browser.gatherUsageStats false
@@ -252,7 +277,7 @@ flujo principal de n8n está activo en el servidor.
 Las capturas son de la aplicación ejecutada el 26 de octubre de 2026. El
 [manual](docs/manual_usuario.md) explica sus controles y mensajes.
 
-## Documentación y estructura
+## Estructura del proyecto
 
 | Documento | Contenido |
 |---|---|
@@ -271,7 +296,7 @@ etiquetas; `data/processed/` las particiones y datos limpios; `results/` las
 métricas e informes; `documentacion/imagenes/` los gráficos y capturas; `app/`
 la interfaz Streamlit; `deploy/` la API y las instrucciones de despliegue.
 
-## Uso responsable
+## Consideraciones éticas
 
 La confianza es una estimación, no una garantía de acierto. El corpus es pequeño,
 sintético y de un dominio limitado. No se ha demostrado generalización a
@@ -280,69 +305,36 @@ personas, cerrar tickets o resolver incidentes críticos automáticamente.
 No ingresar contraseñas ni datos personales innecesarios. La limpieza elimina
 algunos identificadores, pero no garantiza anonimización completa.
 
-## Autores y entrega académica
+## Autores y contribuciones
 
-| Elemento de la entrega | Estado |
-|---|---|
-| Integrantes y contribuciones | Pendiente de completar por el equipo |
-| Repositorio público | https://github.com/ElizabethChiquito/ProyectoIA; subida del código pendiente |
-| Video pitch, máximo 5 minutos | Pendiente de grabación y enlace |
-| Video de respuestas | Pendiente de grabación y enlace |
-| Contacto de soporte del proyecto | No proporcionado |
+| Integrante | Rol | Contribución |
+|---|---|---|
+| **María Quito Castillo** | Líder del Proyecto y Desarrollador TI (desarrolladora full stack) | Liderazgo del proyecto y desarrollo full stack |
+| &nbsp; | Data Scientist | &nbsp; |
+| &nbsp; | Experto Soporte TI | &nbsp; |
+| &nbsp; | Equipo IA | &nbsp; |
+| &nbsp; | Soporte TI | &nbsp; |
+| &nbsp; | TI | &nbsp; |
+| &nbsp; | Mesa de Ayuda | &nbsp; |
 
-## Licencia y referencias
+## Licencia
 
-El código usa [MIT](LICENSE). Esa licencia no se extiende automáticamente al
-corpus original. Se reconoce el aporte de las bibliotecas de código abierto:
-[TF-IDF](https://scikit-learn.org/1.5/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html),
-[calibración](https://scikit-learn.org/1.5/modules/generated/sklearn.calibration.CalibratedClassifierCV.html),
-[GridSearchCV](https://scikit-learn.org/1.5/modules/generated/sklearn.model_selection.GridSearchCV.html),
-[Streamlit AppTest](https://docs.streamlit.io/develop/api-reference/app-testing/st.testing.v1.apptest)
-y [pytest](https://docs.pytest.org/en/stable/how-to/usage.html).
+<br><br>
 
-## Integración desplegada y evidencia actual
+## Agradecimientos y referencias
 
-El flujo principal es [Mquito | Correo → IA → Ticket Redmine](http://185.208.207.203:5678/workflow/opxBwpGpRDrbQeHn).
-Recibe el correo, consulta `http://clasificador-python:8000/predict` en la red
-Docker, ejecuta el modelo de 300, compara con OpenAI y crea el ticket en Redmine.
-El agente externo conserva la decisión de categoría; la predicción Python es una
-comparación operativa. Coincidir no demuestra exactitud.
+<br><br>
 
-El agente devuelve el nombre `tipo_ticket` (Errores/Soporte); el código obtiene
-su ID del catálogo habilitado del proyecto. No se acepta un ID supuesto por el
-agente. También se verifican proyecto, categoría, membresía y rol asignable.
-Las copias importables están en `../workflows/` y no incluyen credenciales.
+## Videos
 
-La prueba inicial de 24 correos produjo 20 tickets y cuatro bloqueos por tipo.
-Después de corregirlos se repitieron solo los cuatro casos afectados: 4/4 crearon
-su ticket. No es una nueva medición de accuracy ni una repetición completa de los
-24 con la versión corregida. Evidencia: `results/n8n_produccion/`.
+### Video pitch de 5 minutos
 
-Pruebas actuales: **51 tests Python aprobados**, Ruff sin errores y las tres
-suites JavaScript de normalización, asignación y adjuntos aprobadas. Se verifican también la integridad de los cuatro artefactos, sus probabilidades
-en 25 entradas y la limitación de CV en la versión de 10.
+Enlace:
 
-Para reproducir el análisis S5 sin reentrenar:
+<br><br>
 
-```cmd
-python -m src.optimization_analysis
-```
+### Video de respuestas a las preguntas
 
-Para revisar los mismos 25 correos y medir regresión conocida:
+Enlace:
 
-```cmd
-python -m src.evaluate_reviewed --prepare
-python -m src.evaluate_reviewed --reviewer "Nombre de quien revisó"
-```
-
-La hoja `data/evaluation/correos_para_revision.json` ya está creada con etiquetas
-vacías; `--prepare` no la sobrescribe. Una persona debe completar las cuatro
-categorías antes de evaluar. El JSON de `data/test/` conserva solo título/cuerpo.
-Estos casos conocidos no demuestran generalización ni ausencia de sobreajuste.
-Ver [protocolo de evaluación](docs/evaluacion_pruebas.md).
-
-La API requiere clave y no publica su puerto. OpenAI puede recibir texto,
-imágenes/PDF seleccionados y respuestas de herramientas de Redmine. No hay un
-anonimizador general antes del agente ni una auditoría de cumplimiento normativo.
-Ver [privacidad y límites](docs/consideraciones_eticas.md) y
-[operación del servidor](deploy/DESPLIEGUE_REALIZADO.md).
+<br><br>

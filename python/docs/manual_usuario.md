@@ -2,15 +2,30 @@
 
 Actualizado: 27 de octubre de 2026.
 
-## Instalar e iniciar
+## Requisitos e instalación
 
-Desde CMD:
+Se necesita Python 3.10 o 3.11, CPU y espacio para las dependencias; no se usa
+GPU. Antes de ejecutar, obtener las copias privadas de los modelos y colocarlas
+en `models/`. Un clon de Git no contiene esos archivos. Para la consola se
+necesitan también los datos de prueba; entrenar requiere el corpus y el
+manifiesto de particiones. Ver [datos](../data/README.md).
+
+Desde CMD, entrar en la carpeta `python` de la copia descargada. Sustituir
+la ruta del ejemplo por la de esa instalación:
 
 ```cmd
-cd /d F:\Maria\python
+cd /d C:\ruta\ProyectoIA\python
+py -3.10 -m venv .venv
+.venv\Scripts\activate
 python -m pip install -r requirements.txt
 python -m streamlit run app/app.py
 ```
+
+En Linux, desde esa misma carpeta, crear el entorno con `python3 -m venv .venv`
+y activarlo con `. .venv/bin/activate`; después usar los comandos `python -m`
+anteriores. Los detalles de descarga están en [Instalación y uso](../README.md#instalación-y-uso).
+
+## Iniciar y detener la interfaz
 
 También puedes hacer doble clic en `Iniciar_clasificador.cmd`. La pantalla se
 abre en http://127.0.0.1:8501. Si Streamlit pregunta un correo de bienvenida,
@@ -67,6 +82,17 @@ correos con cada modelo y exporta el gráfico de CV. No es un test externo.
 El selector centrado superior alterna Clasificar y Modelo y métricas.
 La tarjeta izquierda contiene el selector del modelo, los dos campos y el botón azul.
 La derecha presenta el resultado y el nombre del modelo que lo produjo.
+
+Anotaciones de lectura del formulario:
+
+| Zona de la captura | Función | Acción del usuario |
+|---|---|---|
+| Selector superior Clasificar / Modelo y métricas | Cambiar de vista | Elegir clasificación o información del modelo |
+| Cargar ejemplo, arriba a la derecha del formulario | Completar los campos con un caso precargado | Pulsar para probar sin escribir un ticket |
+| Modelo de clasificación | Seleccionar el archivo de 10, 100, 200 o 300 correos | Elegir la versión antes de clasificar |
+| Título y Descripción | Introducir los dos textos obligatorios | Describir el incidente con contexto suficiente |
+| Botón Clasificar, al pie del formulario | Ejecutar la predicción | Pulsar y esperar el indicador de análisis |
+| Panel Resultado, a la derecha | Consultar la salida | Leer categoría, confianza, probabilidades y advertencias |
 
 ![Entrada inválida](../documentacion/imagenes/02_entrada_invalida.png)
 
@@ -168,6 +194,14 @@ No repitas envíos de producción para probar el diseño: pueden crear tickets r
 
 ## Contacto de soporte
 
-El equipo no ha proporcionado un contacto oficial. Debe completarlo antes de
-publicar la entrega. Mientras tanto, registra el comando y mensaje de error
-para el responsable del proyecto, sin incluir contraseñas ni texto sensible.
+Responsable del proyecto: **María Quito Castillo**, líder del proyecto y
+desarrolladora full stack.
+
+| Canal de soporte | Contacto |
+|---|---|
+| Correo electrónico | &nbsp; |
+| Canal alternativo | &nbsp; |
+
+El equipo debe completar un canal oficial antes de publicar la entrega.
+Al solicitar ayuda, indicar sistema operativo, versión de Python, modelo,
+pasos para reproducir y mensaje de error. No incluir contraseñas ni texto sensible.

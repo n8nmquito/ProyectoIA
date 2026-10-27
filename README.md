@@ -510,16 +510,13 @@ Las medidas y limitaciones se desarrollan en las [consideraciones éticas](pytho
 
 | Integrante | Rol | Contribución |
 |---|---|---|
-| **María Quito Castillo** | Líder del Proyecto | Liderazgo del proyecto |
-| **María Quito Castillo** | Desarrollador TI (desarrolladora full stack) | Desarrollo full stack |
+| **María Quito Castillo** | Líder del Proyecto y Desarrollador TI (desarrolladora full stack) | Liderazgo del proyecto y desarrollo full stack |
 | &nbsp; | Data Scientist | &nbsp; |
 | &nbsp; | Experto Soporte TI | &nbsp; |
 | &nbsp; | Equipo IA | &nbsp; |
 | &nbsp; | Soporte TI | &nbsp; |
 | &nbsp; | TI | &nbsp; |
 | &nbsp; | Mesa de Ayuda | &nbsp; |
-
-Los roles corresponden al [cronograma del proyecto](python/docs/planificacion.md#cronograma-de-desarrollo-planificado-vs-real). Los espacios vacíos quedan disponibles para completar los nombres y las contribuciones del equipo.
 
 <br>
 
@@ -532,5 +529,15 @@ Los roles corresponden al [cronograma del proyecto](python/docs/planificacion.md
 <br><br>
 
 ## Videos
+
+### Video pitch de 5 minutos
+
+Enlace:
+
+<br><br>
+
+### Video de respuestas a las preguntas
+
+Enlace:
 
 <br><br>

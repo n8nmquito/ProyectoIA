@@ -169,6 +169,11 @@ Se requiere que una persona del área revise la definición de categorías y que
 los integrantes del equipo validen los resultados y expliquen las decisiones.
 No se registró una evaluación con usuarios finales externos.
 
+María Quito Castillo asume los roles Líder del Proyecto y Desarrollador TI
+(desarrolladora full stack). Los nombres de los responsables de Data Scientist,
+Experto Soporte TI, Equipo IA, Soporte TI, TI y Mesa de Ayuda quedan por completar
+en la sección de autores del README.
+
 ## Riesgos identificados y mitigación
 
 | Riesgo | Medida aplicada o pendiente |

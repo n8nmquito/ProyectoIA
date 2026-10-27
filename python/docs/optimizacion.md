@@ -50,8 +50,17 @@ mejora absoluta de **0.003275**, aproximadamente
 No se presenta como un aumento grande. LR ajustada queda muy cerca; se necesitan
 más datos y un diseño de evaluación más fuerte para afirmar una ventaja real.
 
+## Configuración final seleccionada y justificación
+
 Configuración final: `{"classifier__estimator__C": 10.0, "classifier__estimator__class_weight": null, "tfidf__min_df": 1}`. La mejor configuración puntual no tiene por
 qué coincidir con el mejor promedio marginal de un solo hiperparámetro.
+
+Se selecciona la combinación que obtiene el mayor F1 macro CV entre los
+candidatos medidos, conservando TF-IDF y la SVM calibrada en un pipeline.
+`min_df=1` mantiene términos poco frecuentes; `C=10` reduce la regularización
+frente a los valores menores explorados y `class_weight=None` evita ponderar
+las clases en esta configuración. Es una elección conjunta respaldada por la
+grilla, sin afirmar que cada valor sea óptimo por separado o para datos reales.
 
 ## Ranking de sensibilidad
 

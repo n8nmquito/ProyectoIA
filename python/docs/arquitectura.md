@@ -48,7 +48,7 @@ Las rutas predeterminadas se resuelven desde la raíz del proyecto. `config.yaml
 define datos, modelo, semilla, folds, búsqueda y umbral de revisión. No es
 necesario editar rutas de la unidad F dentro del código para usar otra carpeta.
 
-## Representación del texto
+## Arquitectura detallada y representación del texto
 
 Se combina título con cuerpo después de validarlos. `TfidfVectorizer` utiliza
 unigramas y bigramas, frecuencia sublineal, normalización Unicode de acentos y
@@ -56,7 +56,7 @@ la normalización L2 predeterminada. El ajuste actual usa min_df=1.
 La salida es una matriz dispersa: no se usa una red neuronal ni embeddings.
 El vocabulario crece de 867 términos en la versión de 10 a 14.409 en la de 300.
 
-## Clasificador y probabilidades
+## Tipo de modelo seleccionado y justificación
 
 La selección compara DummyClassifier mayoritario, LogisticRegression y
 LinearSVC envuelta en CalibratedClassifierCV. El resultado actual favorece
@@ -98,7 +98,24 @@ La consola acepta `--model 10`, `100`, `200`, `300` o una ruta a uno de esos
 archivos. Verifica que los registros del corpus coincidan con las huellas de
 la versión seleccionada y guarda las salidas en carpetas separadas.
 
-## Dependencias registradas
+## Pipeline de datos desde input hasta output
+
+| Paso | Entrada | Transformación o control | Salida |
+|---|---|---|---|
+| 1 | Título y cuerpo | Validar texto, longitud y contenido; limpiar y concatenar | Texto normalizado |
+| 2 | Texto normalizado | TF-IDF con unigramas y bigramas del modelo seleccionado | Vector disperso |
+| 3 | Vector disperso | SVM lineal y calibración sigmoide de dos folds | Cuatro probabilidades |
+| 4 | Probabilidades y vocabulario | Elegir máximo y comprobar umbral de 0.60 y términos conocidos | Categoría, confianza y requiere_revision |
+| 5 | Resultado | Presentación en consola/Streamlit o respuesta de la API | Predicción visible o JSON para n8n |
+
+Este modelo no tiene capas neuronales. Sus etapas son el vectorizador y el
+clasificador calibrado; los parámetros principales son `ngram_range=(1, 2)`,
+`sublinear_tf=True`, `norm=l2`, `strip_accents=unicode`, `min_df=1`, `C=10`,
+`class_weight=None`, `dual=auto` y semilla 42. El flujo completo de n8n agrega
+al pipeline la decisión del agente y las validaciones de Redmine, como muestra
+el diagrama de extremo a extremo.
+
+## Tecnologías y librerías utilizadas con versiones
 
 Python de la ejecución verificada: 3.10.11.
 

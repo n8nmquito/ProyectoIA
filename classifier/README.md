@@ -1,5 +1,11 @@
 # Segunda técnica: TF-IDF + regresión logística
 
+Esta carpeta documenta el **experimento histórico** con el modelo demo en
+PostgreSQL. El flujo actual utiliza la API Python con SVM calibrada y 300
+correos; consultar el [proyecto vigente](../python/README.md) y su
+[arquitectura](../python/docs/arquitectura.md). Las descripciones de integración
+y modelo activo que siguen corresponden a esa etapa anterior.
+
 El corpus original (`demo.csv`) y su modelo derivado (`model.json`) se conservan
 solo en la instalación local y se excluyen de Git mientras no se autorice su
 redistribución. Los comandos que los utilizan requieren disponer de esas copias

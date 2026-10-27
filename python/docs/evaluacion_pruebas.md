@@ -3,6 +3,47 @@
 Revisión: 27 de octubre de 2026. Este documento separa pruebas del código, métricas del
 clasificador y observación manual de predicciones.
 
+## Revisión documental frente a la consigna
+
+La revisión toma como referencia la descripción del Proyecto Final 2026,
+especialmente los requisitos de documentación de las páginas 5 a 7. La lista
+de 14 apartados corresponde a los README de presentación; cada documento
+técnico conserva el contenido específico que le exige la consigna.
+
+| Documento obligatorio | Contenido contrastado | Estado documental |
+|---|---|---|
+| [Planificación](planificacion.md) | Problema y objetivos, relevancia, alcance incluido/excluido, cronograma planificado/real, recursos y riesgos con mitigación | Contenido cubierto; nombres del resto del equipo por completar |
+| [Análisis de datos](analisis_datos.md) | Dataset, estadísticas, seis gráficos, patrones/correlaciones/outliers, decisiones de preprocesamiento y tratamiento de faltantes/desbalance | Contenido cubierto con límites del corpus sintético declarados |
+| [Arquitectura](arquitectura.md) | Modelo y justificación, etapas y parámetros, diagramas completos, pipeline input/output y versiones | Contenido cubierto; se distinguen Streamlit local y automatización desplegada |
+| [Optimización](optimizacion.md) | Workshop S5, rangos, sensibilidad, PDP, importancia, interacciones, configuración justificada y comparación antes/después | Contenido cubierto; la mejora medida es pequeña y no se exagera |
+| [Ética](consideraciones_eticas.md) | Sesgos, equidad, privacidad, transparencia, impacto social, responsabilidad/monitoreo, uso dual y límites | Ocho dimensiones documentadas; medidas propuestas diferenciadas de las implementadas |
+| [Manual](manual_usuario.md) | Instalación, pasos de interfaz, capturas y anotaciones de lectura, funcionalidades, problemas, FAQ y soporte | Falta el canal oficial de soporte; las anotaciones son textuales junto a las capturas, sin marcas superpuestas |
+
+También se revisaron los README de datos, modelos, despliegue y experimento
+histórico; las guías de automatización, configuración y notificaciones; y los
+informes de resultados. No se aplican los 14 apartados de presentación a cada
+informe generado ni a cada guía de un componente.
+
+### Pendientes para cumplimiento estricto de la entrega
+
+- Completar los nombres del resto del equipo y el canal de soporte.
+- Incorporar marcas visuales sobre las capturas si se exige una interpretación
+  literal de «capturas de pantalla anotadas»; las explicaciones actuales están
+  debajo de las imágenes y en la tabla de lectura del manual.
+- Completar Licencia, Agradecimientos y referencias y los dos enlaces de videos
+  en los README. Esos espacios se mantienen vacíos por indicación del equipo.
+- Resolver la correspondencia de carpetas: la consigna presenta `docs/`,
+  `requirements.txt`, `LICENSE`, `src/`, `models/` y `app/` en la raíz del
+  proyecto académico; en este repositorio están bajo `python/`. Documentarlo
+  no equivale a tener la misma estructura literal.
+- Verificar acceso público a la entrega y disponibilidad autorizada de los
+  artefactos necesarios para ejecutarla desde una instalación nueva. La revisión
+  de Markdown no cambia permisos del repositorio ni publica datos o modelos.
+
+Estas diferencias impiden declarar que la entrega completa cumple al 100 %,
+aunque los documentos describan correctamente lo implementado. Esta revisión
+es documental; no constituye una nueva ejecución de pruebas ni del despliegue.
+
 ## Pruebas por tamaño y modelo final elegido
 
 Se prepararon cuatro versiones para las pruebas: 10, 100, 200 y 300 correos.

@@ -56,7 +56,7 @@ La clave se entrega como variable de entorno al crear el contenedor. El comando 
 Archivo: F:\Maria\workflows\correo-ia-redmine-python300.json.
 
 1. Importar como flujo NUEVO. La copia está inactiva y sin credenciales asignadas.
-2. En Consultar API - Modelo 300 reemplazar https://CONFIGURAR-HOST-API/predict por la URL real. Se requiere desplegar antes; el marcador no funciona.
+2. En Consultar API - Modelo 300 comprobar la URL exportada `http://clasificador-python:8000/predict`. Solo funciona si el servicio está desplegado y comparte la red Docker de n8n. Adaptar host y red si la instalación es diferente.
 3. Crear una credencial Header Auth con Name X-API-Key y Value igual a CLASSIFIER_API_KEY. Seleccionarla en ese nodo.
 4. Reasignar las credenciales habituales IMAP, Gemini/OpenAI, Redmine y correo saliente. El proveedor del agente se conserva tal como aparece en la copia local, que puede diferir de la versión activa del servidor.
 5. Verificar la salida: modelo_version=modelo_clasificador_300 y muestras_entrenamiento=300. Comprobar probabilidades y que los adjuntos originales sobreviven al adaptador.

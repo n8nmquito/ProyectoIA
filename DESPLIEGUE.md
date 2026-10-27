@@ -80,13 +80,13 @@ Internet, configurar HTTPS con un proxy y ajustar en Compose `N8N_PROTOCOL`,
 al acceso previsto. Para recuperar contraseñas por correo se requiere SMTP;
 SMTP no está configurado.
 
-## Comunicación y próxima automatización
+## Comunicación y configuración de la automatización
 
 Desde n8n, la dirección de Redmine es **`http://redmine:3000`**.
 Desde Redmine, n8n está disponible en `http://n8n:5678`.
 Usar los nombres de servicio: `localhost` dentro de un contenedor apunta a él mismo.
 
-La API REST de Redmine queda habilitada. Para la próxima etapa:
+La API REST de Redmine queda habilitada. En una instalación nueva:
 
 1. Crear un proyecto en Redmine y un usuario para la integración con permisos
    para crear peticiones en ese proyecto.
@@ -95,7 +95,11 @@ La API REST de Redmine queda habilitada. Para la próxima etapa:
 4. Configurar el acceso al buzón (IMAP, Gmail o Microsoft 365) y luego el flujo
    correo → ticket, incluyendo control de duplicados.
 
-El buzón, el proyecto y el flujo no están creados todavía.
+Estos elementos deben configurarse al reinstalar. En el servidor documentado,
+el flujo ya está desplegado y utiliza la API Python de 300 correos y el agente
+OpenAI. Ver [configuración actual](workflows/GUIA_CONFIGURACION.md) y
+[evidencias](python/deploy/DESPLIEGUE_REALIZADO.md). El control general de
+duplicados sigue pendiente; no se presupone por importar el flujo.
 
 Verificar desde el servidor la comunicación interna:
 
@@ -147,8 +151,10 @@ No hace falta borrar volúmenes ni bases de datos para resolver este error.
 
 Se verificó la sintaxis YAML, las referencias a variables y Dockerfiles, la red
 compartida y que el hash bcrypt corresponde a la contraseña solicitada.
-No se construyeron ni ejecutaron contenedores en la máquina de preparación;
-la validación de arranque y login queda para el servidor con los comandos anteriores.
+La comprobación inicial en la máquina de preparación no construyó ni ejecutó
+contenedores. La evidencia posterior del servicio Python y el flujo del servidor
+se registra en [despliegue realizado](python/deploy/DESPLIEGUE_REALIZADO.md).
+Cada instalación nueva debe comprobar arranque y login con sus propias credenciales.
 
 Referencias oficiales:
 

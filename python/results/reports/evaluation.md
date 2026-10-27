@@ -20,7 +20,9 @@ Parámetros: `{"classifier__estimator__C": 10.0, "classifier__estimator__class_w
 
 ## Alcance de evaluación
 
-El test original ya se examinó durante el desarrollo. Se conserva fuera de entrenamiento como referencia diagnóstica; no es una validación nueva independiente de la ampliación.
+El test original ya se examinó durante el desarrollo. Se conserva fuera del
+entrenamiento del modelo diagnóstico de 280; sus 20 registros sí se incluyen
+en el ajuste final con 300. No es una validación nueva independiente de la ampliación.
 
 ## Errores de test
 

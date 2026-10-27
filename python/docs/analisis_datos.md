@@ -6,7 +6,7 @@ se conservan para comparación; las métricas por versión se detallan en la eva
 
 Versión documentada: 26 de octubre de 2026. Fuente numérica: `results/metrics/eda.json`.
 
-## Procedencia y formato
+## Descripción detallada del dataset
 
 El corpus maestro `data/raw/correos.json` contiene 300 correos simulados en
 español. Los 100 iniciales fueron suministrados por el usuario y otros 200 se
@@ -119,7 +119,7 @@ el peso relativo de términos muy comunes, aunque no entiende su significado.
 Son relaciones entre medidas de tamaño del texto, no correlaciones entre
 causas de incidentes. Se utilizan para conocer el corpus, no para afirmar causalidad.
 
-## Limpieza y control de calidad
+## Decisiones de preprocesamiento y control de calidad
 
 Se aplica Unicode NFKC, minúsculas, eliminación de etiquetas HTML y normalización
 de espacios. Algunas direcciones de correo, URLs, IP, números largos y nombres
@@ -132,6 +132,24 @@ números, etiquetas fuera del conjunto permitido y campos de más de 20.000
 caracteres. Los duplicados normalizados se eliminan antes de dividir; si un mismo
 texto tiene etiquetas contradictorias se detiene la carga. No se inventan
 etiquetas faltantes ni se imputan automáticamente.
+
+### Manejo de datos faltantes y desbalanceados
+
+Los campos obligatorios faltantes se rechazan para evitar construir entradas
+incompletas o etiquetas supuestas. El corpus cargado registra cero faltantes.
+No se aplican imputación, sobremuestreo ni generación adicional durante el fit.
+Se comparó `class_weight=None` con `balanced`; la configuración seleccionada
+usa `None`. Se conservan la distribución original de 300, las particiones
+estratificadas y F1 macro para observar el rendimiento entre categorías.
+
+### Justificación de las transformaciones
+
+Concatenar título y cuerpo conserva la descripción breve y el contexto del
+incidente. La normalización reduce variantes de escritura y el reemplazo de
+identificadores limita vocabulario irrelevante, sin garantizar anonimización.
+No se eliminan stopwords genéricas para conservar negaciones. TF-IDF con
+unigramas y bigramas representa términos y expresiones cortas sin requerir
+GPU; su vocabulario se aprende solo en el entrenamiento de cada fold externo.
 
 El vocabulario TF-IDF se aprende dentro del fold externo de entrenamiento.
 La calibración interna de SVM reutiliza el TF-IDF de ese train externo; no tiene
@@ -149,3 +167,12 @@ No hay una evaluación independiente por empresa, conversación o plantilla.
 La licencia de publicación del material inicial no está confirmada. Antes de
 usar o publicar correos reales, revisar permisos, anonimización y retención.
 Ver [consideraciones éticas](consideraciones_eticas.md).
+
+## Fuente licencia y disponibilidad
+
+El origen es el aporte inicial de 100 correos y la ampliación con 200 ejemplos
+ficticios descritos arriba. No hay una licencia de redistribución confirmada
+para el corpus original ni un enlace público autorizado. La [licencia MIT del
+código](../LICENSE) no concede permisos sobre los datos ni los modelos derivados.
+Los archivos restringidos se mantienen fuera de Git; los pasos que los utilizan
+requieren sus copias privadas.

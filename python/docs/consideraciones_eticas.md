@@ -85,11 +85,27 @@ la atención, asignar mal una solicitud o crear una falsa sensación de segurida
 Las consultas de capacitación, planificación o permisos pueden ser ambiguas.
 Debe conservarse una vía de atención humana y de corrección de tickets.
 
+Se beneficiarían operadores de mesa de ayuda, personal TI y solicitantes si la
+clasificación facilita la derivación. Podrían verse perjudicados solicitantes
+con problemas poco representados o mensajes ambiguos, así como personas cuyos
+datos aparezcan en correos o adjuntos enviados a servicios externos. Estos
+beneficios y perjuicios son potenciales; no se midió su magnitud.
+
 ## 6. Responsabilidad, revisión y seguimiento
 
 El equipo de soporte responde por la atención y corrección del ticket. El
 responsable funcional define categorías; el equipo técnico mantiene datos,
-modelos y flujo. Sus nombres deben completarse en la entrega académica.
+modelos y flujo. María Quito Castillo es la líder del proyecto y desarrolladora
+full stack, correspondiente a los roles Líder del Proyecto y Desarrollador TI
+del cronograma. Los demás responsables nominales siguen por completar.
+
+| Rol del cronograma | Responsabilidad ante fallos | Integrante |
+|---|---|---|
+| Líder del Proyecto | Coordinar revisión, correcciones y decisión de continuidad | María Quito Castillo |
+| Desarrollador TI | Revisar integración, errores y versiones del código | María Quito Castillo |
+| Data Scientist y Equipo IA | Revisar etiquetas, métricas y propuestas de actualización | &nbsp; |
+| Experto Soporte TI y Soporte TI | Validar categorías y revisar derivaciones incorrectas | &nbsp; |
+| TI y Mesa de Ayuda | Observar la operación y corregir la atención de tickets | &nbsp; |
 
 Python marca revisión bajo 60 % o sin vocabulario conocido. **En n8n esa señal
 no bloquea el alta ni obliga a una revisión humana.** Si el agente marca revisión,
@@ -102,6 +118,22 @@ automático de deriva ni una política de auditoría y retención validada. Se
 propone revisar semanalmente errores, bloqueos, discrepancias y casos de baja
 confianza; la frecuencia y responsables deben confirmarse según el servicio.
 Las correcciones deben revisarse antes de incorporarlas a futuros entrenamientos.
+
+### Plan de monitoreo y actualización propuesto
+
+1. Revisar semanalmente una muestra de tickets y los bloqueos, discrepancias
+   y avisos de revisión; registrar fecha, versión y corrección humana.
+2. Separar problemas de clasificación de fallos de integración y de asignación;
+   escalar los incidentes al rol correspondiente de la tabla anterior.
+3. Crear un conjunto nuevo autorizado y etiquetado por personas para evaluar
+   cambios. Mantener los casos conocidos como regresión, separados del nuevo test.
+4. Comparar F1 macro, métricas por clase y baseline antes de promover una versión.
+   Conservar modelo, datos, hashes y configuración anteriores para poder revertir.
+5. La líder del proyecto coordina la revisión con soporte y desarrollo antes de
+   actualizar. La frecuencia y asignación al resto del equipo deben confirmarse.
+
+Este plan no es un monitor automático implementado ni una actividad cuya
+ejecución periódica se haya demostrado.
 
 ## 7. Uso dual y controles implementados
 

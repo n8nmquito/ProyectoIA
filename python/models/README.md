@@ -28,7 +28,33 @@ Cambia 100 por 10, 200 o 300 para elegir otra versión. Sin indicar modelo se
 utiliza el de 300. Cada versión guarda sus resultados en una carpeta separada.
 Los 25 correos de prueba están aparte en data/test y no se usaron para entrenar.
 
-El manual completo está en docs/manual_usuario.md.
+El [manual completo](../docs/manual_usuario.md) explica la interfaz y sus advertencias.
+
+## Arquitectura y configuración
+
+Los cuatro archivos guardan pipelines TF-IDF con unigramas y bigramas y SVM
+lineal calibrada con sigmoide de dos folds. Comparten `C=10`,
+`class_weight=None` y `min_df=1`; cada versión aprende su propio vocabulario y
+clasificador con los registros de su tamaño. Se conservan índices, huellas y
+etiquetas para comprobar el dataset exacto. La selección del modelo de 300 no
+equivale a demostrar superioridad en un test externo común a los cuatro.
+
+## Disponibilidad y regeneración
+
+Los `.pkl` se excluyen de Git mientras no se confirme la autorización de
+redistribución del corpus y sus derivados. Solo cargar archivos propios o de
+una fuente confiable: pickle puede ejecutar código. Con las copias privadas
+del corpus y el manifiesto de particiones, desde `python/`:
+
+```cmd
+python -m src.train
+python -m src.train_versions
+python -m src.export_datasets
+```
+
+Estos comandos reemplazan los artefactos de los mismos nombres. Conservar las
+versiones anteriores antes de entrenar. La [evaluación](../docs/evaluacion_pruebas.md)
+documenta métricas por tamaño, el diagnóstico 280/20 y sus límites.
 
 Para verificar los cuatro modelos y repetir las pruebas sin reentrenarlos:
 
