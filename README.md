@@ -1,73 +1,201 @@
 # Mquito Ticket
 
-Automatización de soporte: **correo → n8n + IA → Redmine**.
+![Python 3.10 y 3.11](https://img.shields.io/badge/Python-3.10%20%7C%203.11-blue)
+[![Licencia MIT del código Python](https://img.shields.io/badge/License-MIT-green)](python/LICENSE)
+![Interfaz Streamlit](https://img.shields.io/badge/Interfaz-Streamlit-red)
+![Estado del proyecto](https://img.shields.io/badge/Estado-piloto%20implementado-blue)
 
-Sistema desplegado con clasificador Python de 300 correos, agente OpenAI y
-validación de tickets en Redmine. La consola y Streamlit permiten probar también
-las versiones de 10, 100 y 200 correos. Ver [proyecto Python](python/README.md).
+Mquito Ticket clasifica solicitudes de soporte TI y automatiza su registro mediante el circuito correo → n8n + IA → Redmine. Incluye un clasificador Python con versiones de 10, 100, 200 y 300 correos, una interfaz Streamlit y una API interna; la versión de 300 es el modelo final elegido. Está orientado a apoyar la derivación inicial de tickets y su supervisión por el equipo de soporte.
 
-## Qué incluye
+## Tabla de contenidos
 
-| Contenedor | Función | Puerto |
+1. [Encabezado y badges](#mquito-ticket)
+2. [Tabla de contenidos](#tabla-de-contenidos)
+3. [Descripción del problema](#descripción-del-problema)
+4. [Dataset](#dataset)
+5. [Metodología](#metodología)
+6. [Resultados](#resultados)
+7. [Instalación y uso](#instalación-y-uso)
+8. [Interfaz de usuario](#interfaz-de-usuario)
+9. [Estructura del proyecto](#estructura-del-proyecto)
+10. [Consideraciones éticas](#consideraciones-éticas)
+11. [Autores y contribuciones](#autores-y-contribuciones)
+12. [Licencia](#licencia)
+13. [Agradecimientos y referencias](#agradecimientos-y-referencias)
+14. [Videos](#videos)
+
+## Descripción del problema
+
+Las mesas de ayuda reciben correos sobre cuentas, errores de aplicaciones, equipos, redes y consultas generales. Leer cada mensaje, identificar su categoría y decidir a quién corresponde atenderlo exige trabajo repetitivo y puede producir derivaciones inconsistentes.
+
+El proyecto propone una clasificación inicial y automatiza la preparación y creación del ticket en Redmine. Su importancia radica en apoyar una atención organizada y permitir revisar las decisiones del sistema. La reducción de tiempos y los beneficios económicos son objetivos: todavía no se han medido.
+
+Los usuarios objetivo son operadores de mesa de ayuda, personal de soporte TI y responsables que supervisan la asignación de solicitudes. La consola y Streamlit también permiten demostrar y evaluar el clasificador en el contexto académico.
+
+## Dataset
+
+### Descripción y características
+
+La fuente principal es `python/data/raw/correos.json`: un corpus de **300 correos simulados en español** sobre soporte TI. Cada registro contiene:
+
+| Variable | Tipo | Función |
 |---|---|---|
-| **n8n** | Orquestación de automatizaciones | `5678` |
-| **Redmine** | Tickets, con API REST habilitada | `3000` |
-| **PostgreSQL** | Bases `n8n` y `redmine`, con usuarios separados | `5432` |
-| **clasificador-python** | API del modelo Python de 300 correos | `8000`, solo dentro de Docker |
+| `titulo` | Texto | Asunto de la solicitud; entrada del modelo |
+| `cuerpo` | Texto | Descripción de la solicitud; entrada del modelo |
+| `clasificacion` | Categoría | Etiqueta utilizada en entrenamiento y evaluación |
 
-`docker-compose.yml` levanta los tres servicios de la base.
-`docker-compose.python.yml` agrega el clasificador a la misma red, sin publicar
-su puerto en el servidor. Desde n8n, Redmine responde en `http://redmine:3000`
-y el clasificador en `http://clasificador-python:8000`.
+| Categoría | Correos |
+|---|---:|
+| accesos | 70 |
+| aplicaciones | 90 |
+| infraestructura | 70 |
+| otros | 70 |
+| **Total** | **300** |
 
-## Flujo de automatización
+Se conservan datasets anidados de 10, 100, 200 y 300 registros y un modelo para cada tamaño. Los conjuntos pequeños están contenidos en los mayores. Además, existen **25 correos sin etiquetas** en `python/data/test/correos_test_25.json`, separados del entrenamiento, para comparar predicciones y confianza.
 
-n8n recibe el correo y conserva sus adjuntos. Consulta el clasificador Python,
-envía la solicitud al agente OpenAI y compara las categorías propuestas.
-Para las solicitudes de soporte, prepara y valida el ticket antes de crearlo
-en Redmine y enviar la notificación correspondiente.
+### Fuente y licencia
 
-<img src="Documentacion/Imagenes/c7f36046-5630-4130-9ed5-a623272a4937.png" alt="Flujo actual: correo IMAP, clasificación Python, agente OpenAI, validaciones, adjuntos y creación del ticket en Redmine" width="560">
+Los 100 correos iniciales fueron aportados por el usuario y se añadieron 200 ejemplos ficticios para ampliar el corpus. No se presentan como solicitudes reales. La autorización de redistribución de los 100 originales no está confirmada; el corpus y sus modelos derivados se mantienen fuera de Git.
 
-El detalle de los nodos y la exportación importable están en la
-[guía del flujo](workflows/README.md).
+La [licencia MIT del código Python](python/LICENSE) no se extiende automáticamente a los datos. **No hay un enlace público autorizado al dataset**. Para reproducir el entrenamiento o ejecutar los modelos se necesitan las copias privadas correspondientes. Consultar el [análisis de datos](python/docs/analisis_datos.md) y la [descripción de los datasets](python/data/README.md).
 
-## Clasificador Python
+## Metodología
 
-El clasificador transforma título y cuerpo mediante TF-IDF y utiliza una SVM
-calibrada para proponer accesos, aplicaciones, infraestructura u otros.
-Se conservan versiones de 10, 100, 200 y 300 correos; la de 300 es la elegida
-para el despliegue. Su predicción sirve para comparar con la decisión del agente.
+### Modelo y justificación
 
-![Preparación de datos, representación TF-IDF, entrenamiento de la SVM, validación y guardado del modelo](Documentacion/Imagenes/c6c1e33b-e22a-4d55-a79f-d2438501b3dc.png)
+El problema se aborda como clasificación supervisada multiclase de texto. Se comparan un baseline que predice la clase mayoritaria, regresión logística y SVM lineal calibrada, usando una representación **TF-IDF de palabras y pares de palabras**.
 
-La metodología, las métricas y sus límites se explican en el
-[proyecto Python](python/README.md). El corpus y los modelos se conservan
-fuera de Git mientras no se autorice su redistribución.
+La SVM calibrada se selecciona por su desempeño en F1 macro durante la comparación y porque permite obtener probabilidades para apoyar la revisión de predicciones. La diferencia frente a la regresión logística optimizada es pequeña y no demuestra superioridad estadística. El artefacto final elegido es `modelo_clasificador_300.pkl`; las otras tres versiones se conservan para comparación.
 
-## Agente de IA y validaciones
+### Preprocesamiento
 
-El agente analiza el asunto, el mensaje y los adjuntos seleccionados.
-Propone categoría, prioridad, proyecto, tipo de ticket y responsable a partir
-de las consultas a Redmine. Los nodos posteriores verifican proyecto, tipo,
-categoría, membresía y rol antes de crear el ticket.
+1. Validar campos, tipos, etiquetas, límites de longitud y presencia de texto.
+2. Normalizar Unicode y HTML, convertir a minúsculas y reemplazar enlaces, correos, IP, ciertos nombres de archivos y números largos.
+3. Eliminar signos y espacios repetidos, y combinar título con cuerpo.
+4. Detectar etiquetas contradictorias para textos iguales y eliminar duplicados.
+5. Ajustar TF-IDF dentro del pipeline y de cada partición de validación, evitando aprender el vocabulario de la partición evaluada.
 
-![Análisis del correo por el agente: recepción, interpretación, propuesta de asignación y explicación del resultado](Documentacion/Imagenes/Agente.png)
+### Optimización y evaluación
 
-Las herramientas del agente consultan proyectos, miembros, tipos de ticket,
-roles y la cuenta de integración mediante peticiones GET.
+Se utiliza `GridSearchCV` con validación cruzada estratificada de cuatro particiones y semilla 42. La búsqueda explora `C`, `class_weight` y `min_df`; se complementa con análisis de sensibilidad e interacción de hiperparámetros. La SVM utiliza calibración sigmoide interna de dos particiones.
 
-<details>
-<summary>Consultas del agente a la API de Redmine</summary>
+La métrica principal es **F1 macro**, que da el mismo peso a las cuatro categorías. También se informa accuracy, precisión, recall, F1 por clase y matriz de confusión; log loss y Brier multiclase permiten examinar las probabilidades.
 
-![Consultas GET del agente a proyectos, membresías, tipos de ticket, roles y cuenta de integración](Documentacion/Imagenes/Apis%20Agente.png)
+La selección histórica utiliza 280 correos y reserva 20 originales para diagnóstico. Después se ajusta el modelo final con los 300 registros. La evaluación por tamaños es exploratoria: usa ajustes ya seleccionados y conjuntos anidados; no constituye una prueba externa ni una validación anidada de toda la búsqueda.
 
-</details>
+### Integración operativa
 
-La configuración de los nodos y las credenciales se describe en la
-[guía de configuración](workflows/GUIA_CONFIGURACION.md).
+n8n recibe el correo, consulta la API Python y envía la solicitud y los adjuntos seleccionados al agente OpenAI. La predicción Python sirve para comparar con la propuesta del agente, que conserva la decisión final de categoría. Antes de crear el ticket en Redmine se validan proyecto, tipo, categoría, membresía y rol asignable.
 
-## Instalación y arranque de los contenedores
+<img src="Documentacion/Imagenes/c7f36046-5630-4130-9ed5-a623272a4937.png" alt="Flujo de correo, clasificación Python, agente IA, validaciones y creación de ticket en Redmine" width="760">
+
+El detalle está en la [arquitectura](python/docs/arquitectura.md), la [optimización](python/docs/optimizacion.md) y la [guía del flujo](workflows/README.md).
+
+## Resultados
+
+### Rendimiento del modelo final y comparación por tamaño
+
+Resultados registrados el 27 de octubre de 2026 en [version_evaluation.csv](python/results/metrics/version_evaluation.csv). Las cifras de CV provienen de volver a entrenar el pipeline en cada partición; no son una evaluación independiente del archivo final ya ajustado con todos los datos.
+
+| Correos | Accuracy CV | F1 macro CV | F1 macro baseline CV | Casos para revisar de 25 |
+|---:|---:|---:|---:|---:|
+| 10 | No viable | No viable | No viable | 22 |
+| 100 | 0.9200 | 0.9201 | 0.0968 | 2 |
+| 200 | 0.9450 | 0.9442 | 0.0968 | 1 |
+| **300 — modelo final elegido** | **0.9533** | **0.9543** | **0.1154** | **2** |
+
+En el conjunto de 10, algunos folds dejan menos de dos registros por clase para la calibración interna; por eso no se fuerza una cifra de CV. El F1 de entrenamiento de la versión de 300 es 1.0000 y su accuracy de entrenamiento es 1.0000; estas cifras describen ejemplos conocidos y no miden generalización.
+
+![Comparación de rendimiento por tamaño del modelo](python/documentacion/imagenes/comparacion_modelos_cv.png)
+
+### Diagnóstico histórico sobre 20 correos
+
+| Modelo evaluado sobre los mismos 20 casos | Accuracy | F1 macro |
+|---|---:|---:|
+| Baseline mayoritario | 0.4500 | 0.1552 |
+| SVM calibrada entrenada con 280 correos | 0.9500 | 0.9511 |
+
+La SVM obtiene 19 aciertos y un error. Esta evaluación corresponde al modelo diagnóstico de 280 registros, **no al modelo final de 300**, que posteriormente aprendió también de esos 20 casos. Fuentes: [métricas diagnósticas](python/results/metrics/test_metrics.json) y [baseline](python/results/metrics/baseline_test_metrics.json).
+
+Los 25 correos adicionales no tienen respuestas esperadas: producen predicciones y confianza, pero no accuracy ni F1. Son casos conocidos de regresión y no demuestran ausencia de sobreajuste ni generalización a correo real. La [evaluación y pruebas](python/docs/evaluacion_pruebas.md) detalla estas limitaciones.
+
+## Instalación y uso
+
+### Requisitos del sistema
+
+- Git y Python 3.10 o 3.11 para consola y Streamlit; CPU y almacenamiento para dependencias, datos y modelos. No se requiere GPU y no hay mínimos medidos de RAM o disco.
+- Copias privadas de los modelos en `python/models/` y de los datasets para las operaciones que los utilicen. Un clon del repositorio no incluye esos artefactos.
+- Para la automatización: servidor Linux con Docker Engine y Docker Compose v2, acceso al buzón y credenciales de OpenAI y Redmine.
+
+### Instalación local en Windows
+
+1. Descargar el proyecto con una cuenta autorizada y entrar en la carpeta Python:
+
+   ```cmd
+   git clone https://github.com/n8nmquito/ProyectoIA.git
+   cd ProyectoIA\python
+   ```
+
+2. Crear un entorno virtual e instalar las dependencias:
+
+   ```cmd
+   py -3.10 -m venv .venv
+   .venv\Scripts\activate
+   python -m pip install -r requirements.txt
+   ```
+
+3. Colocar las copias privadas `modelo_clasificador_10.pkl`, `modelo_clasificador_100.pkl`, `modelo_clasificador_200.pkl` y `modelo_clasificador_300.pkl` en `models/`. Para las pruebas por consola, colocar también el JSON de 25 correos en `data/test/correos_test_25.json`.
+4. Ejecutar la interfaz:
+
+   ```cmd
+   python -m streamlit run app/app.py --server.address 127.0.0.1
+   ```
+
+En Linux, desde `python/`, crear el entorno con `python3 -m venv .venv` y activarlo con `. .venv/bin/activate`; después usar los mismos comandos `python -m pip` y `python -m streamlit`.
+
+### Comandos y ejemplos de uso
+
+Desde `python/`, comparar predicciones de los modelos sobre los 25 correos:
+
+```cmd
+python evaluar_nuevos.py --model 100
+python evaluar_nuevos.py --model 300
+```
+
+Seleccionar otro archivo JSON sin etiquetas y un directorio de salida:
+
+```cmd
+python evaluar_nuevos.py --model 300 --data data/test/correos_test_25.json --output results/ejemplo_300
+```
+
+Cada entrada del JSON utiliza este formato:
+
+```json
+[
+  {
+    "titulo": "No puedo acceder a mi cuenta",
+    "cuerpo": "Al iniciar sesión aparece un mensaje de acceso denegado."
+  }
+]
+```
+
+El comando muestra la categoría propuesta, la confianza y las solicitudes que requieren revisión. Los resultados no son etiquetas verificadas por una persona.
+
+Para reproducir entrenamiento y evaluación, se necesitan además el corpus y el manifiesto privado de particiones descritos en la [documentación de datos](python/data/README.md):
+
+```cmd
+python -m src.train
+python -m src.train_versions
+python -m src.export_datasets
+python -m src.evaluate
+python -m src.evaluate_versions
+python -m pytest -q
+```
+
+Reentrenar sustituye los modelos de los mismos nombres; conservar las versiones anteriores si se necesitan para comparación.
+
+### Automatización con Docker en Linux
 
 Los comandos siguientes se ejecutan en un servidor Linux con Git, Python 3,
 Docker Engine y Docker Compose v2. Docker debe estar iniciado y el usuario
@@ -75,7 +203,7 @@ debe tener permiso para ejecutar sus comandos. Python dentro del contenedor
 se instala al construir la imagen; no hace falta instalar sus dependencias
 en el servidor.
 
-### 1. Descargar el proyecto
+#### Paso 1. Descargar el proyecto
 
 ```bash
 git clone https://github.com/n8nmquito/ProyectoIA.git
@@ -86,7 +214,7 @@ El repositorio es privado: GitHub debe reconocer una cuenta con acceso.
 Los pasos siguientes parten siempre de esta carpeta, donde está
 `docker-compose.yml`.
 
-### 2. Crear y completar el archivo `.env`
+#### Paso 2. Crear y completar el archivo `.env`
 
 Si no existe, crear **`ProyectoIA/.env`**, junto a `docker-compose.yml`,
 copiando la plantilla incluida:
@@ -142,7 +270,7 @@ Completar todos los campos del ejemplo. Las contraseñas no deben quedar vacías
 ni conservar los marcadores `REEMPLAZAR_...`. Para valores con `$` o `#`, usar
 comillas simples como en el ejemplo.
 
-### 3. Generar la carpeta `.secrets/`
+#### Paso 3. Generar la carpeta `.secrets/`
 
 Desde la raíz del proyecto, ejecutar:
 
@@ -180,7 +308,7 @@ Para una instalación existente, recuperar primero sus archivos `.env` y
 cifrado que ya encuentre. Conservar especialmente `N8N_ENCRYPTION_KEY`:
 n8n la necesita para descifrar sus credenciales guardadas.
 
-### 4. Levantar PostgreSQL, n8n y Redmine
+#### Paso 4. Levantar PostgreSQL, n8n y Redmine
 
 ```bash
 docker compose config --quiet
@@ -206,7 +334,7 @@ contenedor. Cambiar contraseñas de PostgreSQL en `.env` después de inicializar
 el volumen requiere cambiarlas también en la base. La contraseña inicial de
 Redmine tampoco se restablece al editar `.env`.
 
-### 5. Preparar y levantar el contenedor Python
+#### Paso 5. Preparar y levantar el contenedor Python
 
 Este paso requiere disponer de la copia privada del modelo entrenado con
 300 correos. Copiarla, sin cambiar su nombre, a:
@@ -270,7 +398,7 @@ La API escucha en el puerto interno `8000`; no se publica un puerto Python
 en el servidor. No agregar esta copia si ya existe otro clasificador desplegado
 en la misma red con el nombre `clasificador-python`.
 
-### 6. Conectar n8n con los servicios
+#### Paso 6. Conectar n8n con los servicios
 
 En n8n, importar `workflows/correo-ia-redmine-python300.json` y configurar
 las credenciales antes de activar el flujo:
@@ -287,7 +415,7 @@ Las claves IMAP, OpenAI, SMTP y Redmine se cargan en **Credentials** de n8n;
 no se agregan al JSON del flujo ni a los ejemplos de este README.
 El arranque de los contenedores no crea esas credenciales ni activa el flujo.
 
-### 7. Consultar estado, detener y volver a iniciar
+#### Paso 7. Consultar estado, detener y volver a iniciar
 
 Para los tres servicios de la base:
 
@@ -314,33 +442,95 @@ prefijo `correo-tickets_`. Conservar esos volúmenes y respaldar `.env` y
 usa HTTP y publica PostgreSQL: está pensada para una red privada o VPN.
 Para acceso público, configurar HTTPS y restringir el acceso a los puertos.
 
-## Próximos pasos
+## Interfaz de usuario
 
-- Completar la revisión humana de etiquetas de los mismos 25 casos conocidos.
-- Mantener sin publicar el corpus inicial mientras no haya autorización.
-- Completar la entrega académica y revisar privacidad antes de utilizar datos reales.
-- Incorporar control de duplicados y seguimiento de respuestas; ajustar las reglas
-  de asignación por proyecto y rol ya implementadas.
+La interfaz principal utiliza **Streamlit** y se ejecuta localmente. Presenta el formulario a la izquierda y el resultado a la derecha, con fondo oscuro, tarjetas gris carbón y acentos azules. Permite seleccionar modelos de 10, 100, 200 y 300 correos; el de 300 es el predeterminado.
 
-**Validación:** flujo probado en el servidor con datos ficticios, Gemini y Redmine,
-incluyendo adjuntos y respaldo ante un PDF ilegible. Ver el detalle en la guía del flujo.
+### Capturas de pantalla
 
-## Interfaz local del clasificador
+![Formulario de clasificación de solicitudes](python/documentacion/imagenes/01_formulario.png)
 
-Streamlit permite probar el clasificador en el navegador sin crear tickets.
-Esta interfaz es opcional y se ejecuta fuera de los contenedores anteriores.
-Requiere los modelos privados correspondientes en `python/models/`.
+![Resultado con categoría, confianza y probabilidades](python/documentacion/imagenes/03_prediccion.png)
 
-Desde la raíz del proyecto, en Linux:
+Las capturas corresponden a la aplicación ejecutada el 26 de octubre de 2026.
 
-```bash
-cd python
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install -r requirements.txt
-python -m streamlit run app/app.py --server.address 127.0.0.1
-```
+### Instrucciones de uso
 
-Abrir `http://127.0.0.1:8501` en el navegador del equipo donde se ejecutó
-Streamlit. Las instrucciones para Windows y el uso de la aplicación están
-en el [proyecto Python](python/README.md).
+1. Iniciar Streamlit con el comando de instalación y abrir [la interfaz local](http://127.0.0.1:8501).
+2. Elegir el tamaño del modelo en el selector de clasificación.
+3. Escribir el título y el cuerpo de la solicitud, o cargar un ejemplo.
+4. Ejecutar la clasificación y revisar la categoría, la confianza y las cuatro probabilidades.
+5. Atender las advertencias de revisión y consultar la vista «Modelo y métricas» para interpretar el resultado. Al cambiar de modelo se conserva el texto y se borra el resultado anterior para volver a clasificarlo.
+
+La interfaz valida entradas y muestra estados de procesamiento y errores. No crea tickets; la automatización de correo funciona como componente separado. Consultar el [manual de usuario](python/docs/manual_usuario.md).
+
+### Acceso a la aplicación desplegada
+
+Streamlit **no tiene un despliegue público**. La automatización está desplegada en el servidor: [n8n](http://185.208.207.203:5678) y [Redmine](http://185.208.207.203:3000), con acceso sujeto a las credenciales y permisos de la instalación. La API Python está en la red interna Docker y no tiene puerto público. Estos accesos utilizan HTTP; el uso con información confidencial requiere revisar el transporte y los permisos.
+
+## Estructura del proyecto
+
+| Carpeta principal | Contenido |
+|---|---|
+| `python/` | Proyecto actual del clasificador, configuración, dependencias y lanzador local |
+| `python/src/` | Preparación de datos, entrenamiento, optimización y evaluación |
+| `python/app/` | Interfaz Streamlit, presentación y estilos |
+| `python/deploy/` | API Python, contenedor e instrucciones de despliegue |
+| `python/data/` | Datos crudos, particiones, datasets por tamaño y casos de prueba; los datos restringidos permanecen fuera de Git |
+| `python/models/` | Cuatro modelos guardados y documentación; los archivos `.pkl` permanecen fuera de Git |
+| `python/notebooks/` | Notebooks de análisis y experimentación |
+| `python/results/` | Métricas, informes y resultados de evaluación |
+| `python/tests/` | Pruebas automatizadas del proyecto Python |
+| `python/docs/` | Planificación, datos, arquitectura, optimización, ética, manual y evaluación |
+| `python/documentacion/imagenes/` | Gráficos y capturas de la aplicación |
+| `python/workshop/` | Material de referencia del taller |
+| `workflows/` | Flujos importables de n8n, guías, validaciones y notificaciones |
+| `n8n/` | Configuración de construcción e inicio de n8n |
+| `redmine/` | Configuración de construcción e inicio de Redmine |
+| `postgres/` | Inicialización de las bases y usuarios de PostgreSQL |
+| `classifier/` | Experimento anterior de TF-IDF y regresión logística integrado con PostgreSQL |
+| `correos_simulados/` | Corpus local del experimento inicial, excluido de Git |
+| `Documentacion/` | Diagramas y documentos complementarios del proyecto |
+
+En la raíz, `docker-compose.yml` configura los servicios de base, `docker-compose.python.yml` incorpora la API Python y `configurar.py` genera los secretos iniciales. `.env` y `.secrets/` son configuración privada y no se publican.
+
+## Consideraciones éticas
+
+- **Privacidad y permisos:** el corpus original y sus derivados se mantienen sin publicar mientras no exista autorización. Las credenciales se guardan fuera del código y de las exportaciones del flujo.
+- **Sesgos y equidad:** el corpus es pequeño, simulado y de un dominio limitado. Puede representar mal abreviaturas, estilos de redacción y problemas poco frecuentes. No se ha evaluado equidad demográfica.
+- **Transparencia:** se muestran probabilidades y advertencias; la confianza no garantiza que una categoría sea correcta. La coincidencia entre Python y el agente tampoco demuestra exactitud.
+- **Servicios externos:** el agente OpenAI puede recibir texto del correo, adjuntos seleccionados y respuestas de herramientas de Redmine. La limpieza del clasificador Python no anonimiza el mensaje original enviado al agente.
+- **Límites de evaluación:** los datos anidados, los ajustes previamente seleccionados y los casos conocidos restringen la interpretación de las métricas. No hay una validación externa con usuarios finales ni resultados demostrados sobre correo real.
+- **Uso inadecuado:** no utilizar predicciones para conceder accesos, sancionar personas, denegar atención o resolver incidentes críticos automáticamente. No introducir contraseñas ni datos personales innecesarios.
+- **Supervisión:** en el flujo n8n no existe una aprobación humana obligatoria antes de cada alta. El equipo de soporte debe revisar y corregir asignaciones; antes de usar información real se deben definir acceso, retención, transporte y responsabilidades.
+
+Las medidas y limitaciones se desarrollan en las [consideraciones éticas](python/docs/consideraciones_eticas.md).
+
+## Autores y contribuciones
+
+| Integrante | Rol | Contribución |
+|---|---|---|
+| **María Quito Castillo** | Líder del Proyecto | Liderazgo del proyecto |
+| **María Quito Castillo** | Desarrollador TI (desarrolladora full stack) | Desarrollo full stack |
+| &nbsp; | Data Scientist | &nbsp; |
+| &nbsp; | Experto Soporte TI | &nbsp; |
+| &nbsp; | Equipo IA | &nbsp; |
+| &nbsp; | Soporte TI | &nbsp; |
+| &nbsp; | TI | &nbsp; |
+| &nbsp; | Mesa de Ayuda | &nbsp; |
+
+Los roles corresponden al [cronograma del proyecto](python/docs/planificacion.md#cronograma-de-desarrollo-planificado-vs-real). Los espacios vacíos quedan disponibles para completar los nombres y las contribuciones del equipo.
+
+<br>
+
+## Licencia
+
+<br><br>
+
+## Agradecimientos y referencias
+
+<br><br>
+
+## Videos
+
+<br><br>
