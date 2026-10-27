@@ -27,6 +27,25 @@ anteriores. Los detalles de descarga están en [Instalación y uso](../README.md
 
 ## Iniciar y detener la interfaz
 
+### Ejecución en Docker en el VPS
+
+```bash
+cd /mquito/mquito-ticket/python
+docker compose up -d --build --wait
+docker compose ps
+```
+
+Abrir [el portal](http://185.208.207.203:8501). El contenedor sigue activo al
+cerrar SSH y se reinicia con Docker. Consultar registros con
+`docker compose logs --tail=100 streamlit`; detener con `docker compose stop`
+y volver a iniciar con `docker compose start`. Se necesitan los cuatro modelos
+en `models/`, montados en solo lectura. El servicio de API para n8n es independiente.
+
+El formulario del portal se procesa en el VPS. Este acceso usa HTTP y no tiene
+autenticación; utilizar ejemplos sin información sensible.
+
+### Ejecución local
+
 También puedes hacer doble clic en `Iniciar_clasificador.cmd`. La pantalla se
 abre en http://127.0.0.1:8501. Si Streamlit pregunta un correo de bienvenida,
 deja el campo vacío y pulsa Enter. Detén la aplicación con Ctrl+C en la consola.

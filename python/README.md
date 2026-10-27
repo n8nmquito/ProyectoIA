@@ -207,6 +207,26 @@ Ver [evaluación y pruebas](docs/evaluacion_pruebas.md) y
 
 ## Instalación y uso
 
+### Portal con Docker Compose
+
+Desde esta carpeta, con las cuatro copias de los modelos en `models/`:
+
+```bash
+docker compose up -d --build --wait
+docker compose ps
+docker compose logs --tail=100 streamlit
+```
+
+En el VPS, la carpeta es `/mquito/mquito-ticket/python` y el portal se abre en
+[http://185.208.207.203:8501](http://185.208.207.203:8501). El contenedor se
+reinicia con Docker y mantiene los modelos montados en solo lectura. El código
+y las métricas se copian en la imagen; reconstruir con el primer comando aplica
+sus cambios. La API interna de n8n continúa como servicio separado.
+
+Para detener e iniciar el portal, usar `docker compose stop` y
+`docker compose start`. `STREAMLIT_PORT=8502 docker compose up -d` cambia el
+puerto publicado del host. Los `.pkl` siguen sin incluirse en Git.
+
 Requisitos: Python 3.10 o 3.11, CPU y espacio para dependencias. No se necesita
 GPU ni servicios externos para la consola o Streamlit. La automatización desplegada
 sí utiliza buzón, API Python, OpenAI y Redmine. En Windows:
@@ -268,7 +288,10 @@ y probabilidades, y consultar información del modelo.
 El selector Modelo de clasificación permite elegir 10, 100, 200 o 300 correos;
 300 es la opción predeterminada. Cada opción carga su archivo `.pkl`. Cambiar
 el modelo borra el resultado anterior y conserva el texto para reclasificarlo.
-Streamlit se ejecuta localmente. La API Python está desplegada en Docker y el
+Streamlit se puede ejecutar localmente o en el [portal Docker del VPS](http://185.208.207.203:8501).
+Al usar el portal, el título y cuerpo se procesan en el VPS. El portal usa HTTP
+y no tiene autenticación; utilizar ejemplos sin información sensible.
+La API Python está desplegada en Docker y el
 flujo principal de n8n está activo en el servidor.
 
 ![Interfaz real: formulario](documentacion/imagenes/01_formulario.png)

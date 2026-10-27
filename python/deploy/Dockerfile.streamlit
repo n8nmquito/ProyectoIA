@@ -1,0 +1,16 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+COPY deploy/requirements-streamlit.txt /app/requirements-streamlit.txt
+RUN pip install --no-cache-dir -r requirements-streamlit.txt \
+    && useradd --uid 10001 --create-home streamlit
+
+COPY app /app/app
+COPY src /app/src
+COPY config.yaml /app/config.yaml
+COPY .streamlit/config.toml /app/.streamlit/config.toml
+COPY results/metrics/test_metrics.json results/metrics/version_evaluation.json /app/results/metrics/
+
+USER streamlit
+EXPOSE 8501
+CMD ["python", "-m", "streamlit", "run", "app/app.py", "--server.address", "0.0.0.0", "--server.port", "8501", "--server.headless", "true", "--browser.gatherUsageStats", "false"]

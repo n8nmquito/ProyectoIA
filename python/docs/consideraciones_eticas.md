@@ -165,6 +165,14 @@ sobreajuste ni generalización a producción. Una confianza alta puede ser erró
 
 ## Privacidad de la interfaz principal local
 
+La misma interfaz también puede desplegarse con `python/compose.yaml`. En ese
+caso el navegador envía el título y cuerpo al VPS para procesarlos; las
+afirmaciones siguientes sobre procesamiento en esta computadora corresponden
+solo a la ejecución local. El portal Docker publica HTTP en el puerto 8501 y
+no incorpora autenticación. Utilizar ejemplos sin información sensible; las
+credenciales y el corpus no se incluyen en su imagen y los modelos se montan
+en modo solo lectura. Esto no modifica los riesgos del flujo de correo/n8n.
+
 Streamlit carga el modelo en esta computadora y se inicia ligado a 127.0.0.1.
 El título y cuerpo no se envían a OpenAI, n8n ni a la API del servidor desde
 esta aplicación. No se escriben como historial de predicciones. La limpieza no

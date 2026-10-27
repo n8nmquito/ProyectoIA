@@ -122,6 +122,29 @@ Los 25 correos adicionales no tienen respuestas esperadas: producen predicciones
 
 ## Instalación y uso
 
+### Portal Streamlit con Docker Compose
+
+Desde la raíz del repositorio, con las cuatro copias del modelo en `python/models/`:
+
+```bash
+cd python
+docker compose up -d --build --wait
+docker compose ps
+```
+
+El portal escucha en el puerto `8501` y se reinicia con Docker. En el VPS se
+ejecuta desde `/mquito/mquito-ticket/python`. Los modelos se montan en modo
+solo lectura; el corpus y las credenciales no se incluyen en la imagen.
+Esta aplicación no modifica la API que utiliza n8n.
+
+```bash
+docker compose logs --tail=100 streamlit
+docker compose stop
+docker compose start
+```
+
+Para cambiar el puerto del host, usar `STREAMLIT_PORT=8502 docker compose up -d`.
+
 ### Requisitos del sistema
 
 - Git y Python 3.10 o 3.11 para consola y Streamlit; CPU y almacenamiento para dependencias, datos y modelos. No se requiere GPU y no hay mínimos medidos de RAM o disco.
@@ -466,7 +489,7 @@ La interfaz valida entradas y muestra estados de procesamiento y errores. No cre
 
 ### Acceso a la aplicación desplegada
 
-Streamlit **no tiene un despliegue público**. La automatización está desplegada en el servidor: [n8n](http://185.208.207.203:5678) y [Redmine](http://185.208.207.203:3000), con acceso sujeto a las credenciales y permisos de la instalación. La API Python está en la red interna Docker y no tiene puerto público. Estos accesos utilizan HTTP; el uso con información confidencial requiere revisar el transporte y los permisos.
+El [portal Streamlit del VPS](http://185.208.207.203:8501) se despliega con `python/compose.yaml`. El formulario enviado a ese portal se procesa en el VPS; la ejecución local sigue disponible. La automatización utiliza [n8n](http://185.208.207.203:5678) y [Redmine](http://185.208.207.203:3000), con sus credenciales y permisos. La API Python de n8n permanece en la red interna Docker. El portal usa HTTP y no incorpora autenticación; utilizar ejemplos sin información sensible.
 
 ## Estructura del proyecto
 

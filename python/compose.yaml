@@ -1,0 +1,42 @@
+name: mquito-portal
+
+services:
+  streamlit:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.streamlit
+    ports:
+      - "${STREAMLIT_PORT:-8501}:8501"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    volumes:
+      - type: bind
+        source: ./models
+        target: /app/models
+        read_only: true
+        bind:
+          create_host_path: false
+    environment:
+      HOME: /tmp
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    mem_limit: 768m
+    cpus: 1.0
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=5).close()"
+      interval: 20s
+      timeout: 6s
+      retries: 5
+      start_period: 30s

@@ -1,0 +1,16 @@
+**
+!app/
+!app/**
+!src/
+!src/**
+!.streamlit/
+!.streamlit/config.toml
+!config.yaml
+!deploy/
+!deploy/requirements-streamlit.txt
+!results/
+!results/metrics/
+!results/metrics/test_metrics.json
+!results/metrics/version_evaluation.json
+**/__pycache__/
+**/*.pyc
