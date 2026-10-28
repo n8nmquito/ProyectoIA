@@ -1,5 +1,7 @@
 # Mquito Ticket
 
+## 1. Encabezado y badges
+
 <p>
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="44" height="44"> &nbsp;
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/streamlit/streamlit-original.svg" alt="Streamlit" width="44" height="44"> &nbsp;
@@ -14,30 +16,30 @@
 
 Clasifica correos de soporte TI con Python y automatiza su registro en Redmine mediante n8n. Incluye una interfaz Streamlit para probar modelos, visualizar predicciones y consultar el historial.
 
-## Tabla de contenidos
+## 2. Tabla de contenidos
 
-1. [Encabezado y badges](#mquito-ticket)
-2. [Tabla de contenidos](#tabla-de-contenidos)
-3. [Descripción del problema](#descripción-del-problema)
-4. [Dataset](#dataset)
-5. [Metodología](#metodología)
-6. [Resultados](#resultados)
-7. [Instalación y uso](#instalación-y-uso)
-8. [Interfaz de usuario](#interfaz-de-usuario)
-9. [Estructura del proyecto](#estructura-del-proyecto)
-10. [Consideraciones éticas](#consideraciones-éticas)
-11. [Autores y contribuciones](#autores-y-contribuciones)
-12. [Licencia](#licencia)
-13. [Agradecimientos y referencias](#agradecimientos-y-referencias)
-14. [Videos](#videos)
+1. [Encabezado y badges](#1-encabezado-y-badges)
+2. [Tabla de contenidos](#2-tabla-de-contenidos)
+3. [Descripción del problema](#3-descripción-del-problema)
+4. [Dataset](#4-dataset)
+5. [Metodología](#5-metodología)
+6. [Resultados](#6-resultados)
+7. [Instalación y uso](#7-instalación-y-uso)
+8. [Interfaz de usuario](#8-interfaz-de-usuario)
+9. [Estructura del proyecto](#9-estructura-del-proyecto)
+10. [Consideraciones éticas](#10-consideraciones-éticas)
+11. [Autores y contribuciones](#11-autores-y-contribuciones)
+12. [Licencia](#12-licencia)
+13. [Agradecimientos y referencias](#13-agradecimientos-y-referencias)
+14. [Videos](#14-videos)
 
-## Descripción del problema
+## 3. Descripción del problema
 
 - **¿Qué problema resuelve?** La lectura y clasificación manual de correos de soporte y su derivación a responsables, tareas repetitivas que pueden generar asignaciones inconsistentes.
 - **¿Por qué es importante?** Ayuda a organizar las solicitudes y mantener trazabilidad de su categoría y asignación. La reducción de tiempos es un objetivo; todavía no se ha medido.
 - **¿Quiénes lo utilizan?** Operadores de mesa de ayuda, personal de soporte TI y responsables que supervisan los tickets; también estudiantes y evaluadores del proyecto.
 
-## Dataset
+## 4. Dataset
 
 ### Descripción, tamaño y variables
 
@@ -59,7 +61,7 @@ Hay muestras anidadas de **10, 100, 200 y 300 correos**, cada una con su modelo.
 
 Más detalle en el [análisis de datos](docs/analisis_datos.md).
 
-## Metodología
+## 5. Metodología
 
 | Aspecto | Implementación y justificación |
 |---|---|
@@ -98,7 +100,7 @@ La imagen corresponde al esquema inicial de componentes; el diagrama anterior de
 
 Ver [arquitectura](docs/arquitectura.md), [optimización](docs/optimizacion.md) y [flujo n8n](../workflows/README.md).
 
-## Resultados
+## 6. Resultados
 
 ### Métricas registradas y comparación con baseline
 
@@ -117,7 +119,7 @@ Estas cifras pertenecen a los artefactos identificados por sus hashes en [versio
 
 El diagnóstico histórico del modelo entrenado con 280 correos sobre 20 reservados obtuvo accuracy 0,9500 y F1 macro 0,9511; corresponde a otra etapa, no al modelo final ajustado con 300. Ver [evaluación y pruebas](docs/evaluacion_pruebas.md).
 
-## Instalación y uso
+## 7. Instalación y uso
 
 ### Requisitos del sistema
 
@@ -195,7 +197,7 @@ docker compose up -d --build --wait
 
 El portal queda en el puerto 8501 y conserva el historial en un volumen SQLite. Para desplegar la automatización completa, seguir la [guía de integración](../workflows/GUIA_CONFIGURACION.md) y el [despliegue de la API](deploy/README.md); configurar las credenciales antes de activar el flujo, que puede crear tickets y enviar avisos.
 
-## Interfaz de usuario
+## 8. Interfaz de usuario
 
 ### URL de los servicios desplegados
 
@@ -234,7 +236,7 @@ Servidor de producción: **185.208.207.203**.
 
 <img src="documentacion/imagenes/app/exportacion_excel.png" alt="Resultado de clasificación con confianza, gráfico y descargas" width="760">
 
-## Estructura del proyecto
+## 9. Estructura del proyecto
 
 | Carpeta | Contenido principal |
 |---|---|
@@ -254,7 +256,7 @@ Servidor de producción: **185.208.207.203**.
 | `classifier/` | Experimento anterior con PostgreSQL; no es el clasificador Python actual |
 | `Documentacion/` | Diagramas y documentos complementarios |
 
-## Consideraciones éticas
+## 10. Consideraciones éticas
 
 - **Privacidad:** usar datos ficticios o autorizados; no introducir contraseñas ni información personal innecesaria. La limpieza del texto no garantiza anonimización.
 - **Servicios externos:** OpenAI puede recibir texto, adjuntos seleccionados y datos consultados en Redmine. Su envío requiere permisos y una política de tratamiento de datos.
@@ -264,7 +266,7 @@ Servidor de producción: **185.208.207.203**.
 
 Ver las [consideraciones éticas completas](docs/consideraciones_eticas.md).
 
-## Autores y contribuciones
+## 11. Autores y contribuciones
 
 | Integrante | Rol | Contribución |
 |---|---|---|
@@ -276,15 +278,15 @@ Ver las [consideraciones éticas completas](docs/consideraciones_eticas.md).
 | &nbsp; | TI | &nbsp; |
 | &nbsp; | Mesa de Ayuda | &nbsp; |
 
-## Licencia
+## 12. Licencia
 
 <br><br>
 
-## Agradecimientos y referencias
+## 13. Agradecimientos y referencias
 
 <br><br>
 
-## Videos
+## 14. Videos
 
 ### Video pitch de 5 minutos
 

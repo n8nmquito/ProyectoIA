@@ -23,7 +23,7 @@ python -m streamlit run app/app.py
 
 En Linux, desde esa misma carpeta, crear el entorno con `python3 -m venv .venv`
 y activarlo con `. .venv/bin/activate`; después usar los comandos `python -m`
-anteriores. Los detalles de descarga están en [Instalación y uso](../README.md#instalación-y-uso).
+anteriores. Los detalles de descarga están en [Instalación y uso](../README.md#7-instalación-y-uso).
 
 ## Iniciar y detener la interfaz
 
