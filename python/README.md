@@ -14,10 +14,10 @@
 
 <p>
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original.svg" alt="Docker" title="Docker" width="44" height="44"> &nbsp;
-  <img src="../Documentacion/Imagenes/logos/n8n.svg" alt="n8n" title="n8n" width="44" height="44"> &nbsp;
-  <img src="../Documentacion/Imagenes/logos/redmine.svg" alt="Redmine" title="Redmine" width="44" height="44"> &nbsp;
+  <img src="documentacion/imagenes/logos/n8n.svg" alt="n8n" title="n8n" width="44" height="44"> &nbsp;
+  <img src="documentacion/imagenes/logos/redmine.svg" alt="Redmine" title="Redmine" width="44" height="44"> &nbsp;
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original.svg" alt="PostgreSQL" title="PostgreSQL" width="44" height="44"> &nbsp;
-  <img src="../Documentacion/Imagenes/logos/openai.svg" alt="OpenAI" title="OpenAI" width="44" height="44"> &nbsp;
+  <img src="documentacion/imagenes/logos/openai.svg" alt="OpenAI" title="OpenAI" width="44" height="44"> &nbsp;
   <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/git/git-original.svg" alt="Git" title="Git" width="44" height="44">
 </p>
 
@@ -91,7 +91,7 @@ El servidor ejecuta los servicios con Docker Compose. n8n recibe el correo por I
 
 **Imagen de arquitectura general disponible en la documentación:**
 
-<img src="../Documentacion/Imagenes/5590086a-6256-4f7c-a3a5-dd7c5bc3377b.png" alt="Arquitectura general de n8n, clasificador Python, Redmine y PostgreSQL" width="900">
+<img src="documentacion/imagenes/arquitectura_general.png" alt="Arquitectura general de n8n, clasificador Python, Redmine y PostgreSQL" width="900">
 
 La imagen corresponde al esquema inicial de componentes. La descripción anterior detalla el despliegue actual con OpenAI, Streamlit y la categoría final de Python.
 
@@ -297,7 +297,6 @@ Mensaje de error al intentar clasificar sin completar el título.
 | `python/workshop/` | Material de referencia del taller |
 | `workflows/` | Flujos n8n, validaciones JavaScript y pruebas |
 | `n8n/`, `redmine/`, `postgres/` | Configuración de n8n, Redmine e inicialización de bases, respectivamente |
-| `Documentacion/` | Diagramas y documentos complementarios |
 
 ## 10. Consideraciones éticas
 
