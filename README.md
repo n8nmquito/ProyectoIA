@@ -1,11 +1,18 @@
 # Mquito Ticket
 
-![Python 3.10.22](https://img.shields.io/badge/Python-3.10.22-blue)
-[![Licencia MIT del código](https://img.shields.io/badge/License-MIT-green)](python/LICENSE)
-![Streamlit](https://img.shields.io/badge/Interfaz-Streamlit-red)
-![Estado](https://img.shields.io/badge/Estado-piloto%20implementado-blue)
+<p>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="44" height="44"> &nbsp;
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/streamlit/streamlit-original.svg" alt="Streamlit" width="44" height="44"> &nbsp;
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/fastapi/fastapi-original.svg" alt="FastAPI" width="44" height="44"> &nbsp;
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original.svg" alt="PostgreSQL" width="44" height="44">
+</p>
 
-Mquito Ticket clasifica correos de soporte TI en accesos, aplicaciones, infraestructura y otros mediante un modelo Python. Incluye una interfaz Streamlit para probar modelos y un flujo n8n que utiliza la categoría de Python para crear y asignar tickets en Redmine. El agente OpenAI prepara el análisis de la solicitud y las validaciones comprueban los datos de Redmine antes del alta.
+![Python 3.10.22](https://img.shields.io/badge/Python-3.10.22-3776AB?style=for-the-badge&logo=python&logoColor=white)
+[![Licencia MIT del código](https://img.shields.io/badge/License-MIT-22A06B?style=for-the-badge)](python/LICENSE)
+![Streamlit 1.41.1](https://img.shields.io/badge/Streamlit-1.41.1-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+[![En producción](https://img.shields.io/badge/Estado-En_producción-2563EB?style=for-the-badge)](http://185.208.207.203:8501)
+
+Clasifica correos de soporte TI con Python y automatiza su registro en Redmine mediante n8n. Incluye una interfaz Streamlit para probar modelos, visualizar predicciones y consultar el historial.
 
 ## Tabla de contenidos
 
