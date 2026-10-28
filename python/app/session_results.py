@@ -8,10 +8,9 @@ from datetime import datetime, timezone
 HISTORY_LIMIT = 50
 
 
-def remember_prediction(state, title, body, size, result):
+def remember_prediction(state, title, body, size, result, store=None, token=None):
     """Keep an independent snapshot of each successful explicit prediction."""
     sequence = state.get("prediction_sequence", 0) + 1
-    state["prediction_sequence"] = sequence
     entry = {
         "id": sequence,
         "fecha_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -20,6 +19,9 @@ def remember_prediction(state, title, body, size, result):
         "cuerpo": body,
         **deepcopy(result),
     }
+    if store is not None:
+        entry = store.append(token, entry, HISTORY_LIMIT)
+    state["prediction_sequence"] = entry["id"]
     state["prediction_history"] = (
         state.get("prediction_history", []) + [entry]
     )[-HISTORY_LIMIT:]

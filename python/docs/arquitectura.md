@@ -229,8 +229,13 @@ La interfaz muestra ejemplos, carga, errores, métricas y limitaciones. Incluye
 los controles Español/English y claro/oscuro, exportación CSV e historial de
 hasta 50 predicciones por sesión con comparación mediante gráficos Altair.
 La interfaz en inglés no cambia el idioma del corpus: los ejemplos y el
-modelo siguen centrados en texto español. El historial reside en memoria;
-no se escriben los textos en archivos del servidor.
+modelo siguen centrados en texto español. Con `HISTORY_DB_PATH`, el historial
+se guarda en SQLite, con transacciones, un contador por historial y retención
+de 50 registros. El componente `app/history_component` recuerda un identificador
+privado en el navegador; el enlace permite recuperar el mismo historial en otro
+navegador. El servidor separa las filas mediante el hash de ese identificador.
+`python/compose.yaml` monta el volumen `prediction_history` en `/history`.
+Sin esa variable, la ejecución local conserva solo memoria de sesión.
 `Iniciar_clasificador.cmd` inicia Streamlit ligado a 127.0.0.1; la pantalla se
 abre en el navegador local. No se presenta como una ventana nativa de Windows.
 

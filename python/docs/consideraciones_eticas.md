@@ -176,7 +176,13 @@ en modo solo lectura. Esto no modifica los riesgos del flujo de correo/n8n.
 Streamlit carga el modelo en esta computadora y se inicia ligado a 127.0.0.1.
 El título y cuerpo no se envían a OpenAI, n8n ni a la API del servidor desde
 esta aplicación. El historial conserva hasta 50 predicciones con sus textos
-en la memoria de la sesión, sin guardarlos en archivos del servidor. Descargar
+por historial. En Docker se guardan en SQLite sobre un volumen persistente,
+con separación mediante un identificador privado recordado por el navegador
+y presente en el enlace. Quien tenga ese enlace puede ver ese historial: no
+equivale a autenticación de usuarios. El identificador se almacena como hash
+en la base, pero los textos no están cifrados. Borrar historial elimina sus
+filas; el volumen debe incluirse en la política de respaldo y retención. En
+modo local sin almacenamiento configurado solo se conserva memoria. Descargar
 un CSV genera una copia que incluye los textos y requiere el mismo cuidado
 que el correo original. La limpieza no
 es anonimización y deben evitarse datos personales y secretos. Las advertencias

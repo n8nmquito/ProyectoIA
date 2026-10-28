@@ -4,6 +4,7 @@ WORKDIR /app
 COPY deploy/requirements-streamlit.txt /app/requirements-streamlit.txt
 RUN pip install --no-cache-dir -r requirements-streamlit.txt \
     && useradd --uid 10001 --create-home streamlit
+RUN mkdir /history && chown streamlit:streamlit /history
 
 COPY app /app/app
 COPY src /app/src

@@ -2,6 +2,7 @@
 
 import json
 import logging
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -15,6 +16,8 @@ if str(ROOT) in sys.path:
 sys.path.insert(0, str(ROOT))
 
 from app.presentation import apply_style, empty_result, heading  # noqa: E402
+from app.browser_history import browser_history_token  # noqa: E402
+from app.persistent_history import configured_store, history_token  # noqa: E402
 from app.session_results import (  # noqa: E402
     HISTORY_LIMIT, csv_bytes, remember_prediction,
 )
@@ -130,7 +133,14 @@ def load_example():
 
 
 def clear_history():
-    """Remove session history without affecting the currently displayed result."""
+    """Remove this private history from storage and session memory."""
+    try:
+        store = configured_store()
+        if store is not None:
+            store.clear(st.session_state["history_token"])
+    except (OSError, sqlite3.Error):
+        st.session_state["history_delete_error"] = True
+        return
     st.session_state.pop("prediction_history", None)
     st.session_state.pop("comparison_ids", None)
 
@@ -205,14 +215,28 @@ def probability_chart(entries, compare=False):
 
 def render_history():
     """Compare explicit predictions in the current session and download CSV."""
-    st.subheader(tr("Historial de la sesión", "Session history"))
-    st.caption(tr(
+    st.subheader(tr("Historial de predicciones", "Prediction history"))
+    if st.session_state.get("persistent_history"):
+        st.caption(tr(
+            f"Se guardan las últimas {HISTORY_LIMIT} predicciones en el servidor "
+            "para este enlace, incluso al recargar o reiniciar el contenedor. "
+            "Conserva la dirección actual para recuperar tu historial. "
+            "Quien tenga ese enlace puede consultarlo; no lo compartas si contiene datos privados.",
+            f"The latest {HISTORY_LIMIT} predictions are saved on the server "
+            "for this link, including across reloads and container restarts. "
+            "Keep the current URL to recover your history. Anyone with that "
+            "link can access it; do not share it if it contains private data."))
+    else:
+        st.caption(tr(
         f"Se conservan las últimas {HISTORY_LIMIT} predicciones solo en esta sesión. "
         "No se guardan en archivos. El historial se pierde al terminar o reiniciar "
         "la sesión del servidor; una reconexión puede conservarlo temporalmente.",
         f"The latest {HISTORY_LIMIT} predictions are kept only in this session. "
         "They are not written to files. History is lost when the server session "
-        "ends or restarts; a reconnection may temporarily retain it."))
+            "ends or restarts; a reconnection may temporarily retain it."))
+    if st.session_state.pop("history_delete_error", False):
+        st.error(tr("No se pudo borrar el historial. Intenta nuevamente.",
+                    "History could not be cleared. Please try again."))
     history = st.session_state.get("prediction_history", [])
     if not history:
         st.info(tr("Clasifica un ticket para iniciar el historial.",
@@ -362,21 +386,56 @@ def render_about(size, threshold):
         "synthetic, in Spanish, and focused on IT/JDE/BSSV support. Generalization "
         "to other organizations and demographic fairness have not been demonstrated. "
         "Do not use it to grant access, penalize people or close critical incidents."))
+    if st.session_state.get("persistent_history"):
+        st.write(tr(
+            "El historial se guarda en el servidor, separado por el enlace "
+            "privado de esta página. Conserva ese enlace para recuperarlo y "
+            "no lo compartas si incluye datos privados. Borrar historial elimina "
+            "sus registros guardados; no borra los CSV descargados.",
+            "History is saved on the server and isolated by this page's private "
+            "link. Keep the link to recover it and do not share it if it contains "
+            "private data. Clear history removes saved records but not downloaded CSVs."))
+    else:
+        st.write(tr("Sin almacenamiento configurado, el historial solo vive en esta sesión.",
+                    "Without configured storage, history only lives in this session."))
     st.write(tr(
-        "El formulario no envía textos a proveedores de IA ni escribe un "
-        "historial en disco. En el portal remoto, los textos sí viajan al VPS y "
-        "el historial reside en la memoria de la sesión. Una descarga CSV contiene "
-        "los textos ingresados. No introduzcas contraseñas ni información sensible. "
-        "El portal usa HTTP y no tiene autenticación.",
-        "The form does not send text to AI providers or write history to disk. "
-        "On the remote portal, text is sent to the VPS and history is held in "
-        "session memory. CSV downloads contain the entered text. Do not enter "
-        "passwords or sensitive information. The portal uses HTTP without authentication."))
+        "El formulario no envía textos a proveedores de IA. En el portal remoto "
+        "sí se transmiten al VPS y los CSV contienen los textos ingresados. "
+        "No introduzcas contraseñas ni información sensible. El portal usa HTTP "
+        "y no tiene autenticación de usuarios.",
+        "The form does not send text to AI providers. On the remote portal, "
+        "text is sent to the VPS and CSV downloads contain the entered text. "
+        "Do not enter passwords or sensitive information. The portal uses HTTP "
+        "and does not authenticate users."))
 
 
 def main():
     """Render validated inputs, prediction tools and a model information section."""
     st.set_page_config(page_title="Tickets TI | Clasificador", page_icon="🎫", layout="wide")
+    try:
+        store = configured_store()
+        st.session_state["persistent_history"] = store is not None
+        if store is not None:
+            browser_token = browser_history_token(st.query_params.get("historial"))
+            if browser_token is None:
+                st.info("Cargando historial… / Loading history…")
+                st.stop()
+            token = history_token(browser_token)
+            st.query_params["historial"] = token
+            if st.session_state.get("history_token") != token:
+                clear_prediction()
+                st.session_state.pop("comparison_ids", None)
+            st.session_state["history_token"] = token
+            saved_history = store.load(token)
+            if saved_history:
+                st.session_state["prediction_history"] = saved_history
+                st.session_state["prediction_sequence"] = saved_history[-1]["id"]
+            else:
+                st.session_state.pop("prediction_history", None)
+                st.session_state.pop("comparison_ids", None)
+    except (OSError, sqlite3.Error, ValueError):
+        st.error("No se pudo abrir el historial guardado. / Saved history could not be opened.")
+        return
     st.session_state.setdefault("model_size", 300)
     # Keep user values when translated widget labels produce new widget IDs.
     for key in ("title", "body", "model_size", "theme"):
@@ -446,8 +505,20 @@ def main():
                                                 st.session_state.body,
                                                 config["confidence_threshold"])
                     st.session_state.update(last_result=result, result_model_size=size)
-                    remember_prediction(st.session_state, st.session_state.title,
-                                        st.session_state.body, size, result)
+                    try:
+                        remember_prediction(st.session_state, st.session_state.title,
+                                            st.session_state.body, size, result,
+                                            store, st.session_state.get("history_token"))
+                        st.success(tr("Predicción guardada en el historial.",
+                                      "Prediction saved to history."))
+                    except (OSError, sqlite3.Error):
+                        remember_prediction(st.session_state, st.session_state.title,
+                                            st.session_state.body, size, result)
+                        st.warning(tr(
+                            "La predicción está disponible, pero no pudo guardarse "
+                            "en el servidor. Descarga el CSV antes de salir.",
+                            "The prediction is available but could not be saved "
+                            "on the server. Download the CSV before leaving."))
                 except FileNotFoundError:
                     st.error(tr(f"Falta el modelo de {size} correos. Consulta al responsable.",
                                 f"The {size}-email model is missing. Contact the project owner."))

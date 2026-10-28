@@ -65,7 +65,9 @@ el navegador como pantalla. El procesamiento utiliza el modelo guardado en esta 
 La versión de 300 es la elegida para el proyecto. Las menores permiten observar
 cambios de predicción; más ejemplos no garantizan acertar todos los correos.
 La pantalla no reentrena ni ejecuta n8n o crea tickets. Conserva hasta 50
-predicciones en la memoria de la sesión y permite descargarlas en CSV.
+predicciones por historial y permite descargarlas en CSV. En Docker se
+guardan en un volumen persistente y el navegador recuerda su identificador.
+En una ejecución local sin almacenamiento configurado solo se conservan en memoria.
 No ingreses contraseñas, secretos o datos personales innecesarios.
 
 ## Acerca de
@@ -116,12 +118,17 @@ correos con cada modelo y exporta el gráfico de CV. No es un test externo.
    valores al pasar el cursor. También admite desplazamiento y zoom.
 4. Pulsar **Descargar historial CSV** para descargar todas las filas retenidas.
    Se incluyen hasta 50 resultados; al superar ese límite se elimina el más antiguo.
-5. **Borrar historial** elimina las filas de la memoria de la sesión, sin
-   borrar un resultado actual que siga visible ni archivos ya descargados.
+5. **Borrar historial** elimina las filas de este historial en el servidor y
+   en la sesión, sin borrar un resultado actual visible ni CSV ya descargados.
+6. Después de clasificar, comprobar la confirmación de guardado. El mismo
+   navegador recupera el historial al volver a abrir el portal. Conservar el
+   enlace actual para recuperarlo en otro navegador; quien tenga ese enlace
+   puede consultarlo. Un fallo de almacenamiento se muestra como advertencia.
 
 Editar título, descripción o modelo invalida el resultado actual para evitar
 descargar una predicción de un texto anterior. El historial conserva sus copias
-independientes hasta que se borra o termina la sesión. Las descargas contienen
+independientes en el almacenamiento del portal hasta que se borran o superan
+el límite de 50 registros. Sin almacenamiento configurado, termina con la sesión. Las descargas contienen
 texto ingresado; no incluir secretos. Comparar confianza no mide accuracy.
 
 ## Capturas de la aplicación real
@@ -261,8 +268,11 @@ enviar texto y adjuntos al agente y crear tickets.
 además son casos conocidos del desarrollo, no una evaluación independiente.
 
 **¿Se guardan los textos del formulario?** Se conservan hasta 50 predicciones
-con sus textos en la memoria de la sesión. No se escriben en archivos del
-servidor; la descarga CSV sí incluye esos textos en el equipo del usuario.
+con sus textos en una base SQLite del portal Docker. El volumen sobrevive a
+recargas y recreaciones del contenedor; el navegador guarda un identificador
+privado para recuperarlos. Eliminar el volumen elimina los historiales. En
+modo local sin `HISTORY_DB_PATH` solo se conserva memoria. La descarga CSV
+también incluye esos textos en el equipo del usuario.
 Borrar historial elimina esas filas; el resultado actual puede seguir visible.
 Evita datos sensibles.
 

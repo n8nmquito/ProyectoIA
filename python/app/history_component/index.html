@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>History identity</title></head>
+<body><script>
+(() => {
+  const storageKey = "mquito_private_history_v1";
+  const valid = value => typeof value === "string" && /^[A-Za-z0-9_-]{32,64}$/.test(value);
+  const send = (type, fields = {}) => window.parent.postMessage({isStreamlitMessage: true, type, ...fields}, "*");
+  let sent;
+  window.addEventListener("message", event => {
+    if (event.source !== window.parent || event.data?.type !== "streamlit:render") return;
+    let token = event.data.args?.link_token;
+    if (!valid(token)) {
+      try { token = window.localStorage.getItem(storageKey); } catch (_) {}
+    }
+    if (!valid(token)) {
+      const bytes = window.crypto.getRandomValues(new Uint8Array(32));
+      token = Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+    try { window.localStorage.setItem(storageKey, token); } catch (_) {}
+    if (sent !== token) {
+      sent = token;
+      send("streamlit:setComponentValue", {value: token, dataType: "json"});
+    }
+    send("streamlit:setFrameHeight", {height: 0});
+  });
+  send("streamlit:componentReady", {apiVersion: 1});
+})();
+</script></body></html>

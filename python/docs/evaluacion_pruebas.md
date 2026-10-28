@@ -66,6 +66,21 @@ Unicode, saltos de línea, valores reales de probabilidades y protección frente
 a fórmulas en celdas de texto. Se comprueba además el límite de retención sin
 reutilizar identificadores.
 
+### Guardado persistente del historial
+
+El portal confirma el guardado después de cada clasificación correcta. SQLite
+almacena hasta 50 registros por historial en el volumen Docker
+`mquito-portal_prediction_history`, fuera del sistema de archivos efímero del
+contenedor. Un componente propio recuerda el identificador privado en el
+navegador; el enlace permite recuperar ese mismo historial en otro navegador.
+Sin `HISTORY_DB_PATH`, se mantiene el modo local de memoria de sesión.
+
+`tests/test_persistent_history.py` verifica restauración en una instancia nueva,
+aislamiento entre identificadores, borrado independiente, escrituras concurrentes
+sin IDs duplicados, retención y recuperación desde una sesión de interfaz nueva.
+La verificación en el portal incluye entrada manual, consulta inmediata del
+historial, nueva visita a la URL inicial y recreación real del contenedor.
+
 ## Pruebas por tamaño y modelo final elegido
 
 Se prepararon cuatro versiones para las pruebas: 10, 100, 200 y 300 correos.
@@ -191,7 +206,7 @@ de haber inspeccionado esos casos.
 
 ## Pruebas automatizadas
 
-Última ejecución verificada: **56 pruebas aprobadas, cero fallos o errores**.
+Última ejecución verificada: **59 pruebas aprobadas, cero fallos o errores**.
 Evidencia legible por herramientas: results/metrics/pytest.xml.
 
 | Archivo | Comportamientos comprobados |
