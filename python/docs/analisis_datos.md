@@ -8,11 +8,11 @@ Versión documentada: 26 de octubre de 2026. Fuente numérica: `results/metrics/
 
 ## Descripción detallada del dataset
 
-El corpus maestro `data/raw/correos.json` contiene 300 correos simulados en
-español. Los 100 iniciales fueron suministrados por el usuario y otros 200 se
-crearon como ejemplos ficticios para ampliar el corpus. Las ampliaciones
-buscaron cubrir categorías y casos funcionales faltantes. No son una muestra
-aleatoria de una organización ni tickets reales recopilados de producción.
+La fuente son cuatro datasets de **10, 100, 200 y 300 correos simulados en
+español**, utilizados para entrenar y comparar los modelos del proyecto.
+El corpus maestro `data/raw/correos.json` conserva el conjunto de 300.
+No son una muestra aleatoria de una organización ni tickets reales
+recopilados de producción.
 
 Cada registro de entrenamiento contiene `titulo`, `cuerpo` y `clasificacion`.
 Las únicas etiquetas aceptadas son accesos, aplicaciones, infraestructura y otros.
@@ -170,8 +170,8 @@ Ver [consideraciones éticas](consideraciones_eticas.md).
 
 ## Fuente licencia y disponibilidad
 
-El origen es el aporte inicial de 100 correos y la ampliación con 200 ejemplos
-ficticios descritos arriba. Por indicación de la responsable del proyecto, se
+La fuente corresponde a los datasets de 10, 100, 200 y 300 correos simulados
+descritos arriba. Por indicación de la responsable del proyecto, se
 incluyen el [corpus maestro](../data/raw/correos.json) y los cuatro datasets
 de [entrenamiento](../data/train/). La [licencia MIT del código](../LICENSE)
 no se extiende automáticamente a los datos. Los modelos, las particiones

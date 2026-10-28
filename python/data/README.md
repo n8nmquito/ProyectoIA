@@ -4,8 +4,9 @@ El proyecto prueba versiones de 10, 100, 200 y 300 correos y adopta
 **modelo_clasificador_300.pkl como modelo final**. Las tres versiones menores
 se conservan para comparación; las métricas por versión se detallan en la evaluación actual.
 
-La fuente principal es raw/correos.json, con 300 correos simulados y los campos
-titulo, cuerpo y clasificacion. Hay 70 de accesos, 90 de aplicaciones, 70 de
+La fuente del proyecto son datasets de **10, 100, 200 y 300 correos
+simulados**, con los campos titulo, cuerpo y clasificacion. El archivo
+raw/correos.json conserva el corpus maestro de 300. Hay 70 de accesos, 90 de aplicaciones, 70 de
 infraestructura y 70 de otros. El título y el cuerpo son las entradas; la
 clasificación es la respuesta usada únicamente durante entrenamiento y evaluación.
 

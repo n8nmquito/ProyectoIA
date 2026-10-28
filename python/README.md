@@ -55,7 +55,7 @@ Clasifica correos de soporte TI con Python y automatiza su registro en Redmine m
 
 ### Descripción, tamaño y variables
 
-Se utilizan **300 correos simulados en español**: 70 de accesos, 90 de aplicaciones, 70 de infraestructura y 70 de otros.
+Se utilizan **cuatro conjuntos de 10, 100, 200 y 300 correos simulados en español**. El conjunto de 300 contiene 70 de accesos, 90 de aplicaciones, 70 de infraestructura y 70 de otros.
 
 | Variable | Contenido | Uso |
 |---|---|---|
@@ -67,7 +67,7 @@ Hay muestras anidadas de **10, 100, 200 y 300 correos**, cada una con su modelo.
 
 ### Fuente, licencia y acceso
 
-- **Fuente:** 100 ejemplos iniciales aportados al proyecto y 200 ejemplos ficticios añadidos para ampliar el corpus; no se presentan como correos reales de producción.
+- **Fuente:** datasets de **10, 100, 200 y 300 correos simulados**, creados para las pruebas y el entrenamiento del proyecto. No proceden de correos reales de producción.
 - **Licencia de los datos:** no se ha declarado una licencia específica. La licencia MIT del código no concede automáticamente derechos sobre el dataset.
 - **Enlaces:** [corpus de 300 correos](data/raw/correos.json), [muestras de entrenamiento](data/train/) y [25 correos de prueba](data/test/correos_test_25.json). Están incluidos en este repositorio y su acceso depende de los permisos del mismo.
 
