@@ -63,7 +63,7 @@ Se utilizan **cuatro conjuntos de 10, 100, 200 y 300 correos simulados en españ
 | `cuerpo` | Texto de la solicitud | Entrada del modelo |
 | `clasificacion` | Una de las cuatro categorías | Etiqueta para entrenar y evaluar |
 
-Hay muestras anidadas de **10, 100, 200 y 300 correos**, cada una con su modelo. Los **25 correos de prueba** solo contienen título y cuerpo: permiten obtener predicciones, pero no calcular accuracy o F1 porque no tienen etiquetas esperadas.
+Hay muestras anidadas de **10, 100, 200 y 300 correos**, cada una con su modelo. Los **25 correos de prueba** contienen título y cuerpo y se utilizan para comprobar el funcionamiento del clasificador y revisar manualmente sus predicciones. Su contenido permite reconocer el tipo de solicitud; no necesitan etiquetas para ejecutar estas pruebas funcionales. Para calcular accuracy o F1 sí sería necesario registrar y validar una categoría esperada para cada correo.
 
 ### Fuente, licencia y acceso
 
@@ -112,7 +112,7 @@ Evaluación registrada del pipeline mediante **validación cruzada exploratoria 
 
 El pipeline de 300 obtiene **accuracy CV de 95,33 % y F1 macro CV de 0,9543**, frente a **0,1154 de F1 macro del baseline**. En 10 correos la calibración no es viable en todos los folds, por lo que no se publica una cifra de CV.
 
-Estas cifras pertenecen a los artefactos identificados por sus hashes en [version_evaluation.json](python/results/metrics/version_evaluation.json); no se recalculan automáticamente al reentrenar. Los ajustes se seleccionaron sobre datos relacionados y las muestras son anidadas: los resultados no equivalen a una prueba externa independiente. Los 25 correos sin etiquetas tampoco proporcionan accuracy o F1.
+Estas cifras pertenecen a los artefactos identificados por sus hashes en [version_evaluation.json](python/results/metrics/version_evaluation.json); no se recalculan automáticamente al reentrenar. Los ajustes se seleccionaron sobre datos relacionados y las muestras son anidadas: los resultados no equivalen a una prueba externa independiente. Los 25 correos se reservan para pruebas funcionales y revisión manual; no se usan para calcular estas métricas.
 
 El diagnóstico histórico del modelo entrenado con 280 correos sobre 20 reservados obtuvo accuracy 0,9500 y F1 macro 0,9511; corresponde a otra etapa, no al modelo final ajustado con 300. Ver [evaluación y pruebas](python/docs/evaluacion_pruebas.md).
 
