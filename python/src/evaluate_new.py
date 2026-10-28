@@ -223,7 +223,7 @@ def main():
     print(f"Modelo: {model_path.name}")
     print(f"Modelo entrenado con {summary['n_training']} correos.")
     print(f"Nuevos: {summary['n_test']}; entrada: título y cuerpo.")
-    columns = ["caso", "predicha", "confianza_pct", "requiere_revision"]
+    columns = ["caso", "titulo", "predicha", "confianza_pct", "requiere_revision"]
     print(predictions[columns].to_string(index=False, float_format="%.1f"))
     pending = predictions.loc[predictions["requiere_revision"]]
     print(f"\nCorreos que requieren revisión: {len(pending)}")
