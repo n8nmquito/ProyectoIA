@@ -110,6 +110,10 @@ correos con cada modelo y exporta el gráfico de CV. No es un test externo.
 
 1. Clasificar un ticket y pulsar **Descargar predicción CSV** para obtener el
    texto, modelo, categoría, confianza, señal de revisión y cuatro probabilidades.
+   El archivo usa UTF-8 con BOM, separador de punto y coma y una primera línea
+   `sep=;` para que Excel detecte las columnas al abrirlo. Los campos entrecomillados
+   conservan los párrafos del correo dentro de una sola celda. Para importarlo
+   con otra herramienta, omitir esa primera línea y elegir el separador `;`.
 2. Abrir **Historial y comparación**. Cada clasificación correcta agrega una
    fila; cambiar de pestaña, tema o idioma no repite la predicción.
 3. Para comparar modelos sobre el mismo ticket, conservar el texto, cambiar

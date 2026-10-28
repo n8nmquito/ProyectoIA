@@ -30,14 +30,19 @@ def remember_prediction(state, title, body, size, result, store=None, token=None
 
 
 def csv_bytes(entries):
-    """Export actual predictions as UTF-8 CSV, neutralizing cell formulas."""
+    """Export Excel-compatible UTF-8 CSV with an explicit separator directive."""
     columns = [
         "id", "fecha_utc", "modelo_correos", "titulo", "cuerpo",
         "categoria", "confianza", "requiere_revision",
         "p_accesos", "p_aplicaciones", "p_infraestructura", "p_otros",
     ]
     output = io.StringIO(newline="")
-    writer = csv.DictWriter(output, fieldnames=columns)
+    # Excel uses the regional list separator unless the file declares one.
+    output.write("sep=;\r\n")
+    writer = csv.DictWriter(
+        output, fieldnames=columns, delimiter=";",
+        quoting=csv.QUOTE_ALL, lineterminator="\r\n",
+    )
     writer.writeheader()
     for entry in entries:
         row = {key: entry.get(key, "") for key in columns}
