@@ -36,7 +36,7 @@ El portal permite probar las respuestas y comparar modelos con pocos datos. **To
 - Portal Streamlit local o desplegado en Docker, con selección de modelos disponibles, ejemplos, resultados, temas, idiomas, descargas, historial y comparación.
 - NexpAPI interna con el modelo de 300 y autenticación; n8n para recibir correo, limpiar texto, consultar el clasificador y ejecutar el agente OpenAI.
 - Preparación y validación de tickets, resolución de responsables, carga de adjuntos y registro en Redmine, con avisos según el flujo configurado.
-- Código versionado en **main** y los cinco documentos requeridos en `python/docs/`.
+- Código versionado en **main** y los seis documentos requeridos en `python/docs/`.
 
 ### Qué NO incluye
 
@@ -72,7 +72,7 @@ Faltan los nombres del resto del equipo, el apartado de licencia del README y lo
 | Desarrollo | Embeddings, clasificador, comparación de modelos y API simulada | Se implementaron TF-IDF, SVM calibrada y NexpAPI real en Docker; no embeddings |
 | Testing | Categoría, prioridad/grupo por separado y Testing Plan | Métricas de categoría, pruebas Python y validaciones de integración/asignación; no modelo Python separado de prioridad/grupo |
 | Deploy Piloto | Prueba controlada del agente | Ejecuciones diagnósticas con datos ficticios y controles que evitan crear tickets o enviar correos durante esas pruebas |
-| Deploy Completo | MVP final, documentación y monitoreo inicial | Portal, NexpAPI y flujo desplegados; código en main y cinco documentos. El monitoreo automático de deriva no está implementado |
+| Deploy Completo | MVP final, documentación y monitoreo inicial | Portal, NexpAPI y flujo desplegados; código en main y seis documentos. El monitoreo automático de deriva no está implementado |
 
 El cronograma informa cierre el **25/10/2026**, cinco días antes del **30/10/2026** previsto, sin explicar los adelantos. Esa fecha no demuestra que se hayan implementado todos los entregables mencionados.
 
@@ -118,6 +118,6 @@ Las versiones están en [arquitectura](arquitectura.md). Se requieren cuentas y 
 | Duplicar tickets al reprocesar correos | Cursor IMAP que evita reprocesar mensajes antiguos ya considerados | No existe garantía global de idempotencia; comprobar Redmine antes de reintentar una ejecución |
 | Perder correspondencia entre datos y modelos | Datasets por tamaño, hashes, configuración y reportes registrados | Conservar artefactos anteriores antes de reentrenar y reevaluar cada nueva versión |
 | Costes o dependencia del proveedor externo | El clasificador Python funciona sin OpenAI; la API y el portal ejecutan el modelo localmente | Definir presupuesto y revisar consumo; el análisis del agente depende del servicio externo |
-| Entrega académica incompleta | Código en main, cinco documentos ordenados y espacios identificados en el README | Completar integrantes, licencia pendiente y enlaces de los dos videos |
+| Entrega académica incompleta | Código en main, seis documentos ordenados y espacios identificados en el README | Completar integrantes, licencia pendiente y enlaces de los dos videos |
 
 Antes de operar con correos reales, hay que asignar responsables y acordar cómo revisar errores. El [plan de monitoreo](consideraciones_eticas.md) sigue siendo una propuesta, no una rutina automática.

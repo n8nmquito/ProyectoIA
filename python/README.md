@@ -165,7 +165,7 @@ python -m src.train_versions
 python -m streamlit run app/app.py
 ```
 
-Abrir [la interfaz local](http://localhost:8501). Consultar los pasos de uso en [Interfaz de usuario](#8-interfaz-de-usuario).
+Abrir [la interfaz local](http://localhost:8501). Consultar el [manual de usuario](docs/manual_usuario.md) para los pasos, las capturas anotadas y la solución de problemas.
 
 ### Comandos y ejemplos de uso
 
@@ -296,7 +296,7 @@ Mensaje de error al intentar clasificar sin completar el título.
 | `python/results/` | Métricas, predicciones e informes |
 | `python/tests/` | Pruebas automatizadas |
 | `python/notebooks/` | Análisis y experimentos reproducibles |
-| `python/docs/` | Planificación, análisis de datos, arquitectura, optimización y consideraciones éticas |
+| `python/docs/` | Planificación, análisis de datos, arquitectura, optimización, consideraciones éticas y manual de usuario |
 | `python/deploy/` | Dockerfile y dependencias del portal Streamlit |
 | `nexpapi/` | API interna de clasificación, Dockerfile, dependencias y Compose |
 | `python/workshop/` | Material de referencia del taller |
