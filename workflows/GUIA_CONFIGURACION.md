@@ -17,6 +17,66 @@ Las claves se administran en n8n y en los archivos privados del servicio. `X-API
 
 NexpAPI comparte la red Docker de n8n y no publica el puerto 8000. El host interno es `nexpapi`, no `localhost`. Consultar [NexpAPI](../nexpapi/README.md) y [operación del despliegue](../python/deploy/DESPLIEGUE_REALIZADO.md).
 
+## Credenciales de n8n: para qué sirven y cómo se usan
+
+Los nombres siguientes corresponden a la lista de credenciales de la instalación. Cada credencial guarda los datos de acceso de un servicio; los nodos que la seleccionan pueden utilizarla sin escribir la clave en el código. Las plantillas exportadas no incluyen esas credenciales: hay que seleccionarlas nuevamente al importar.
+
+### 1. Clasificador Python 300 - API interna
+
+- **Tipo:** Header Auth.
+- **Para qué sirve:** autorizar las consultas al clasificador Python de 300 correos que expone NexpAPI. Devuelve categoría, confianza y probabilidades.
+- **Qué configurar:** nombre del encabezado `X-API-Key` y, como valor, la misma clave que `CLASSIFIER_API_KEY` del `.env` privado de NexpAPI.
+- **Cómo se usa:** seleccionar esta credencial en **Consultar API - Modelo 300**, con autenticación Header Auth, método `POST` y URL `http://nexpapi:8000/predict`. El cuerpo JSON contiene `titulo` y `cuerpo` limpios. n8n agrega la clave al encabezado de la petición.
+
+### 2. OpenAI account
+
+- **Tipo:** OpenAI.
+- **Para qué sirve:** permitir que el agente analice la solicitud, genere el resumen y proponga prioridad, tipo y proyecto. La categoría final sigue siendo la de Python.
+- **Qué configurar:** la API key de OpenAI del proyecto autorizado para ejecutar el agente.
+- **Cómo se usa:** seleccionar la credencial en **OpenAI - Cargar API key**, conectado a **Agente IA - Analizar solicitud**. El modelo configurado es `gpt-4.1-mini`. Esta conexión utiliza texto limpio, adjuntos seleccionados y contexto de las herramientas; no entrena el clasificador Python.
+
+### 3. Mquito - Seguimiento de tickets PostgreSQL
+
+- **Tipo:** Postgres.
+- **Para qué sirve:** guardar el último estado observado de cada ticket y los avisos pendientes, enviados o fallidos. Permite reconocer cambios de estado y evitar repetir una misma transición en el flujo de notificaciones.
+- **Qué configurar:** host interno `postgres`, puerto `5432`, base `n8n`, usuario dedicado `mquito_ticket_notify` y su contraseña privada. El esquema utilizado es `ticket_notify`.
+- **Cómo se usa:** asignarla a los nodos PostgreSQL del flujo **Mquito | Avisos de cambios de estado Redmine**: **Comparar y registrar cambios**, **Reservar avisos pendientes**, **Registrar envío aceptado** y **Registrar fallo de envío**. Esta cuenta necesita los permisos de lectura, escritura y ejecución previstos por el script de instalación; una cuenta de solo lectura no sirve para ese seguimiento.
+- **Referencia:** [configuración del seguimiento](status-notifications/README.md#configuración).
+
+### 4. Gmail soporte - Notificaciones SMTP
+
+- **Tipo:** SMTP.
+- **Para qué sirve:** enviar los avisos de ticket creado, correo omitido, error de procesamiento y cambios de estado al solicitante.
+- **Qué configurar:** servidor `smtp.gmail.com`, puerto `465` con TLS, usuario del buzón y la credencial de acceso SMTP admitida por esa cuenta; el remitente debe estar autorizado.
+- **Cómo se usa:** seleccionarla en **Notificar - Ticket creado**, **Notificar - Correo omitido**, **Notificar - Error de procesamiento** y **Notificar cambio al solicitante**. Los filtros del flujo deciden si corresponde enviar el mensaje. SMTP envía correos; la lectura del buzón utiliza IMAP.
+
+### 5. Mquito ML - PostgreSQL solo lectura
+
+- **Tipo:** Postgres.
+- **Para qué sirve:** por su nombre y los antecedentes del despliegue, corresponde al mecanismo anterior de clasificación basado en PostgreSQL. Su configuración y sus permisos efectivos no se pueden comprobar desde la captura.
+- **Qué configurar si se conserva para consultas:** host, puerto, base, usuario y contraseña de la cuenta con permisos de lectura sobre los objetos necesarios. El nombre «solo lectura» no impone permisos: estos se conceden en PostgreSQL.
+- **Cómo se usa actualmente:** las plantillas vigentes del clasificador y de avisos no contienen nodos de clasificación que la necesiten. El modelo actual se consulta mediante **Clasificador Python 300 - API interna**. Antes de reutilizarla, revisar sus conexiones en n8n y los permisos de la cuenta; no asignarla a los nodos que registran notificaciones.
+
+### 6. Header Auth account
+
+- **Tipo:** Header Auth.
+- **Para qué sirve en este proyecto:** autenticar las consultas y operaciones sobre Redmine, incluidas lectura de catálogos, validación de responsables, subida de adjuntos y creación de tickets.
+- **Qué configurar:** nombre del encabezado `X-Redmine-API-Key` y, como valor, la API key de la cuenta de integración de Redmine. Verificar ese encabezado al abrir la credencial, ya que su nombre genérico no identifica el servicio por sí solo.
+- **Cómo se usa:** seleccionarla en las herramientas y nodos HTTP de Redmine, como **Consultar proyectos**, **Verificar proyecto propuesto**, **Subir adjunto a Redmine**, **Crear ticket en Redmine** y **Consultar tickets de Redmine** del flujo de seguimiento. Las operaciones permitidas dependen de los permisos de la cuenta en Redmine.
+
+### 7. IMAP account
+
+- **Tipo:** IMAP.
+- **Para qué sirve:** recibir los correos de soporte y sus adjuntos para iniciar la automatización.
+- **Qué configurar:** servidor IMAP del proveedor, puerto, TLS, usuario del buzón y su credencial de acceso. Usar los valores admitidos por la cuenta de correo.
+- **Cómo se usa:** seleccionarla en **Leer buzón IMAP**; configurar la carpeta `INBOX` y el formato `Resolved` del nodo. El correo recibido pasa luego a normalización y limpieza. Para responder o notificar se usa la credencial SMTP.
+
+### Dónde seleccionarlas
+
+En n8n, abrir **Credentials** para crear o editar la credencial del tipo correspondiente. Después abrir el nodo que la necesita y seleccionarla en su campo de credenciales. En los nodos HTTP, comprobar también el tipo de autenticación y el encabezado del servicio. Los nodos Code de limpieza y preparación no requieren credenciales propias.
+
+Las cantidades de conexiones que aparecen junto a algunas credenciales indican referencias dentro de n8n; no son permisos ni cantidades de solicitudes realizadas. Esta guía identifica su uso según las plantillas del repositorio y la captura, sin inspeccionar los secretos ni la configuración privada de la instalación.
+
 ## Entrada, salida y errores
 
 1. **Limpiar firma y datos** quita firmas y redacta datos sensibles del asunto/cuerpo dentro de n8n.

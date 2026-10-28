@@ -122,6 +122,8 @@ La imagen muestra el esquema anterior. El flujo vigente incorpora la limpieza pr
 
 Ver el [diagrama completo y las responsabilidades de cada componente](python/docs/arquitectura.md#3-diagrama-de-flujo-del-sistema-completo) y el [proceso de automatización](PROCESO_AUTOMATIZACION.md).
 
+La [guía de credenciales de n8n](workflows/GUIA_CONFIGURACION.md#credenciales-de-n8n-para-qué-sirven-y-cómo-se-usan) explica para qué sirve cada acceso, qué configurar y en qué nodos se utiliza: NexpAPI, OpenAI, PostgreSQL, SMTP, Redmine e IMAP.
+
 ## 6. Resultados
 
 ### Métricas finales del modelo
