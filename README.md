@@ -69,7 +69,7 @@ Hay muestras anidadas de **10, 100, 200 y 300 correos**, cada una con su modelo.
 
 - **Fuente:** datasets de **10, 100, 200 y 300 correos simulados**, creados para las pruebas y el entrenamiento del proyecto. No proceden de correos reales de producción.
 - **Licencia de los datos:** no se ha declarado una licencia específica. La licencia MIT del código no concede automáticamente derechos sobre el dataset.
-- **Enlaces:** [corpus de 300 correos](python/data/raw/correos.json), [muestras de entrenamiento](python/data/train/) y [25 correos de prueba](python/data/test/correos_test_25.json). Están incluidos en este repositorio y su acceso depende de los permisos del mismo.
+- **Enlaces:** [corpus de 300 correos](python/data/raw/correos.json), [muestras de entrenamiento](python/data/train/) y [25 correos de prueba](python/data/test/correos_test_25.json).
 
 Más detalle en el [análisis de datos](python/docs/analisis_datos.md).
 
