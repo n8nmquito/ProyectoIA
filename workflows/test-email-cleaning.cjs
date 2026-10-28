@@ -29,6 +29,17 @@ const html = clean({ asunto: 'Ayuda', cuerpo: 'Versión normalizada',
 assert.equal(html.json.cuerpo, 'No guarda & falla.');
 assert.equal(html.json.html_para_limpieza, undefined);
 assert.equal(html.json.limpieza.firma_eliminada, true);
+const corporateSignature = '\n\n*| *Consultor Técnico\n\n*| *persona@empresa.test <persona@empresa.test>\n\n[image: facebook] <https://img.newoldstamp.com/r/123/facebook>\n\n*AVISO DE CONFIDENCIALIDAD: *La información de este e-mail es confidencial.';
+const corporate = clean({ asunto: 'Error en JDE',
+  cuerpo: 'No puedo guardar la orden.' + corporateSignature });
+assert.equal(corporate.json.cuerpo, 'No puedo guardar la orden.');
+assert.equal(corporate.json.limpieza.firma_eliminada, true);
+assert.equal(clean({ asunto: 'Ayuda', cuerpo:
+  'El consultor técnico no puede entrar. Necesito habilitar su acceso.' }).json.cuerpo,
+  'El consultor técnico no puede entrar. Necesito habilitar su acceso.');
+assert.equal(clean({ asunto: 'Error', cuerpo:
+  'No abre JDE.\n\n*AVISO DE CONFIDENCIALIDAD:*\nMensaje privado.' }).json.cuerpo,
+  'No abre JDE.');
 for (const ending of ['--\nFirma', 'Sent from my phone', 'Aviso de confidencialidad']) {
   assert.equal(clean({ asunto: 'Ayuda', cuerpo: `Error al guardar.\n${ending}` }).json.cuerpo, 'Error al guardar.');
 }

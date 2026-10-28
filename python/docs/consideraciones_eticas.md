@@ -36,7 +36,7 @@ El dataset es simulado. Los correos reales, remitentes, adjuntos y consultas a R
 
 ### ¿Cómo se protege la privacidad de los usuarios?
 
-El nodo **Limpiar firma y datos** de n8n quita firmas y redacta datos del asunto y cuerpo **antes de enviarlos a NexpAPI y OpenAI**. Usa patrones: puede omitir información y no anonimiza adjuntos ni respuestas de herramientas. Los originales quedan en n8n y Redmine.
+El nodo **Limpiar firma y datos** de n8n quita firmas y redacta datos del asunto y cuerpo **antes de enviarlos a NexpAPI y OpenAI**. Usa patrones: puede omitir información y no anonimiza adjuntos ni respuestas de herramientas. El ticket usa el asunto y cuerpo limpios. El original puede quedar en la ejecución de n8n; los adjuntos y el contacto del solicitante se conservan en Redmine.
 
 NexpAPI exige `X-API-Key`, funciona en la red Docker y no publica el puerto 8000. Las claves quedan fuera de Git. Streamlit no llama a OpenAI; su historial SQLite guarda textos y se accede con un enlace privado, sin autenticación de usuarios. Las descargas también pueden contener información sensible.
 

@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-28",
+  "model": "gpt-4.1-mini",
+  "mode": "Un correo por ejecución de diagnóstico",
+  "external_effects": "OpenAI y herramientas GET de Redmine; sin tickets ni SMTP.",
+  "cases": [
+    {
+      "caso": "comando-aislado",
+      "esperada": "omitir",
+      "obtenida": "omitir",
+      "motivo": "No se identifica una necesidad de soporte ni solicitud explícita en el correo.",
+      "execution_id": "28891"
+    },
+    {
+      "caso": "inventario-sin-solicitud",
+      "esperada": "omitir",
+      "obtenida": "omitir",
+      "motivo": "No se identifica una necesidad de soporte ni solicitud explícita en el correo.",
+      "execution_id": "28892"
+    },
+    {
+      "caso": "comando-con-falla",
+      "esperada": "crear_ticket",
+      "obtenida": "crear_ticket",
+      "motivo": "Se identifica una necesidad clara de soporte por falla técnica en equipo al abrir JDE, con solicitud explícita de ayuda para revisar memoria.",
+      "execution_id": "28893"
+    },
+    {
+      "caso": "acceso-sin-error",
+      "esperada": "crear_ticket",
+      "obtenida": "crear_ticket",
+      "motivo": "El correo contiene una solicitud clara de habilitación de acceso y consulta sobre permisos, lo que constituye una necesidad de soporte.",
+      "execution_id": "28894"
+    }
+  ],
+  "privacy": {
+    "execution_id": "28890",
+    "cases": 4,
+    "result": "Firma corporativa eliminada y texto limpio utilizado al preparar Redmine."
+  },
+  "batch_diagnostics": [
+    {
+      "execution_id": "28886",
+      "result": "Falló el formato de salida del agente."
+    },
+    {
+      "execution_id": "28888",
+      "result": "Alcanzó el límite de 15 iteraciones."
+    }
+  ],
+  "limitation": "La prueba por lotes no quedó validada; las cuatro comprobaciones individuales sí pasaron."
+}

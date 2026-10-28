@@ -33,6 +33,6 @@ Un estado `success` de n8n puede incluir un rechazo controlado. Antes de reinten
 
 ## Privacidad y límites
 
-El asunto y cuerpo llegan limpios a NexpAPI y OpenAI, pero la redacción por patrones puede omitir datos. Los adjuntos seleccionados y las respuestas de herramientas no se anonimizan. Los originales permanecen en n8n y Redmine.
+El asunto y cuerpo llegan limpios a NexpAPI y OpenAI, pero la redacción por patrones puede omitir datos. Los adjuntos seleccionados y las respuestas de herramientas no se anonimizan. La descripción del ticket usa el asunto y cuerpo limpios. El correo original puede permanecer en la ejecución de n8n; los adjuntos y el contacto del solicitante se conservan en Redmine.
 
 El corpus simulado, los datasets y los modelos entregados están versionados en Git. Las claves y las copias privadas del despliegue se mantienen aparte. No se ha demostrado cumplimiento normativo ni generalización a correos reales; las advertencias y el seguimiento se detallan en la documentación ética.

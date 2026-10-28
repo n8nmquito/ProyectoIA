@@ -33,8 +33,11 @@ for (const [name, outputs] of Object.entries(workflow.connections)) {
 for (const sender of ['persona@prueba.test', 'demo@example.invalid',
   'no-reply@prueba.test', 'n8n.mquito@gmail.com', 'dirección inválida']) {
   const email = { remitente: sender, asunto: 'Error en JDE',
-    cuerpo: 'No guarda la orden.', message_id: sender, fecha: '2026-10-28' };
-  const previous = { 'Normalizar correo': email,
+    cuerpo: 'No guarda la orden.\nFirma privada\npassword: secreto-no-publicar',
+    message_id: sender, fecha: '2026-10-28' };
+  const cleanEmail = { ...email, asunto: 'Error en JDE (limpio)',
+    cuerpo: 'No guarda la orden. Texto limpio.', limpieza: { version: 3 } };
+  const previous = { 'Normalizar correo': email, 'Limpiar firma y datos': cleanEmail,
     'Leer buzón IMAP': { from: sender, subject: email.asunto } };
   const expectedError = execute(source('notificacion-error.js'), {
     estado: 'pendiente_revision', asunto: email.asunto, message_id: sender,
@@ -60,10 +63,20 @@ for (const sender of ['persona@prueba.test', 'demo@example.invalid',
     const applied = execute(source('aplicar-categoria-python.js'),
       { output: analysis }, links);
     const currentPreparation = source('preparar-ticket.js')
-      .replace('Categoría sugerida', 'Categoría final (Python)');
+      .replace('Categoría sugerida', 'Categoría final (Python)')
+      .replace("const email = $('Normalizar correo').item.json;",
+        "const email = $('Normalizar correo').item.json; const cleanEmail = $('Limpiar firma y datos').item.json;")
+      .replace("['Asunto original',email.asunto]", "['Asunto (limpio)',cleanEmail.asunto]")
+      .replace("'## Texto del correo'", "'## Texto del correo (limpio)'")
+      .replace("String(email.cuerpo||'')", "String(cleanEmail.cuerpo||'')");
     const expected = execute(currentPreparation, applied, links);
-    assert.deepEqual(run('Preparar ticket - Intaco', { output: analysis }, links),
-      expected);
+    const prepared = run('Preparar ticket - Intaco', { output: analysis }, links);
+    assert.deepEqual(prepared, expected);
+    assert.ok(!prepared.issue.description.includes('Firma privada'));
+    assert.ok(!prepared.issue.description.includes('secreto-no-publicar'));
+    assert.throws(() => run('Preparar ticket - Intaco', { output: analysis }, {
+      ...links, 'Limpiar firma y datos': { cuerpo: '' },
+    }), /Falta el texto limpio/);
     assert.throws(() => run('Preparar ticket - Intaco', { output: analysis }, {
       ...links, 'Consultar API - Modelo 300': { ...ml, estado: 'error' },
     }), /Python no devolvió una categoría válida/);

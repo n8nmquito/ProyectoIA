@@ -50,11 +50,17 @@ function redact(value) {
 let body = plain(original.json.html_para_limpieza || original.json.cuerpo);
 const lines = body.split('\n');
 for (let index = 0; index < lines.length; index++) {
-  const line = lines[index].trim();
+  // Mail clients can decorate signature lines with Markdown or table markers.
+  const line = lines[index].trim()
+    .replace(/^[\s>*_`|]+|[\s*_`|]+$/g, '').trim();
   const hasContent = lines.slice(0, index).some(previous => previous.trim());
   const signoff = /^(?:saludos(?: cordiales)?|cordialmente|atentamente|un saludo|gracias y saludos|best regards|kind regards|regards|sincerely)[,.!\s]*$/i.test(line) && lines.length - index <= 15;
   const footer = /^(?:aviso de confidencialidad|confidentiality notice|este (?:mensaje|correo).{0,100}confidencial|this (?:message|e-?mail).{0,100}confidential)/i.test(line);
-  if (hasContent && (line === '--' || /^(?:enviado desde|sent from my)\b/i.test(line) || signoff || footer)) {
+  const tail = lines.slice(index).join('\n');
+  const signatureRole = /^(?:consultor(?:a)? t[eé]cnic[oa]|analista de sistemas|soporte t[eé]cnico|technical consultant)\s*[.,]?$/i.test(line)
+    && /[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(tail)
+    && /newoldstamp|aviso de confidencialidad|confidentiality notice|\[image:\s*(?:facebook|chrome|linkedin)/i.test(tail);
+  if (hasContent && (line === '--' || /^(?:enviado desde|sent from my)\b/i.test(line) || signoff || footer || signatureRole)) {
     body = lines.slice(0, index).join('\n');
     signatureRemoved = true;
     break;
@@ -65,5 +71,5 @@ body = redact(body);
 if (!subject || !body) throw new Error('No quedó asunto o cuerpo útil después de limpiar. Revisar manualmente.');
 const { html_para_limpieza, ...email } = original.json;
 return { json: { ...email, asunto: subject, cuerpo: body,
-  limpieza: { version: 2, firma_eliminada: signatureRemoved, datos_redactados: counts },
+  limpieza: { version: 3, firma_eliminada: signatureRemoved, datos_redactados: counts },
 }, ...(original.binary ? { binary: original.binary } : {}) };

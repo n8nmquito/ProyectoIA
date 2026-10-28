@@ -25,6 +25,8 @@ Consultar [configuración](GUIA_CONFIGURACION.md), [NexpAPI](../nexpapi/README.m
 
 El nodo **Limpiar firma y datos** ejecuta [limpiar-correo.js](nodes/limpiar-correo.js) dentro de n8n. Elimina firmas habituales y redacta contactos, IP, enlaces, credenciales y campos personales etiquetados. No llama a un endpoint de limpieza. Si no queda texto útil, deriva a revisión sin usar el original como respaldo.
 
+La descripción del ticket usa también el asunto y cuerpo limpios. Reconoce firmas con marcas Markdown, contactos corporativos y avisos de confidencialidad. El contacto del solicitante y los adjuntos se conservan por separado; el original puede permanecer en la ejecución de n8n. Esta limpieza no modifica tickets anteriores.
+
 **Unir correo y predicción** conserva el texto limpio y los adjuntos junto con la respuesta de NexpAPI. El selector comprueba modelo, categoría y probabilidades antes de pasar al agente; no vuelve a clasificar.
 
 El agente puede recibir PNG, JPEG, WebP y PDF: hasta **4 archivos**, **4 MiB por archivo** y **8 MiB en total**. Los originales se conservan para Redmine. La selección y la limpieza de texto no anonimizan adjuntos ni garantizan detectar todos los datos sensibles.
@@ -53,6 +55,8 @@ node workflows/test-attachments.cjs
 ```
 
 La ejecución aislada **28845** comprobó NexpAPI y los adjuntos con dos correos ficticios, sin agentes externos, tickets ni SMTP. Las pruebas históricas de 24 correos y la corrección posterior de tipos están registradas en [resultados](../python/results/n8n_produccion/resultados.json) y [regresión](../python/results/n8n_produccion/regresion_tipo_ticket.json).
+
+La [regresión de relevancia y firmas](../python/results/n8n_produccion/regresion_relevancia.json) registra cuatro casos individuales con OpenAI y cuatro comprobaciones de limpieza sin crear tickets ni enviar avisos. Las pruebas del agente por lotes fallaron por formato y límite de iteraciones; esa modalidad queda pendiente de validar.
 
 La rama manual del flujo principal puede crear tickets reales. Un estado `success` puede contener un rechazo controlado: comprobar el ID en Redmine antes de reintentar. El cursor IMAP evita reprocesar mensajes antiguos ya considerados; no sustituye una garantía global de idempotencia.
 

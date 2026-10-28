@@ -1,0 +1,26 @@
+[
+  {
+    "id": "comando-aislado",
+    "asunto": "Consulta",
+    "cuerpo": "Get-CimInstance Win32_PhysicalMemory | Select-Object DeviceLocator, Capacity, Speed, ConfiguredClockSpeed, Manufacturer",
+    "accion_esperada": "omitir"
+  },
+  {
+    "id": "inventario-sin-solicitud",
+    "asunto": "Información del equipo",
+    "cuerpo": "DeviceLocator: DIMM 0\nCapacity: 17179869184\nSpeed: 3200\nManufacturer: Kingston",
+    "accion_esperada": "omitir"
+  },
+  {
+    "id": "comando-con-falla",
+    "asunto": "El equipo se reinicia al abrir JDE",
+    "cuerpo": "El equipo se reinicia al abrir JDE desde esta mañana. Necesito ayuda para revisar la memoria. Ejecuté este comando para obtener sus datos:\nGet-CimInstance Win32_PhysicalMemory | Select-Object DeviceLocator, Capacity, Speed, ConfiguredClockSpeed, Manufacturer",
+    "accion_esperada": "crear_ticket"
+  },
+  {
+    "id": "acceso-sin-error",
+    "asunto": "Solicitud de acceso a JDE",
+    "cuerpo": "Necesito que habiliten mi acceso al módulo de compras de JDE para registrar órdenes. ¿Pueden ayudarme con el procedimiento y los permisos necesarios?",
+    "accion_esperada": "crear_ticket"
+  }
+]

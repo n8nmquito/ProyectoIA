@@ -42,7 +42,7 @@ Ambos servicios utilizan `unless-stopped`. Los volúmenes conservan historial y 
 
 La limpieza de firmas y datos sensibles se ejecuta en un nodo Code JavaScript de n8n. NexpAPI recibe título/cuerpo limpios y determina la categoría. Si la limpieza, la API o su respuesta fallan, se deriva a revisión antes de ejecutar el agente.
 
-OpenAI prepara el análisis y propone prioridad, tipo y proyecto. El código fija la categoría Python, consulta el responsable y valida los catálogos, la membresía y el rol. Los originales y adjuntos se conservan para Redmine; los adjuntos no se anonimizan.
+OpenAI prepara el análisis y propone prioridad, tipo y proyecto. El código fija la categoría Python, consulta el responsable y valida los catálogos, la membresía y el rol. La descripción del ticket usa el asunto y cuerpo limpios. Redmine conserva el contacto del solicitante y los adjuntos originales; los archivos no se anonimizan.
 
 La plantilla vigente es [correo-ia-redmine-python300.json](../../workflows/correo-ia-redmine-python300.json). La otra exportación es histórica y no sirve como sustituto de la configuración actual.
 

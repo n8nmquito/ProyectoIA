@@ -23,9 +23,9 @@ NexpAPI comparte la red Docker de n8n y no publica el puerto 8000. El host inter
 2. **Consultar API - Modelo 300** envía solo `titulo` y `cuerpo` limpios a `/predict`.
 3. **Unir correo y predicción** reúne el correo limpio, sus adjuntos y la respuesta.
 4. **Seleccionar adjuntos para IA** verifica que la respuesta corresponda a `modelo_clasificador_300`, con 300 muestras, categoría y probabilidades válidas; luego prepara archivos para el agente.
-5. El agente recibe la categoría Python y analiza el correo. **Preparar ticket - Intaco** fija la categoría Python y construye el ticket en un solo nodo.
+5. El agente omite comandos, código o inventarios aislados sin problema ni solicitud de ayuda. Las solicitudes de acceso, configuración o asistencia siguen siendo válidas sin un error. El agente recibe la categoría Python y analiza el correo. **Preparar ticket - Intaco** fija la categoría Python y construye el ticket en un solo nodo.
 
-Si falla la limpieza, la API o la validación de la respuesta, la ejecución deriva directamente a **Sin análisis IA - Revisión**. No pasa al agente ni crea un ticket con una categoría de respaldo. Los originales siguen disponibles para Redmine; los adjuntos no se anonimizan.
+Si falla la limpieza, la API o la validación de la respuesta, la ejecución deriva directamente a **Sin análisis IA - Revisión**. No pasa al agente ni crea un ticket con una categoría de respaldo. La descripción de Redmine también usa el asunto y cuerpo limpios. Los adjuntos originales y el contacto del solicitante se conservan; no se anonimizan los archivos.
 
 ## Tipo, categoría y responsable
 
