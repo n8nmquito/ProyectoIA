@@ -10,7 +10,7 @@
 | URL desde n8n | `http://nexpapi:8000/predict` |
 | Modelo de la API | 300 correos; SHA-256 `2905ce4167d90281106ff7a37f6211114eccf459c1764d8ac5c61f0b81bf6a87` |
 | Portal | `mquito-portal-streamlit-1`, proyecto `mquito-portal`, puerto 8501 |
-| Flujo principal n8n | `opxBwpGpRDrbQeHn`, 44 nodos y categoría final Python |
+| Flujo principal n8n | `opxBwpGpRDrbQeHn`, 41 nodos y categoría final Python |
 
 NexpAPI exige `X-API-Key` y no publica el puerto 8000. Su `.env` permanece privado. La API reutiliza `python/src` y `python/config.yaml`; el modelo desplegado está en `nexpapi/models` mediante `NEXPAPI_MODEL_DIR`.
 

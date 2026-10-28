@@ -23,9 +23,12 @@ const agent = { categoria: 'aplicaciones', requiere_revision: false,
   descripcion: 'Solicitud de capacitación en JDE.', assigned_to_id: 10,
   membership_id: 110, role_id: 5, motivo_asignacion: 'Aplicaciones' };
 function apply(prediction = ml, analysis = agent) {
-  return run('Aplicar categoría Python', { output: analysis }, {
-    'Consultar API - Modelo 300': prediction,
-  });
+  const source = fs.readFileSync(path.join(__dirname,
+    'nodes/aplicar-categoria-python.js'), 'utf8');
+  return vm.runInNewContext(`(function(){${source}\n})()`, {
+    $json: { output: analysis },
+    $: () => ({ item: { json: prediction } }),
+  }, { timeout: 1000 }).json;
 }
 const applied = apply();
 assert.equal(applied.output.categoria, 'otros');
@@ -80,7 +83,10 @@ assert.deepEqual(workflow.pinData, {});
 for (const node of workflow.nodes) assert.equal(node.credentials, undefined);
 for (const links of Object.values(workflow.connections)) for (const outputs of Object.values(links))
   for (const output of outputs) for (const link of output) assert.ok(nodes[link.node], link.node);
-for (const name of ['Aplicar categoría Python', 'Consultar categorías para asignación',
+assert.equal(nodes['Aplicar categoría Python'], undefined);
+assert.match(nodes['Preparar ticket - Intaco'].parameters.jsCode,
+  /The normalized API result is authoritative/);
+for (const name of ['Preparar ticket - Intaco', 'Consultar categorías para asignación',
   'Consultar miembros para asignación', 'Resolver responsable por categoría']) {
   assert.equal(workflow.connections[name].main[1][0].node, 'Sin análisis IA - Revisión');
 }

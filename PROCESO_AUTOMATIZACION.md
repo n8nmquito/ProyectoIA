@@ -9,7 +9,7 @@ El diseño completo está en [arquitectura](python/docs/arquitectura.md) y los l
 3. **Consultar API - Modelo 300** envía ese texto a `http://nexpapi:8000/predict`. Python devuelve la categoría final, confianza y probabilidades.
 4. **Unir correo y predicción** recupera el contexto limpio y los adjuntos. El selector valida la respuesta y prepara los archivos permitidos para el agente.
 5. OpenAI decide si es una solicitud de soporte, resume y propone prioridad, tipo y proyecto consultando catálogos de Redmine. Recibe la categoría de Python y no puede sustituirla.
-6. Si corresponde crear el ticket, **Aplicar categoría Python** fija esa categoría y marca revisión cuando hay baja confianza o desacuerdo.
+6. Si corresponde crear el ticket, **Preparar ticket - Intaco** aplica la categoría Python y marca revisión cuando hay baja confianza o desacuerdo.
 7. El código resuelve `tipo_ticket` por nombre, comprueba proyecto y categoría, y busca el responsable configurado. Valida membresía y rol antes de asignarlo.
 8. Recupera y sube los adjuntos originales, crea el ticket en Redmine y prepara el aviso al remitente.
 
@@ -19,7 +19,7 @@ Las herramientas del agente son GET. La creación y asignación posteriores son 
 
 ## Plantilla vigente
 
-Importar [correo-ia-redmine-python300.json](workflows/correo-ia-redmine-python300.json), la plantilla actual de **44 nodos**, desactivada y sin credenciales. Consultar la [guía de configuración](workflows/GUIA_CONFIGURACION.md) antes de publicarla.
+Importar [correo-ia-redmine-python300.json](workflows/correo-ia-redmine-python300.json), la plantilla actual de **41 nodos**, desactivada y sin credenciales. Consultar la [guía de configuración](workflows/GUIA_CONFIGURACION.md) antes de publicarla.
 
 `workflows/correo-ia-redmine.json` conserva una versión histórica de 47 nodos. No representa la política actual de categoría final y limpieza; se mantiene como referencia de etapas anteriores.
 

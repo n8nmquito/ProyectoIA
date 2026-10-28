@@ -14,7 +14,7 @@ El responsable configurado en la categoría de Redmine tiene prioridad. Se consu
 
 | Archivo | Estado y uso |
 |---|---|
-| [correo-ia-redmine-python300.json](correo-ia-redmine-python300.json) | **Plantilla vigente: 44 nodos**, limpieza local y categoría Python obligatoria. Usar para nuevas instalaciones |
+| [correo-ia-redmine-python300.json](correo-ia-redmine-python300.json) | **Plantilla vigente: 41 nodos**, limpieza local y categoría Python obligatoria. Usar para nuevas instalaciones |
 | [correo-ia-redmine.json](correo-ia-redmine.json) | **Referencia histórica: 47 nodos**. Conserva la lógica anterior de comparación y no reproduce el flujo actual |
 
 Ambas exportaciones están desactivadas y sin credenciales. Reasigna las credenciales antes de publicar la plantilla vigente y guarda la versión activa antes de modificarla. Son versiones diferentes, no copias intercambiables.
@@ -36,10 +36,13 @@ Desde la raíz del repositorio, ejecutar sin crear tickets ni enviar correos:
 ```bash
 node workflows/test-email-cleaning.cjs
 node workflows/test-python-category.cjs
+node workflows/test-compact-workflow.cjs
 node workflows/status-notifications/test.cjs
 ```
 
-Las dos primeras suites comprueban la limpieza local, la autoridad de la categoría Python, la asignación y las conexiones de la plantilla vigente. La tercera verifica la lógica del flujo independiente de avisos de estado.
+Las tres primeras suites comprueban la limpieza local, la autoridad de la categoría Python, la asignación y la equivalencia de las tres fusiones de la plantilla vigente. La última verifica el flujo independiente de avisos de estado.
+
+El flujo mantiene una línea principal de izquierda a derecha. Las ramas de adjuntos y validación del responsable quedan arriba; las herramientas del agente y los errores, debajo. **Preparar ticket - Intaco** aplica primero la categoría Python; **Resultado del ticket** y **Sin análisis IA - Revisión** preparan también sus respectivos avisos. Los filtros de envío permanecen separados.
 
 Estas comprobaciones se conservan para la plantilla histórica y sus componentes:
 

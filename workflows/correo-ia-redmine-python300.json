@@ -17,7 +17,7 @@
       "typeVersion": 2.2,
       "position": [
         0,
-        288
+        360
       ],
       "notesInFlow": false,
       "notes": "Lee mensajes nuevos de INBOX y descarga los adjuntos. No marca los mensajes como leídos. Si una ejecución falla, revisarla antes de reintentar."
@@ -32,8 +32,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        176,
-        272
+        260,
+        360
       ],
       "onError": "continueErrorOutput"
     },
@@ -57,8 +57,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1072,
-        304
+        1560,
+        360
       ],
       "notesInFlow": false,
       "onError": "continueErrorOutput",
@@ -84,8 +84,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        832,
-        544
+        1300,
+        700
       ],
       "notesInFlow": false,
       "notes": "Alternativa desconectada. Para usarla, seleccionar su credencial y sustituir la conexión del modelo activo del agente."
@@ -100,22 +100,22 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1408,
-        480
+        2340,
+        700
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "let result = $json.output;\nif (typeof result === 'string') { try { result = JSON.parse(result); } catch { throw new Error('La IA no devolvió JSON válido. No se creó un ticket.'); } }\nif (!result || typeof result !== 'object') throw new Error('Falta la salida estructurada de IA.');\nconst categories = ['aplicaciones','infraestructura','accesos','otros'];\nconst priorities = { baja:1, normal:2, alta:3, urgente:4 };\nfor (const key of ['resumen','descripcion']) if (typeof result[key] !== 'string' || !result[key].trim()) throw new Error('Campo IA inválido: '+key);\nif (!categories.includes(result.categoria) || !Object.hasOwn(priorities,result.prioridad)) throw new Error('Categoría o prioridad fuera del catálogo.');\nif (!Array.isArray(result.datos_faltantes) || !result.datos_faltantes.every(v=>typeof v==='string') || typeof result.requiere_revision !== 'boolean') throw new Error('Salida IA incompleta.');\nfor (const key of ['project_id']) if (!Number.isSafeInteger(result[key]) || result[key] < 1) throw new Error('ID de proyecto/tipo inválido: '+key);\nfor (const key of ['assigned_to_id','membership_id','role_id']) if (!Number.isSafeInteger(result[key]) || result[key] < 0) throw new Error('ID de asignación inválido: '+key);\nif (typeof result.motivo_asignacion !== 'string' || !result.motivo_asignacion.trim()) throw new Error('Falta motivo de asignación');\nif (result.assigned_to_id > 0 && (!result.membership_id || !result.role_id)) throw new Error('Falta membresía o rol para validar la asignación');\nif (!['Errores','Soporte'].includes(result.tipo_ticket)) throw new Error('Tipo de ticket fuera del catálogo permitido.');\nconst email = $('Normalizar correo').item.json;\n// Correo real del remitente; nunca se toma de la respuesta de IA.\nconst sender = String(email.remitente || '').trim();\nconst addressMatch = sender.match(/<([^<>]+)>$/);\nconst requesterEmail = (addressMatch ? addressMatch[1] : sender).trim();\nconst validRequester = requesterEmail.length <= 254 && /^[^\\s<>@,;]+@[^\\s<>@,;]+\\.[^\\s<>@,;]+$/.test(requesterEmail);\n\n// Escape content so email text cannot break the Markdown tables.\nconst cell = value => String(value ?? 'No disponible').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\\|/g,'&#124;').replace(/[\\r\\n]+/g,' ').replace(/([\\\\x60*_\\[\\]])/g,'\\$1');\nconst table = rows => ['| Campo | Detalle |','| --- | --- |', ...rows.map(([key,value])=>'| '+key+' | '+cell(value)+' |')].join('\\n');\nconst lines = [\n '## Datos del correo', '', table([\n ['Remitente',email.remitente],['Asunto original',email.asunto],['Fecha',email.fecha],['Message-ID',email.message_id]\n ]), '', '## Análisis de la solicitud', '', result.descripcion.slice(0,6000), '',\n table([['Categoría final (Python)',result.categoria],['Prioridad sugerida',result.prioridad],['Prioridad aplicada',result.requiere_revision?'normal':result.prioridad],['Requiere revisión',result.requiere_revision?'Sí':'No'],['Datos faltantes',result.datos_faltantes.slice(0,20).map(v=>v.slice(0,300)).join('; ')||'Ninguno identificado']]),\n '', '## Texto del correo'+(email.texto_recortado?' (recortado a 16000 caracteres)':''), '',\n String(email.cuerpo||'').split(/\\r?\\n/).map(line=>'> '+cell(line)).join('\\n')\n];\nreturn { json: { routing: { tracker_name:result.tipo_ticket, category:result.categoria, user_id:result.assigned_to_id, membership_id:result.membership_id, role_id:result.role_id, reason:result.motivo_asignacion.slice(0,1500) }, issue: { custom_fields: validRequester ? [{ id: 1, value: requesterEmail }] : [], project_id:result.project_id,  subject: ((email.demo ? '[DEMO] ' : '') + (result.requiere_revision ? '[REVISAR] ' : '') + result.resumen.trim()).slice(0,255), description:lines.join('\\n'), priority_id: result.requiere_revision ? 2 : priorities[result.prioridad] } } };\n"
+        "jsCode": "// Primera etapa: conservar sus validaciones y salida.\nconst etapaAnterior = (($json) => {\n// The normalized API result is authoritative, never the agent's category.\nconst ml = $('Consultar API - Modelo 300').item.json;\nconst classes = ['accesos', 'aplicaciones', 'infraestructura', 'otros'];\nif (!ml || ml.estado !== 'clasificado' || !classes.includes(ml.categoria)\n    || ml.muestras_entrenamiento !== 300\n    || ml.modelo_version !== 'modelo_clasificador_300'\n    || !Number.isFinite(ml.confianza) || ml.confianza < 0 || ml.confianza > 1\n    || typeof ml.requiere_revision !== 'boolean') {\n  throw new Error('Python no devolvió una categoría válida. No se crea ticket; revisar la ejecución.');\n}\nlet output = $json.output;\nif (typeof output === 'string') output = JSON.parse(output);\nif (!output || typeof output !== 'object') throw new Error('Falta el análisis del agente.');\nconst analysis = { ...output };\nconst proposedCategory = analysis.categoria;\nconst agreement = proposedCategory === ml.categoria;\nanalysis.categoria = ml.categoria;\nanalysis.requiere_revision = analysis.requiere_revision === true\n  || ml.requiere_revision === true || !agreement;\nif (!agreement) {\n  // Discard routing chosen for a category that Python did not select.\n  analysis.assigned_to_id = 0;\n  analysis.membership_id = 0;\n  analysis.role_id = 0;\n  analysis.motivo_asignacion = 'Resolver responsable de la categoría final de Python.';\n}\nconst labels = { accesos: 'Accesos', aplicaciones: 'Aplicaciones', infraestructura: 'Infraestructura', otros: 'Otros' };\nanalysis.descripcion = String(analysis.descripcion || '').slice(0, 4500)\n  + '\\n\\nCategoría final determinada por Python: ' + labels[ml.categoria]\n  + '\\nConfianza Python: ' + (ml.confianza * 100).toFixed(2) + ' %'\n  + '\\nCategoría devuelta por el agente: ' + (labels[proposedCategory] || 'No válida');\nreturn { json: { ...$json, output: analysis, comparacion_tecnicas: {\n  categoria_ml: ml.categoria, categoria_llm: proposedCategory,\n  categoria_final: ml.categoria, autoridad_categoria: 'python',\n  coinciden: agreement, modelo_version: ml.modelo_version,\n  datos_entrenamiento: ml.datos_entrenamiento, estado_ml: ml.estado,\n  evaluacion_accuracy: false,\n  nota: 'Python determina la categoría final. El agente recibe esa categoría; la coincidencia no es una evaluación independiente.',\n} } };\n\n})($json);\n// Segunda etapa: recibe exactamente la salida anterior.\nreturn (($json) => {\nlet result = $json.output;\nif (typeof result === 'string') { try { result = JSON.parse(result); } catch { throw new Error('La IA no devolvió JSON válido. No se creó un ticket.'); } }\nif (!result || typeof result !== 'object') throw new Error('Falta la salida estructurada de IA.');\nconst categories = ['aplicaciones','infraestructura','accesos','otros'];\nconst priorities = { baja:1, normal:2, alta:3, urgente:4 };\nfor (const key of ['resumen','descripcion']) if (typeof result[key] !== 'string' || !result[key].trim()) throw new Error('Campo IA inválido: '+key);\nif (!categories.includes(result.categoria) || !Object.hasOwn(priorities,result.prioridad)) throw new Error('Categoría o prioridad fuera del catálogo.');\nif (!Array.isArray(result.datos_faltantes) || !result.datos_faltantes.every(v=>typeof v==='string') || typeof result.requiere_revision !== 'boolean') throw new Error('Salida IA incompleta.');\nfor (const key of ['project_id']) if (!Number.isSafeInteger(result[key]) || result[key] < 1) throw new Error('ID de proyecto/tipo inválido: '+key);\nfor (const key of ['assigned_to_id','membership_id','role_id']) if (!Number.isSafeInteger(result[key]) || result[key] < 0) throw new Error('ID de asignación inválido: '+key);\nif (typeof result.motivo_asignacion !== 'string' || !result.motivo_asignacion.trim()) throw new Error('Falta motivo de asignación');\nif (result.assigned_to_id > 0 && (!result.membership_id || !result.role_id)) throw new Error('Falta membresía o rol para validar la asignación');\nif (!['Errores','Soporte'].includes(result.tipo_ticket)) throw new Error('Tipo de ticket fuera del catálogo permitido.');\nconst email = $('Normalizar correo').item.json;\n// Correo real del remitente; nunca se toma de la respuesta de IA.\nconst sender = String(email.remitente || '').trim();\nconst addressMatch = sender.match(/<([^<>]+)>$/);\nconst requesterEmail = (addressMatch ? addressMatch[1] : sender).trim();\nconst validRequester = requesterEmail.length <= 254 && /^[^\\s<>@,;]+@[^\\s<>@,;]+\\.[^\\s<>@,;]+$/.test(requesterEmail);\n\n// Escape content so email text cannot break the Markdown tables.\nconst cell = value => String(value ?? 'No disponible').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\\|/g,'&#124;').replace(/[\\r\\n]+/g,' ').replace(/([\\\\x60*_\\[\\]])/g,'\\$1');\nconst table = rows => ['| Campo | Detalle |','| --- | --- |', ...rows.map(([key,value])=>'| '+key+' | '+cell(value)+' |')].join('\\n');\nconst lines = [\n '## Datos del correo', '', table([\n ['Remitente',email.remitente],['Asunto original',email.asunto],['Fecha',email.fecha],['Message-ID',email.message_id]\n ]), '', '## Análisis de la solicitud', '', result.descripcion.slice(0,6000), '',\n table([['Categoría final (Python)',result.categoria],['Prioridad sugerida',result.prioridad],['Prioridad aplicada',result.requiere_revision?'normal':result.prioridad],['Requiere revisión',result.requiere_revision?'Sí':'No'],['Datos faltantes',result.datos_faltantes.slice(0,20).map(v=>v.slice(0,300)).join('; ')||'Ninguno identificado']]),\n '', '## Texto del correo'+(email.texto_recortado?' (recortado a 16000 caracteres)':''), '',\n String(email.cuerpo||'').split(/\\r?\\n/).map(line=>'> '+cell(line)).join('\\n')\n];\nreturn { json: { routing: { tracker_name:result.tipo_ticket, category:result.categoria, user_id:result.assigned_to_id, membership_id:result.membership_id, role_id:result.role_id, reason:result.motivo_asignacion.slice(0,1500) }, issue: { custom_fields: validRequester ? [{ id: 1, value: requesterEmail }] : [], project_id:result.project_id,  subject: ((email.demo ? '[DEMO] ' : '') + (result.requiere_revision ? '[REVISAR] ' : '') + result.resumen.trim()).slice(0,255), description:lines.join('\\n'), priority_id: result.requiere_revision ? 2 : priorities[result.prioridad] } } };\n\n})(etapaAnterior.json);\n"
       },
       "id": "4da1e61b-7d93-4d68-9db0-895a1ee6345b",
       "name": "Preparar ticket - Intaco",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1808,
-        288
+        2340,
+        360
       ],
       "notesInFlow": false,
       "onError": "continueErrorOutput",
@@ -149,8 +149,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        4688,
-        144
+        6240,
+        360
       ],
       "notesInFlow": false,
       "retryOnFail": false,
@@ -160,15 +160,15 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "if (!$json.issue?.id) throw new Error('Redmine no devolvió el ID del ticket. Revisar antes de repetir.'); return {json:{ticket_id:$json.issue.id,asunto:$json.issue.subject,url:'http://185.208.207.203:3000/issues/'+$json.issue.id,estado:'creado'}};"
+        "jsCode": "// Primera etapa: conservar sus validaciones y salida.\nconst etapaAnterior = (($json) => {\nif (!$json.issue?.id) throw new Error('Redmine no devolvió el ID del ticket. Revisar antes de repetir.'); return {json:{ticket_id:$json.issue.id,asunto:$json.issue.subject,url:'http://185.208.207.203:3000/issues/'+$json.issue.id,estado:'creado'}};\n})($json);\n// Segunda etapa: recibe exactamente la salida anterior.\nreturn (($json) => {\nlet email={};try {email=$('Normalizar correo').item.json;}catch {try{email=$('Leer buzón IMAP').item.json;}catch{}}\nlet raw={};try{raw=$('Leer buzón IMAP').item.json;}catch{}\nconst sender=String(email.remitente || raw.from?.value?.[0]?.address || raw.from?.text || raw.from || '').trim();\nconst match=sender.match(/<([^<>]+)>$/);const to=(match?match[1]:sender).trim().toLowerCase();\nconst headers=raw.headers||raw.metadata||{};\nconst header=name=>String(Object.entries(headers).find(([key])=>key.toLowerCase()===name)?.[1]||'').toLowerCase();\nconst valid=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9-]+(?:\\.[a-z0-9-]+)+$/i.test(to) && !/[\\r\\n,;]/.test(to);\nconst automatic=(header('auto-submitted') && header('auto-submitted')!=='no') || /bulk|list|junk/.test(header('precedence')) || header('list-id') || /^(no[._-]?reply|mailer-daemon|postmaster)@/.test(to);\nconst reason=!valid?'Remitente no válido':email.demo?'Correo de prueba':to==='n8n.mquito@gmail.com'?'Buzón propio':/@(?:example\\.(?:com|org|net|invalid)|[^@]+\\.invalid)$/.test(to)?'Dirección de ejemplo':automatic?'Mensaje automático':'';\nconst asunto=String(email.asunto||raw.subject||'Solicitud de soporte').replace(/[\\r\\n]/g,' ').slice(0,180);\nconst kind='ticket';\nlet subject,text;\nif(kind==='ticket') {subject='[Mquito] Ticket #'+$json.ticket_id+' creado';text='Hola,\\n\\nRegistramos tu solicitud: '+asunto+'\\nTicket: #'+$json.ticket_id+'\\nPodés consultar su estado en: '+$json.url+'\\n\\nMesa de soporte TI - Mquito';}\nelse if(kind==='omitido') {subject='[Mquito] Correo sin ticket de soporte';text='Hola,\\n\\nTu correo «'+asunto+'» fue clasificado como contenido ajeno al soporte TI y no se creó un ticket. Si se trata de un problema técnico, enviá una nueva solicitud con el sistema afectado y una descripción del problema.\\n\\nMesa de soporte TI - Mquito';}\nelse {subject='[Mquito] No se pudo completar el procesamiento';text='Hola,\\n\\nNo pudimos completar el procesamiento automático de tu correo «'+asunto+'». El caso quedó registrado en la ejecución para revisión. Antes de reenviar, consultá con soporte si ya existe un ticket para evitar duplicados.\\n\\nMesa de soporte TI - Mquito';}\nreturn {json:{...$json,notificacion:{enviar:!reason,omision:reason,para:valid?to:'',asunto:subject,texto:text}}};\n})(etapaAnterior.json);\n"
       },
       "id": "8df98ddb-b529-4fee-94bd-9220e067a625",
       "name": "Resultado del ticket",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4928,
-        288
+        6500,
+        360
       ],
       "onError": "continueErrorOutput"
     },
@@ -182,22 +182,22 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1240,
-        288
+        1300,
+        360
       ]
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "let email={};try{email=$('Normalizar correo').item.json;}catch{}\nreturn {json:{estado:'pendiente_revision',asunto:email.asunto||'Solicitud de soporte',message_id:email.message_id,motivo:'No se completó el procesamiento. Revisar la ejecución y comprobar si Redmine creó el ticket antes de reintentar.'}};"
+        "jsCode": "// Primera etapa: conservar sus validaciones y salida.\nconst etapaAnterior = (($json) => {\nlet email={};try{email=$('Normalizar correo').item.json;}catch{}\nreturn {json:{estado:'pendiente_revision',asunto:email.asunto||'Solicitud de soporte',message_id:email.message_id,motivo:'No se completó el procesamiento. Revisar la ejecución y comprobar si Redmine creó el ticket antes de reintentar.'}};\n})($json);\n// Segunda etapa: recibe exactamente la salida anterior.\nreturn (($json) => {\nlet email={};try {email=$('Normalizar correo').item.json;}catch {try{email=$('Leer buzón IMAP').item.json;}catch{}}\nlet raw={};try{raw=$('Leer buzón IMAP').item.json;}catch{}\nconst sender=String(email.remitente || raw.from?.value?.[0]?.address || raw.from?.text || raw.from || '').trim();\nconst match=sender.match(/<([^<>]+)>$/);const to=(match?match[1]:sender).trim().toLowerCase();\nconst headers=raw.headers||raw.metadata||{};\nconst header=name=>String(Object.entries(headers).find(([key])=>key.toLowerCase()===name)?.[1]||'').toLowerCase();\nconst valid=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9-]+(?:\\.[a-z0-9-]+)+$/i.test(to) && !/[\\r\\n,;]/.test(to);\nconst automatic=(header('auto-submitted') && header('auto-submitted')!=='no') || /bulk|list|junk/.test(header('precedence')) || header('list-id') || /^(no[._-]?reply|mailer-daemon|postmaster)@/.test(to);\nconst reason=!valid?'Remitente no válido':email.demo?'Correo de prueba':to==='n8n.mquito@gmail.com'?'Buzón propio':/@(?:example\\.(?:com|org|net|invalid)|[^@]+\\.invalid)$/.test(to)?'Dirección de ejemplo':automatic?'Mensaje automático':'';\nconst asunto=String(email.asunto||raw.subject||'Solicitud de soporte').replace(/[\\r\\n]/g,' ').slice(0,180);\nconst kind='error';\nlet subject,text;\nif(kind==='ticket') {subject='[Mquito] Ticket #'+$json.ticket_id+' creado';text='Hola,\\n\\nRegistramos tu solicitud: '+asunto+'\\nTicket: #'+$json.ticket_id+'\\nPodés consultar su estado en: '+$json.url+'\\n\\nMesa de soporte TI - Mquito';}\nelse if(kind==='omitido') {subject='[Mquito] Correo sin ticket de soporte';text='Hola,\\n\\nTu correo «'+asunto+'» fue clasificado como contenido ajeno al soporte TI y no se creó un ticket. Si se trata de un problema técnico, enviá una nueva solicitud con el sistema afectado y una descripción del problema.\\n\\nMesa de soporte TI - Mquito';}\nelse {subject='[Mquito] No se pudo completar el procesamiento';text='Hola,\\n\\nNo pudimos completar el procesamiento automático de tu correo «'+asunto+'». El caso quedó registrado en la ejecución para revisión. Antes de reenviar, consultá con soporte si ya existe un ticket para evitar duplicados.\\n\\nMesa de soporte TI - Mquito';}\nreturn {json:{...$json,notificacion:{enviar:!reason,omision:reason,para:valid?to:'',asunto:subject,texto:text}}};\n})(etapaAnterior.json);\n"
       },
       "id": "4bec701a-79f8-4812-9da4-d9ffcb2d5e4d",
       "name": "Sin análisis IA - Revisión",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2880,
-        656
+        3380,
+        1480
       ],
       "notesInFlow": false,
       "notes": "Ruta de error del procesamiento: registra revisión y prepara aviso al remitente; no confirma ni niega un alta ante un timeout."
@@ -212,8 +212,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3456,
-        288
+        4940,
+        360
       ],
       "onError": "continueErrorOutput"
     },
@@ -226,7 +226,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3968,
+        5460,
         80
       ],
       "onError": "continueErrorOutput"
@@ -240,7 +240,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4448,
+        5980,
         80
       ],
       "onError": "continueErrorOutput"
@@ -274,8 +274,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3728,
-        288
+        5200,
+        360
       ]
     },
     {
@@ -324,8 +324,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        4208,
-        -144
+        5720,
+        80
       ],
       "notesInFlow": false,
       "retryOnFail": false,
@@ -370,8 +370,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.5,
       "position": [
-        1008,
-        832
+        1430,
+        960
       ]
     },
     {
@@ -412,8 +412,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.5,
       "position": [
-        1120,
-        944
+        1690,
+        960
       ]
     },
     {
@@ -441,8 +441,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.5,
       "position": [
-        1200,
-        816
+        1950,
+        960
       ]
     },
     {
@@ -470,8 +470,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.5,
       "position": [
-        1392,
-        800
+        1430,
+        1220
       ]
     },
     {
@@ -499,8 +499,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.5,
       "position": [
-        1520,
-        848
+        1690,
+        1220
       ]
     },
     {
@@ -529,8 +529,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2032,
-        272
+        2600,
+        360
       ],
       "onError": "continueErrorOutput"
     },
@@ -544,8 +544,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2256,
-        288
+        2860,
+        360
       ],
       "onError": "continueErrorOutput"
     },
@@ -578,8 +578,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2464,
-        288
+        3900,
+        360
       ]
     },
     {
@@ -608,8 +608,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2656,
-        112
+        4160,
+        80
       ],
       "onError": "continueErrorOutput"
     },
@@ -639,7 +639,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2944,
+        4420,
         80
       ],
       "onError": "continueErrorOutput"
@@ -654,27 +654,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3248,
+        4680,
         80
       ],
       "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "// The normalized API result is authoritative, never the agent's category.\nconst ml = $('Consultar API - Modelo 300').item.json;\nconst classes = ['accesos', 'aplicaciones', 'infraestructura', 'otros'];\nif (!ml || ml.estado !== 'clasificado' || !classes.includes(ml.categoria)\n    || ml.muestras_entrenamiento !== 300\n    || ml.modelo_version !== 'modelo_clasificador_300'\n    || !Number.isFinite(ml.confianza) || ml.confianza < 0 || ml.confianza > 1\n    || typeof ml.requiere_revision !== 'boolean') {\n  throw new Error('Python no devolvió una categoría válida. No se crea ticket; revisar la ejecución.');\n}\nlet output = $json.output;\nif (typeof output === 'string') output = JSON.parse(output);\nif (!output || typeof output !== 'object') throw new Error('Falta el análisis del agente.');\nconst analysis = { ...output };\nconst proposedCategory = analysis.categoria;\nconst agreement = proposedCategory === ml.categoria;\nanalysis.categoria = ml.categoria;\nanalysis.requiere_revision = analysis.requiere_revision === true\n  || ml.requiere_revision === true || !agreement;\nif (!agreement) {\n  // Discard routing chosen for a category that Python did not select.\n  analysis.assigned_to_id = 0;\n  analysis.membership_id = 0;\n  analysis.role_id = 0;\n  analysis.motivo_asignacion = 'Resolver responsable de la categoría final de Python.';\n}\nconst labels = { accesos: 'Accesos', aplicaciones: 'Aplicaciones', infraestructura: 'Infraestructura', otros: 'Otros' };\nanalysis.descripcion = String(analysis.descripcion || '').slice(0, 4500)\n  + '\\n\\nCategoría final determinada por Python: ' + labels[ml.categoria]\n  + '\\nConfianza Python: ' + (ml.confianza * 100).toFixed(2) + ' %'\n  + '\\nCategoría devuelta por el agente: ' + (labels[proposedCategory] || 'No válida');\nreturn { json: { ...$json, output: analysis, comparacion_tecnicas: {\n  categoria_ml: ml.categoria, categoria_llm: proposedCategory,\n  categoria_final: ml.categoria, autoridad_categoria: 'python',\n  coinciden: agreement, modelo_version: ml.modelo_version,\n  datos_entrenamiento: ml.datos_entrenamiento, estado_ml: ml.estado,\n  evaluacion_accuracy: false,\n  nota: 'Python determina la categoría final. El agente recibe esa categoría; la coincidencia no es una evaluación independiente.',\n} } };\n"
-      },
-      "id": "d8b0b6b3-a619-4be6-ba7b-322a78837ec6",
-      "name": "Aplicar categoría Python",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1632,
-        288
-      ],
-      "notesInFlow": false,
-      "onError": "continueErrorOutput",
-      "notes": "Python determina la categoría final. Baja confianza o desacuerdo requieren revisión. La IA no puede sobrescribirla."
     },
     {
       "parameters": {
@@ -701,8 +684,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.5,
       "position": [
-        1312,
-        928
+        1950,
+        1220
       ]
     },
     {
@@ -715,8 +698,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1392,
-        80
+        1820,
+        360
       ],
       "onError": "continueErrorOutput"
     },
@@ -750,8 +733,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1568,
-        80
+        2080,
+        360
       ]
     },
     {
@@ -764,22 +747,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1872,
-        -80
-      ]
-    },
-    {
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "let email={};try {email=$('Normalizar correo').item.json;}catch {try{email=$('Leer buzón IMAP').item.json;}catch{}}\nlet raw={};try{raw=$('Leer buzón IMAP').item.json;}catch{}\nconst sender=String(email.remitente || raw.from?.value?.[0]?.address || raw.from?.text || raw.from || '').trim();\nconst match=sender.match(/<([^<>]+)>$/);const to=(match?match[1]:sender).trim().toLowerCase();\nconst headers=raw.headers||raw.metadata||{};\nconst header=name=>String(Object.entries(headers).find(([key])=>key.toLowerCase()===name)?.[1]||'').toLowerCase();\nconst valid=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9-]+(?:\\.[a-z0-9-]+)+$/i.test(to) && !/[\\r\\n,;]/.test(to);\nconst automatic=(header('auto-submitted') && header('auto-submitted')!=='no') || /bulk|list|junk/.test(header('precedence')) || header('list-id') || /^(no[._-]?reply|mailer-daemon|postmaster)@/.test(to);\nconst reason=!valid?'Remitente no válido':email.demo?'Correo de prueba':to==='n8n.mquito@gmail.com'?'Buzón propio':/@(?:example\\.(?:com|org|net|invalid)|[^@]+\\.invalid)$/.test(to)?'Dirección de ejemplo':automatic?'Mensaje automático':'';\nconst asunto=String(email.asunto||raw.subject||'Solicitud de soporte').replace(/[\\r\\n]/g,' ').slice(0,180);\nconst kind='ticket';\nlet subject,text;\nif(kind==='ticket') {subject='[Mquito] Ticket #'+$json.ticket_id+' creado';text='Hola,\\n\\nRegistramos tu solicitud: '+asunto+'\\nTicket: #'+$json.ticket_id+'\\nPodés consultar su estado en: '+$json.url+'\\n\\nMesa de soporte TI - Mquito';}\nelse if(kind==='omitido') {subject='[Mquito] Correo sin ticket de soporte';text='Hola,\\n\\nTu correo «'+asunto+'» fue clasificado como contenido ajeno al soporte TI y no se creó un ticket. Si se trata de un problema técnico, enviá una nueva solicitud con el sistema afectado y una descripción del problema.\\n\\nMesa de soporte TI - Mquito';}\nelse {subject='[Mquito] No se pudo completar el procesamiento';text='Hola,\\n\\nNo pudimos completar el procesamiento automático de tu correo «'+asunto+'». El caso quedó registrado en la ejecución para revisión. Antes de reenviar, consultá con soporte si ya existe un ticket para evitar duplicados.\\n\\nMesa de soporte TI - Mquito';}\nreturn {json:{...$json,notificacion:{enviar:!reason,omision:reason,para:valid?to:'',asunto:subject,texto:text}}};"
-      },
-      "id": "b4807695-268c-4cea-84bc-6df05f263649",
-      "name": "Preparar aviso - Ticket creado",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        5104,
-        176
+        2340,
+        -200
       ]
     },
     {
@@ -812,8 +781,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        5360,
-        288
+        6760,
+        360
       ]
     },
     {
@@ -832,8 +801,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        5600,
-        288
+        7020,
+        360
       ],
       "webhookId": "d7023330-4868-4ef2-baec-7bc33d8072ca",
       "onError": "continueRegularOutput",
@@ -855,26 +824,12 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        2080,
-        -32
+        2600,
+        -200
       ],
       "webhookId": "c2ec5605-d009-44d8-af4e-0fc25b118e3d",
       "onError": "continueRegularOutput",
       "notes": "Envía al remitente. Si SMTP falla, revisar el error en esta ejecución; no reejecutar la creación del ticket."
-    },
-    {
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "let email={};try {email=$('Normalizar correo').item.json;}catch {try{email=$('Leer buzón IMAP').item.json;}catch{}}\nlet raw={};try{raw=$('Leer buzón IMAP').item.json;}catch{}\nconst sender=String(email.remitente || raw.from?.value?.[0]?.address || raw.from?.text || raw.from || '').trim();\nconst match=sender.match(/<([^<>]+)>$/);const to=(match?match[1]:sender).trim().toLowerCase();\nconst headers=raw.headers||raw.metadata||{};\nconst header=name=>String(Object.entries(headers).find(([key])=>key.toLowerCase()===name)?.[1]||'').toLowerCase();\nconst valid=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9-]+(?:\\.[a-z0-9-]+)+$/i.test(to) && !/[\\r\\n,;]/.test(to);\nconst automatic=(header('auto-submitted') && header('auto-submitted')!=='no') || /bulk|list|junk/.test(header('precedence')) || header('list-id') || /^(no[._-]?reply|mailer-daemon|postmaster)@/.test(to);\nconst reason=!valid?'Remitente no válido':email.demo?'Correo de prueba':to==='n8n.mquito@gmail.com'?'Buzón propio':/@(?:example\\.(?:com|org|net|invalid)|[^@]+\\.invalid)$/.test(to)?'Dirección de ejemplo':automatic?'Mensaje automático':'';\nconst asunto=String(email.asunto||raw.subject||'Solicitud de soporte').replace(/[\\r\\n]/g,' ').slice(0,180);\nconst kind='error';\nlet subject,text;\nif(kind==='ticket') {subject='[Mquito] Ticket #'+$json.ticket_id+' creado';text='Hola,\\n\\nRegistramos tu solicitud: '+asunto+'\\nTicket: #'+$json.ticket_id+'\\nPodés consultar su estado en: '+$json.url+'\\n\\nMesa de soporte TI - Mquito';}\nelse if(kind==='omitido') {subject='[Mquito] Correo sin ticket de soporte';text='Hola,\\n\\nTu correo «'+asunto+'» fue clasificado como contenido ajeno al soporte TI y no se creó un ticket. Si se trata de un problema técnico, enviá una nueva solicitud con el sistema afectado y una descripción del problema.\\n\\nMesa de soporte TI - Mquito';}\nelse {subject='[Mquito] No se pudo completar el procesamiento';text='Hola,\\n\\nNo pudimos completar el procesamiento automático de tu correo «'+asunto+'». El caso quedó registrado en la ejecución para revisión. Antes de reenviar, consultá con soporte si ya existe un ticket para evitar duplicados.\\n\\nMesa de soporte TI - Mquito';}\nreturn {json:{...$json,notificacion:{enviar:!reason,omision:reason,para:valid?to:'',asunto:subject,texto:text}}};"
-      },
-      "id": "76ac16d2-897b-4ac0-89e3-3fe65de911a1",
-      "name": "Preparar aviso - Error de procesamiento",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1856,
-        912
-      ]
     },
     {
       "parameters": {
@@ -906,8 +861,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2112,
-        912
+        3640,
+        1480
       ]
     },
     {
@@ -926,8 +881,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        2352,
-        912
+        3900,
+        1480
       ],
       "webhookId": "28af16c4-bde4-4209-b905-9877a90f4034",
       "onError": "continueRegularOutput",
@@ -956,8 +911,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        820,
-        160
+        780,
+        80
       ],
       "onError": "continueErrorOutput",
       "notes": "La API determina la categoría final. Recibe texto limpiado localmente en n8n."
@@ -988,8 +943,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2448,
-        320
+        3120,
+        360
       ],
       "onError": "continueErrorOutput",
       "notes": "Consulta GET para resolver el responsable real de la categoría final de Python."
@@ -1020,8 +975,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        2672,
-        320
+        3380,
+        360
       ],
       "onError": "continueErrorOutput",
       "notes": "Consulta GET para resolver el responsable real de la categoría final de Python."
@@ -1036,8 +991,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2880,
-        320
+        3640,
+        360
       ],
       "onError": "continueErrorOutput",
       "notes": "Prioriza assigned_to de la categoría real. Resuelve membresía y rol por IDs del catálogo, sin confiar en los propuestos por IA."
@@ -1052,8 +1007,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        400,
-        288
+        520,
+        360
       ],
       "onError": "continueErrorOutput",
       "notes": "Limpieza local en n8n: firmas y datos sensibles del asunto/cuerpo. No llama a otra API. No anonimiza adjuntos."
@@ -1069,8 +1024,8 @@
         "options": {}
       },
       "position": [
-        1030,
-        288
+        1040,
+        360
       ],
       "notes": "Conserva asunto/cuerpo limpios y adjuntos junto con la respuesta de /predict. No ejecuta clasificación."
     }
@@ -1132,24 +1087,6 @@
         [
           {
             "node": "Validar decisión del correo",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Sin análisis IA - Revisión",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Preparar ticket - Intaco": {
-      "main": [
-        [
-          {
-            "node": "Verificar proyecto propuesto",
             "type": "main",
             "index": 0
           }
@@ -1452,24 +1389,6 @@
         ]
       ]
     },
-    "Aplicar categoría Python": {
-      "main": [
-        [
-          {
-            "node": "Preparar ticket - Intaco",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Sin análisis IA - Revisión",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Consultar categorías y responsables": {
       "ai_tool": [
         [
@@ -1503,7 +1422,7 @@
       "main": [
         [
           {
-            "node": "Aplicar categoría Python",
+            "node": "Preparar ticket - Intaco",
             "type": "main",
             "index": 0
           }
@@ -1511,35 +1430,6 @@
         [
           {
             "node": "Correo omitido",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Resultado del ticket": {
-      "main": [
-        [
-          {
-            "node": "Preparar aviso - Ticket creado",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Sin análisis IA - Revisión",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Preparar aviso - Ticket creado": {
-      "main": [
-        [
-          {
-            "node": "¿Notificar? - Ticket creado",
             "type": "main",
             "index": 0
           }
@@ -1563,28 +1453,6 @@
         [
           {
             "node": "Notificar - Correo omitido",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Sin análisis IA - Revisión": {
-      "main": [
-        [
-          {
-            "node": "Preparar aviso - Error de procesamiento",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Preparar aviso - Error de procesamiento": {
-      "main": [
-        [
-          {
-            "node": "¿Notificar? - Error de procesamiento",
             "type": "main",
             "index": 0
           }
@@ -1703,6 +1571,46 @@
         [
           {
             "node": "Seleccionar adjuntos para IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar ticket - Intaco": {
+      "main": [
+        [
+          {
+            "node": "Verificar proyecto propuesto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sin análisis IA - Revisión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resultado del ticket": {
+      "main": [
+        [
+          {
+            "node": "¿Notificar? - Ticket creado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sin análisis IA - Revisión": {
+      "main": [
+        [
+          {
+            "node": "¿Notificar? - Error de procesamiento",
             "type": "main",
             "index": 0
           }
