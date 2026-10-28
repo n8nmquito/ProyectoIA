@@ -103,6 +103,23 @@ Búsqueda con `GridSearchCV` de `C: [0.1, 1.0, 10.0]`, `class_weight: [null, bal
 
 ### Flujo de automatización
 
+#### Workflows de n8n
+
+La instalación tiene dos flujos que cubren momentos distintos de la atención:
+
+| Workflow | Cómo se inicia | Qué hace | Resultado |
+|---|---|---|---|
+| **Mquito \| Correo → IA → Ticket Redmine** | Al recibir un correo en el buzón IMAP | Normaliza y limpia el texto, consulta el clasificador Python, analiza la solicitud con OpenAI, valida los datos y el responsable, sube los adjuntos y crea el ticket si corresponde | Ticket en Redmine y confirmación por correo cuando los filtros lo permiten; los correos ajenos a soporte se omiten y los fallos se derivan a revisión |
+| **Mquito \| Avisos de cambios de estado Redmine** | Cada minuto | Consulta los tickets del proyecto configurado, compara su estado con el guardado en PostgreSQL y prepara avisos cuando detecta un cambio | Correo al solicitante con el estado anterior, el nuevo estado y el enlace del ticket; guarda el resultado del envío |
+
+El primer flujo registra la solicitud; el segundo mantiene informado al solicitante durante su atención. Se ejecutan de forma independiente y se relacionan mediante los tickets de Redmine. El seguimiento usa el campo **Correo del solicitante**, guarda la primera observación sin enviar aviso y notifica los cambios de estado observados en consultas posteriores. No ejecuta el clasificador ni el agente de IA, y no cambia el estado del ticket.
+
+Por ejemplo, el primer flujo puede registrar un correo sobre un problema de acceso y confirmar el número del ticket. Si después un técnico cambia su estado en Redmine, el segundo detecta ese cambio y avisa al solicitante, siempre que tenga una dirección válida y el ticket ya cuente con una observación anterior.
+
+La captura muestra ambos como **Published**. Las plantillas del repositorio se entregan desactivadas y sin credenciales, por lo que deben configurarse antes de publicarlas en otra instalación. Ver el [proceso principal](PROCESO_AUTOMATIZACION.md) y el [seguimiento de estados](workflows/status-notifications/README.md).
+
+#### Etapas del flujo principal
+
 El recorrido del correo hasta el ticket se organiza en diez etapas:
 
 1. **Leer buzón IMAP:** recibir el asunto, cuerpo y adjuntos del correo.

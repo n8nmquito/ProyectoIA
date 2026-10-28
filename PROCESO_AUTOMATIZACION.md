@@ -4,6 +4,26 @@ El diseño completo está en [arquitectura](python/docs/arquitectura.md) y los l
 
 La [sección Flujo de automatización](python/docs/arquitectura.md#flujo-de-automatización) reúne la imagen de referencia y la explicación actualizada de sus diez etapas.
 
+## Qué hace cada workflow
+
+### Mquito | Correo → IA → Ticket Redmine
+
+Se inicia con los correos que recibe el buzón IMAP. Limpia el texto, obtiene la categoría del modelo Python de 300 correos y utiliza OpenAI para analizar la solicitud y proponer los datos del ticket. Después valida proyecto, tipo, categoría y responsable, recupera los adjuntos originales y crea el ticket en Redmine si corresponde. Prepara la confirmación al remitente y la envía según los filtros configurados. También contempla la omisión de mensajes ajenos a soporte y la derivación de errores a revisión.
+
+Utiliza las credenciales de **IMAP**, **NexpAPI**, **OpenAI**, **Redmine** y **SMTP**.
+
+### Mquito | Avisos de cambios de estado Redmine
+
+Se ejecuta cada minuto y consulta los tickets del proyecto configurado en Redmine. Compara el estado actual con el último guardado en PostgreSQL; cuando observa una transición, registra el aviso y lo envía al correo del solicitante si la dirección es válida. El mensaje incluye número, asunto, estado anterior, nuevo estado y enlace. Guarda también si SMTP aceptó el envío o si falló.
+
+La primera observación establece la referencia sin enviar correo. Cambiar solamente el asunto o el responsable no dispara el aviso. Este flujo observa los estados; no crea tickets, no cambia sus estados ni utiliza IA. Los cambios que ocurran y se reviertan entre consultas pueden no detectarse.
+
+Utiliza las credenciales de **Redmine**, **PostgreSQL de seguimiento** y **SMTP**. Los detalles están en [notificaciones de cambios de estado](workflows/status-notifications/README.md).
+
+### Relación entre ambos
+
+El primer workflow registra la solicitud y el segundo sigue su evolución. No se llaman directamente: comparten Redmine como punto de conexión. El seguimiento toma el destinatario del campo personalizado **Correo del solicitante** del ticket. En la configuración documentada consulta el proyecto **Tickets de novedades (ID 1)**, incluidos sus tickets cerrados.
+
 ## Recorrido actual
 
 1. n8n recibe el correo por IMAP, normaliza los campos y conserva los originales y adjuntos.
