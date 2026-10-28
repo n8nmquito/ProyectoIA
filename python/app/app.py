@@ -25,14 +25,79 @@ from src.utils import file_hash, load_config  # noqa: E402
 LOGGER = logging.getLogger(__name__)
 MODEL_SIZES = (10, 100, 200, 300)
 EXAMPLES = (
-    ("Mi usuario está bloqueado", "No puedo iniciar sesión con mi cuenta. "
-     "Necesito restablecer el acceso."),
-    ("Error al guardar una orden", "JDE devuelve un error al confirmar la "
-     "orden de compra y no guarda los cambios."),
-    ("Sin conexión de red", "Todos los equipos de la oficina perdieron "
-     "conexión al servidor y a internet."),
-    ("Solicitud de capacitación", "Necesitamos coordinar una capacitación "
-     "para aprender a utilizar el sistema."),
+    (
+        "Cuenta bloqueada al iniciar sesión en el sistema de gestión",
+        "Buenos días, equipo de soporte:\n\n"
+        "Desde el inicio de mi jornada no puedo ingresar al sistema de gestión "
+        "con mi usuario habitual. Después de varios intentos aparece el mensaje "
+        "«La cuenta se encuentra bloqueada. Comuníquese con el administrador». "
+        "Ayer podía acceder con normalidad y no solicité cambios de permisos.\n\n"
+        "Verifiqué la distribución del teclado, desactivé el bloqueo de "
+        "mayúsculas y probé desde otro navegador. También intenté el proceso "
+        "de recuperación, pero informa que la cuenta debe ser desbloqueada "
+        "por un administrador. Mis compañeros pueden iniciar sesión, por lo "
+        "que el inconveniente parece limitado a mi cuenta.\n\n"
+        "Necesito registrar las solicitudes pendientes del área. Por favor, "
+        "revisen el bloqueo y ayúdenme a recuperar el acceso mediante el "
+        "procedimiento de validación de identidad correspondiente. No adjunto "
+        "contraseñas ni códigos de verificación. Muchas gracias.",
+    ),
+    (
+        "JDE muestra un error y no guarda las modificaciones de una orden",
+        "Hola, equipo de aplicaciones:\n\n"
+        "Al editar una orden de compra en JDE, modifico la fecha de entrega "
+        "y agrego una observación. Cuando presiono Guardar, la pantalla muestra "
+        "«Error al actualizar el registro» y vuelve al listado. Al abrir "
+        "nuevamente la orden, ambos campos conservan los valores anteriores.\n\n"
+        "Repetí el procedimiento después de cerrar sesión y desde otro "
+        "navegador, con el mismo resultado. Una compañera autorizada también "
+        "reprodujo el error con otra orden en el ambiente de pruebas. Podemos "
+        "consultar registros y acceder a las demás pantallas; el problema "
+        "aparece específicamente al guardar estas modificaciones.\n\n"
+        "Esto impide actualizar los compromisos con los proveedores. "
+        "Solicitamos revisar la validación y el proceso de actualización "
+        "de la aplicación. Evitaremos crear órdenes duplicadas o modificar "
+        "datos directamente en la base mientras se investiga. Podemos "
+        "compartir los pasos de reproducción por el canal de soporte.",
+    ),
+    (
+        "Varios equipos de la oficina perdieron la conexión de red",
+        "Buen día, mesa de ayuda:\n\n"
+        "Desde hace aproximadamente media hora, varios equipos del mismo "
+        "sector no tienen conexión a la red corporativa ni acceso a internet. "
+        "No podemos abrir las carpetas compartidas ni comunicarnos con el "
+        "servidor de archivos. Las aplicaciones instaladas localmente "
+        "continúan funcionando, pero sus conexiones al servidor fallan.\n\n"
+        "Comprobamos que los cables de red estén conectados y reiniciamos "
+        "uno de los equipos de prueba, sin recuperar la conectividad. "
+        "Desde otra oficina sí es posible acceder a esos mismos recursos. "
+        "El inconveniente afecta a varios usuarios y no cambia al iniciar "
+        "sesión con otra cuenta autorizada.\n\n"
+        "Solicitamos revisar el switch del sector, el enlace de red y la "
+        "asignación de direcciones. El área tiene detenida la consulta de "
+        "documentos compartidos. No modificamos la configuración de los "
+        "equipos de comunicaciones ni conectamos dispositivos externos. "
+        "Quedamos disponibles para realizar las comprobaciones que indiquen.",
+    ),
+    (
+        "Solicitud de capacitación sobre el circuito de compras en JDE",
+        "Hola, equipo de soporte:\n\n"
+        "La próxima semana se incorporarán personas al área de compras y "
+        "queremos coordinar una capacitación sobre el uso habitual de JDE. "
+        "Necesitamos repasar la consulta de órdenes, la interpretación de "
+        "sus estados, el registro de observaciones y los canales para "
+        "solicitar ayuda cuando una operación no pueda completarse.\n\n"
+        "No estamos reportando un error de la aplicación ni una caída del "
+        "servicio. Las cuentas actuales funcionan y no solicitamos altas, "
+        "cambios de permisos o modificaciones técnicas mediante este correo. "
+        "Buscamos orientación y material de referencia para que las nuevas "
+        "personas conozcan el procedimiento antes de comenzar a operar.\n\n"
+        "¿Podrían indicarnos si existe un manual actualizado y proponer "
+        "una fecha para una sesión de aproximadamente una hora? Podemos "
+        "utilizar ejemplos ficticios en el ambiente de capacitación y "
+        "reunir previamente las consultas del equipo. Gracias por ayudarnos "
+        "a organizar la actividad.",
+    ),
 )
 CATEGORIES_EN = {
     "accesos": "Access", "aplicaciones": "Applications",
