@@ -1,10 +1,11 @@
-# Sistema de clasificación de tickets de soporte TI
+# Sistema de Clasificación de Tickets de Soporte TI
 
-![Python 3.10 y 3.11](https://img.shields.io/badge/Python-3.10%20%7C%203.11-blue)
-![Licencia MIT](https://img.shields.io/badge/Licencia-MIT-green)
-![Interfaz Streamlit](https://img.shields.io/badge/Interfaz-Streamlit-red)
+![Python 3.10](https://img.shields.io/badge/Python-3.10-blue)
+[![Licencia MIT del código](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+![Streamlit](https://img.shields.io/badge/Interfaz-Streamlit-red)
+![Estado](https://img.shields.io/badge/Estado-piloto%20implementado-blue)
 
-Este proyecto recibe el título y el cuerpo de un correo y sugiere a qué equipo de soporte corresponde atenderlo. Incluye cuatro modelos entrenados con 10, 100, 200 y 300 correos, una prueba por consola, Streamlit y una API Python integrada con n8n, OpenAI y Redmine. Las categorías son accesos, aplicaciones, infraestructura y otros; la versión de 300 es el modelo final elegido.
+Mquito Ticket clasifica correos de soporte TI en accesos, aplicaciones, infraestructura y otros mediante un modelo Python. Incluye una interfaz Streamlit para probar modelos y un flujo n8n que utiliza la categoría de Python para crear y asignar tickets en Redmine. El agente OpenAI prepara el análisis de la solicitud y las validaciones comprueban los datos de Redmine antes del alta.
 
 ## Tabla de contenidos
 
@@ -25,373 +26,176 @@ Este proyecto recibe el título y el cuerpo de un correo y sugiere a qué equipo
 
 ## Descripción del problema
 
-La mesa de ayuda recibe consultas mezcladas y debe decidir quién las atiende.
-El sistema propone una categoría para apoyar ese primer paso y reducir tareas
-repetitivas. Está pensado para personal de soporte y para la demostración del
-proyecto universitario. En el flujo desplegado, el agente propone la categoría final y el ticket se crea
-automáticamente después de las validaciones. El equipo de soporte debe supervisarlo;
-no existe una aprobación humana obligatoria antes de cada alta.
+- **¿Qué problema resuelve?** La lectura y clasificación manual de correos de soporte y su derivación a responsables, tareas repetitivas que pueden generar asignaciones inconsistentes.
+- **¿Por qué es importante?** Ayuda a organizar las solicitudes y mantener trazabilidad de su categoría y asignación. La reducción de tiempos es un objetivo; todavía no se ha medido.
+- **¿Quiénes lo utilizan?** Operadores de mesa de ayuda, personal de soporte TI y responsables que supervisan los tickets; también estudiantes y evaluadores del proyecto.
 
 ## Dataset
 
-`data/raw/correos.json` es la fuente principal: **300 correos simulados**,
-con título, cuerpo y clasificación. La distribución es 70 accesos, 90 aplicaciones,
-70 infraestructura y 70 otros. Los 100 iniciales fueron aportados por el usuario;
-se añadieron 200 ejemplos ficticios para ampliar el corpus. No se presentan
-como tickets reales ni se enviaron mensajes para producirlos.
+### Descripción, tamaño y variables
 
-| Modelo guardado en models/ | Dataset exacto en data/train/ | Cantidad |
-|---|---|---:|
-| modelo_clasificador_10.pkl | correos_10.json | 10 |
-| modelo_clasificador_100.pkl | correos_100.json | 100 |
-| modelo_clasificador_200.pkl | correos_200.json | 200 |
-| modelo_clasificador_300.pkl | correos_300.json | 300 |
+Se utilizan **300 correos simulados en español**: 70 de accesos, 90 de aplicaciones, 70 de infraestructura y 70 de otros.
 
-Los conjuntos son anidados: los correos de la versión pequeña también aparecen
-en las versiones mayores. Todas usan los mismos ajustes para comparar el efecto
-de la cantidad de ejemplos. Cada versión se ajusta desde cero con el dataset de su tamaño. La versión de 10 es demostrativa.
+| Variable | Contenido | Uso |
+|---|---|---|
+| `titulo` | Asunto del correo | Entrada del modelo |
+| `cuerpo` | Texto de la solicitud | Entrada del modelo |
+| `clasificacion` | Una de las cuatro categorías | Etiqueta para entrenar y evaluar |
 
-Los **25 correos de `data/test/correos_test_25.json`** solo tienen título y cuerpo.
-No forman parte de ningún entrenamiento. Su prueba muestra predicciones y
-confianza; al no tener respuestas esperadas, no calcula accuracy ni F1.
-Esos casos ya fueron analizados durante el desarrollo y sirven como regresión,
-no como una evaluación ciega nueva de las mejoras posteriores.
+Hay muestras anidadas de **10, 100, 200 y 300 correos**, cada una con su modelo. Los **25 correos de prueba** solo contienen título y cuerpo: permiten obtener predicciones, pero no calcular accuracy o F1 porque no tienen etiquetas esperadas.
 
-El [corpus maestro](data/raw/correos.json) y los [datasets de entrenamiento](data/train/)
-se incluyen en Git por indicación de la responsable del proyecto. Los modelos
-`.pkl`, las particiones procesadas y la hoja de revisión siguen excluidos.
-La licencia MIT del código no se extiende automáticamente a los datos.
-Ver [análisis de datos](docs/analisis_datos.md).
+### Fuente, licencia y acceso
+
+- **Fuente:** 100 ejemplos iniciales aportados al proyecto y 200 ejemplos ficticios añadidos para ampliar el corpus; no se presentan como correos reales de producción.
+- **Licencia de los datos:** no se ha declarado una licencia específica. La licencia MIT del código no concede automáticamente derechos sobre el dataset.
+- **Enlaces:** [corpus de 300 correos](data/raw/correos.json), [muestras de entrenamiento](data/train/) y [25 correos de prueba](data/test/correos_test_25.json). Están incluidos en este repositorio y su acceso depende de los permisos del mismo.
+
+Más detalle en el [análisis de datos](docs/analisis_datos.md).
 
 ## Metodología
 
-Se validan los campos, se limpian los textos y se combina título con cuerpo.
-TF-IDF representa palabras individuales y pares de palabras. Se comparan una
-referencia mayoritaria, regresión logística y SVM lineal calibrada.
-La elección usa F1 macro y validación cruzada estratificada de cuatro grupos.
+| Aspecto | Implementación y justificación |
+|---|---|
+| **Modelo** | Clasificación supervisada multiclase con TF-IDF y SVM lineal calibrada. Se eligió por su F1 macro en la comparación con regresión logística y por ofrecer probabilidades estimadas. |
+| **Preprocesamiento** | Validación de campos y etiquetas; limpieza de HTML, normalización Unicode y minúsculas; sustitución de enlaces, correos, IP y números largos; combinación de título y cuerpo y control de duplicados. |
+| **Representación** | TF-IDF de palabras y pares de palabras, con frecuencia sublineal y normalización de acentos. Se ajusta dentro de cada partición de validación. |
+| **Optimización** | `GridSearchCV` con cuatro particiones estratificadas y semilla 42 sobre `C`, `class_weight` y `min_df`; calibración sigmoide interna de dos particiones. Los comandos por tamaño entrenan desde cero con los parámetros guardados en YAML, sin repetir la búsqueda. |
+| **Métricas** | F1 macro como principal, porque pondera por igual las categorías; accuracy, precisión, recall, F1 por clase y matriz de confusión. También se registran log loss y Brier multiclase para las probabilidades. |
 
-Para seleccionar ajustes se usan **280 correos**; se conservan **20 originales**
-como diagnóstico de evaluación. Después se ajusta el modelo final con los 300.
-Las versiones 10/100/200/300 se entrenan con la configuración elegida. La SVM
-usa calibración sigmoide de dos grupos, compatible con el conjunto de 10.
+En n8n, **Python determina la categoría final**. El agente prepara el resumen y propone prioridad, tipo y proyecto; el código consulta el responsable configurado de la categoría y valida membresía y rol. Si Python no devuelve una categoría válida, no se crea el ticket y el caso deriva a revisión.
 
-### Integración desplegada y evidencia actual
-
-El flujo principal es [Mquito | Correo → IA → Ticket Redmine](http://185.208.207.203:5678/workflow/opxBwpGpRDrbQeHn).
-Recibe el correo, consulta `http://clasificador-python:8000/predict` en la red
-Docker, ejecuta el modelo de 300, compara con OpenAI y crea el ticket en Redmine.
-Python determina la categoría final del ticket. El agente recibe esa categoría
-y propone el resto del análisis. El código consulta el responsable configurado
-de la categoría y valida su membresía y rol. Si Python no responde con una
-categoría válida, no se crea el ticket y el flujo deriva a revisión. La baja
-confianza o un desacuerdo del agente marcan revisión sin cambiar la categoría.
-La coincidencia ya no es una comparación independiente: el agente conoce la
-predicción Python.
-
-El agente devuelve el nombre `tipo_ticket` (Errores/Soporte); el código obtiene
-su ID del catálogo habilitado del proyecto. No se acepta un ID supuesto por el
-agente. También se verifican proyecto, categoría, membresía y rol asignable.
-Las copias importables están en `../workflows/` y no incluyen credenciales.
-
-La prueba inicial de 24 correos produjo 20 tickets y cuatro bloqueos por tipo.
-Después de corregirlos se repitieron solo los cuatro casos afectados: 4/4 crearon
-su ticket. No es una nueva medición de accuracy ni una repetición completa de los
-24 con la versión corregida. Evidencia: `results/n8n_produccion/`.
-
-Pruebas actuales: **90 tests Python aprobados**, Ruff sin errores y las tres
-suites JavaScript de normalización, asignación y adjuntos aprobadas. Se verifican también la integridad de los cuatro artefactos, sus probabilidades
-en 25 entradas y la limitación de CV en la versión de 10.
-
-Para reproducir el análisis S5 sin reentrenar:
-
-```cmd
-python -m src.optimization_analysis
-```
-
-Para revisar los mismos 25 correos y medir regresión conocida:
-
-```cmd
-python -m src.evaluate_reviewed --prepare
-python -m src.evaluate_reviewed --reviewer "Nombre de quien revisó"
-```
-
-La hoja `data/evaluation/correos_para_revision.json` ya está creada con etiquetas
-vacías; `--prepare` no la sobrescribe. Una persona debe completar las cuatro
-categorías antes de evaluar. El JSON de `data/test/` conserva solo título/cuerpo.
-Estos casos conocidos no demuestran generalización ni ausencia de sobreajuste.
-Ver [protocolo de evaluación](docs/evaluacion_pruebas.md).
-
-La API requiere clave y no publica su puerto. OpenAI puede recibir texto,
-imágenes/PDF seleccionados y respuestas de herramientas de Redmine. No hay un
-anonimizador general antes del agente ni una auditoría de cumplimiento normativo.
-Ver [privacidad y límites](docs/consideraciones_eticas.md) y
-[operación del servidor](deploy/DESPLIEGUE_REALIZADO.md).
+Ver [arquitectura](docs/arquitectura.md), [optimización](docs/optimizacion.md) y [flujo n8n](../workflows/README.md).
 
 ## Resultados
 
-### Modelo final elegido
+### Métricas registradas y comparación con baseline
 
-Se prepararon cuatro versiones para las pruebas: 10, 100, 200 y 300 correos.
-Las de 10, 100 y 200 se conservan para comparar sus predicciones con las de
-la versión de 300 sobre los mismos correos de prueba.
+Evaluación registrada del pipeline mediante **validación cruzada exploratoria de cuatro particiones**. El baseline predice siempre la categoría mayoritaria.
 
-**El modelo final elegido para usar en el proyecto es
-`modelo_clasificador_300.pkl`.** Es el predeterminado en config.yaml y utiliza
-los 300 correos del dataset completo. Los otros tres quedan como versiones
-de comparación y evidencia del experimento.
+| Correos de entrenamiento | Accuracy CV | F1 macro CV | F1 macro baseline CV |
+|---:|---:|---:|---:|
+| 10 | No viable | No viable | No viable |
+| 100 | 0.9200 | 0.9201 | 0.0968 |
+| 200 | 0.9450 | 0.9442 | 0.0968 |
+| **300 — modelo final** | 0.9533 | 0.9543 | 0.1154 |
 
-Esta elección del proyecto no se presenta como una superioridad de accuracy
-demostrada frente a los otros tamaños: la prueba de 25 correos muestra
-predicciones y confianza, sin etiquetas para calcular aciertos por versión.
+El pipeline de 300 obtiene **accuracy CV de 95,33 % y F1 macro CV de 0,9543**, frente a **0,1154 de F1 macro del baseline**. En 10 correos la calibración no es viable en todos los folds, por lo que no se publica una cifra de CV.
 
-### Evaluación actual por versión (27 de octubre de 2026)
+Estas cifras pertenecen a los artefactos identificados por sus hashes en [version_evaluation.json](results/metrics/version_evaluation.json); no se recalculan automáticamente al reentrenar. Los ajustes se seleccionaron sobre datos relacionados y las muestras son anidadas: los resultados no equivalen a una prueba externa independiente. Los 25 correos sin etiquetas tampoco proporcionan accuracy o F1.
 
-| Correos | F1 en entrenamiento | F1 macro CV | Accuracy CV | F1 baseline CV | Revisar de 25 |
-|---:|---:|---:|---:|---:|---:|
-| 10 | 0.5000 | No viable | No viable | No viable | 22 |
-| 100 | 1.0000 | 0.9201 | 0.9200 | 0.0968 | 2 |
-| 200 | 1.0000 | 0.9442 | 0.9450 | 0.0968 | 1 |
-| 300 | 1.0000 | 0.9543 | 0.9533 | 0.1154 | 2 |
-
-El F1 de entrenamiento usa los ejemplos conocidos del propio modelo; no mide
-su generalización. La CV vuelve a ajustar clones del pipeline en cuatro folds
-estratificados (semilla 42) y aprende TF-IDF dentro de cada fold. Los ajustes
-se seleccionaron antes con datos relacionados: es CV **exploratoria**, no un
-test externo ni una validación anidada de toda la búsqueda. Los datasets son
-anidados y no aíslan causalmente el efecto del tamaño.
-
-En 10 correos hay clases con dos registros: al reservar ejemplos para validar
-quedan menos de dos para la calibración interna. No se fuerza una cifra de CV
-ni se cambia el algoritmo para hacerla aparecer. Sus métricas de entrenamiento
-son accuracy 0.40 y F1 macro 0.50; es una versión de demostración limitada.
-
-Cada versión procesó los mismos 25 correos sin etiquetas. Los casos de baja
-confianza no equivalen a errores comprobados. Esa prueba no produce F1 ni
-accuracy y no demuestra ausencia de sobreajuste.
-Las huellas SHA-256 confirman que los cuatro modelos y sus datasets no cambiaron.
-
-```cmd
-python -m src.evaluate_versions
-```
-
-Evidencia: `results/metrics/version_evaluation.json` y `.csv`, junto con los
-cuatro directorios `results/new_test_25/modelo_clasificador_<tamaño>/`.
-
-![Comparación CV por versión](documentacion/imagenes/comparacion_modelos_cv.png)
-
-### Diagnóstico histórico de selección
-
-Comparación por validación cruzada sobre los 280 de la etapa de selección:
-
-| Modelo | F1 macro CV | Desviación CV | F1 train CV |
-|---|---:|---:|---:|
-| baseline | 0.1122 | 0.0019 | 0.1122 |
-| logistic | 0.9373 | 0.0160 | 1.0000 |
-| svm | 0.9617 | 0.0185 | 1.0000 |
-| logistic_optimized | 0.9649 | 0.0211 | 1.0000 |
-| svm_optimized | 0.9650 | 0.0161 | 1.0000 |
-
-La SVM ajustada alcanza **0.9650 de F1 macro CV**. La diferencia
-con la regresión logística ajustada es muy pequeña; no demuestra superioridad
-estadística. La búsqueda mejora la SVM en 0.003275 de F1 absoluto.
-
-En los 20 originales, el modelo diagnóstico de 280 obtiene **95.0%
-de accuracy** y **0.9511 de F1 macro**. Son 19 aciertos y un error.
-El baseline mayoritario obtiene 45.0% de accuracy y
-0.1552 de F1 macro en esos mismos 20.
-
-**Estas métricas no son una prueba independiente de las cuatro versiones entrenadas.**
-El modelo de 300 ya aprendió de esos 20 y los subconjuntos menores pueden
-contener algunos. No hay una tabla de accuracy de los cuatro tamaños sobre los
-25 correos, porque esa prueba no tiene etiquetas para medir aciertos.
-
-![Matriz de confusión del diagnóstico 280/20](documentacion/imagenes/confusion_matrix.png)
-
-Ver [evaluación y pruebas](docs/evaluacion_pruebas.md) y
-[optimización](docs/optimizacion.md) para interpretar las cifras y sus límites.
+El diagnóstico histórico del modelo entrenado con 280 correos sobre 20 reservados obtuvo accuracy 0,9500 y F1 macro 0,9511; corresponde a otra etapa, no al modelo final ajustado con 300. Ver [evaluación y pruebas](docs/evaluacion_pruebas.md).
 
 ## Instalación y uso
 
-### Portal con Docker Compose
+### Requisitos del sistema
 
-Desde esta carpeta, con las cuatro copias de los modelos en `models/`:
+- Git y Python **3.10**, la versión utilizada por las imágenes Docker; entorno virtual y dependencias de `requirements.txt`.
+- CPU; **no requiere GPU**. No se han establecido mínimos medidos de RAM y disco.
+- Docker con Compose para ejecutar los contenedores. Para el flujo completo se necesitan además Redmine, n8n y credenciales IMAP, SMTP y OpenAI.
+
+### Instalación paso a paso en Linux
+
+```bash
+git clone https://github.com/n8nmquito/ProyectoIA.git
+cd ProyectoIA/python
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+
+# Crear los cuatro modelos desde cero; los .pkl no se incluyen en Git
+python -m src.train_versions
+
+# Iniciar la interfaz
+python -m streamlit run app/app.py
+```
+
+Abrir [la interfaz local](http://localhost:8501). Las instrucciones de Windows y la solución de problemas están en el [manual](docs/manual_usuario.md).
+
+### Comandos y ejemplos de uso
+
+Desde la carpeta `python`, con el entorno virtual activado, entrenar únicamente el tamaño elegido:
+
+```bash
+python -m src.train_versions --size 10
+python -m src.train_versions --size 100
+python -m src.train_versions --size 200
+python -m src.train_versions --size 300
+```
+
+Cada comando reemplaza solo el modelo y el dataset de ese tamaño; no necesita un modelo previo. La fuente y los parámetros se definen en [config.yaml](config.yaml).
+
+Probar un modelo con los 25 correos incluidos y actualizar la comparación por tamaños:
+
+```bash
+python evaluar_nuevos.py --model 300
+python -m src.evaluate_versions
+```
+
+El primer comando muestra título, categoría, confianza y revisión; guarda el CSV y el resumen en `results/new_test_25/modelo_clasificador_300/`. Cambiar `300` por `10`, `100` o `200` para probar otra versión.
+
+### Ejecutar con Docker
+
+Después de generar los modelos, desde la carpeta `python`:
 
 ```bash
 docker compose up -d --build --wait
-docker compose ps
-docker compose logs --tail=100 streamlit
 ```
 
-En el VPS, la carpeta es `/mquito/mquito-ticket/python` y el portal se abre en
-[http://185.208.207.203:8501](http://185.208.207.203:8501). El contenedor se
-reinicia con Docker y mantiene los modelos montados en solo lectura. El código
-y las métricas se copian en la imagen; reconstruir con el primer comando aplica
-sus cambios. La API interna de n8n continúa como servicio separado.
-
-Para detener e iniciar el portal, usar `docker compose stop` y
-`docker compose start`. `STREAMLIT_PORT=8502 docker compose up -d` cambia el
-puerto publicado del host. Los `.pkl` siguen sin incluirse en Git.
-
-Requisitos: Python 3.10 o 3.11, CPU y espacio para dependencias. No se necesita
-GPU ni servicios externos para la consola o Streamlit. La automatización desplegada
-sí utiliza buzón, API Python, OpenAI y Redmine. En Windows:
-
-```cmd
-cd /d F:\Maria\python
-py -3.10 -m venv .venv
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-Si ya tienes el entorno configurado, usa su `python`. Para elegir un modelo:
-
-```cmd
-python evaluar_nuevos.py --model 10
-python evaluar_nuevos.py --model 100
-python evaluar_nuevos.py --model 200
-python evaluar_nuevos.py --model 300
-```
-
-Sin `--model` se usa el de 300. Cada versión guarda sus predicciones en una
-carpeta propia dentro de `results/new_test_25/`. La consola muestra el título y
-el cuerpo de los correos que requieren revisión. `--data` permite otro JSON
-sin etiquetas; `--output` permite indicar dónde guardar los resultados.
-
-Para regenerar los entrenamientos y los datasets:
-
-```cmd
-python -m src.train
-python -m src.train_versions
-python -m src.export_datasets
-python -m src.evaluate
-python -m src.evaluate_versions
-python -m pytest -q
-```
-
-Para reentrenar una versión individual en Linux, desde la carpeta `python`:
-
-```bash
-.venv/bin/python -m src.train_versions --size 10
-.venv/bin/python -m src.train_versions --size 100
-.venv/bin/python -m src.train_versions --size 200
-.venv/bin/python -m src.train_versions --size 300
-```
-
-Cada comando sustituye solo el modelo y dataset del tamaño elegido, conserva
-las otras versiones, crea `models/` si hace falta y guarda `results/metrics/model_versions_<tamaño>.json`
-y `.csv`. Sin `--size` se reentrenan las cuatro versiones. La selección usa
-las mismas muestras anidadas del corpus de 300; no agrega los 25 de prueba.
-
-`src.train` selecciona ajustes y vuelve a entrenar el modelo de 300. Después,
-`src.train_versions` crea los modelos seleccionados desde cero usando el YAML y
-guarda sus datasets. `src.export_datasets` solo exporta los datos exactos de los
-modelos actuales, sin reentrenarlos. `src.evaluate` reconstruye en memoria el
-modelo diagnóstico de 280 y repite sus métricas, sin guardar otro `.pkl`.
-
-El selector del portal descubre los archivos `models/modelo_clasificador_<cantidad>.pkl`
-al cargar la página. Ignora las subcarpetas de respaldo y desactiva la
-clasificación si no encuentra modelos. Recargar permite actualizar la lista
-después de entrenar, añadir o retirar archivos.
-
-La configuración central incluye `history_limit` (50 por defecto),
-`tfidf.ngram_range`, `tfidf.sublinear_tf`, `tfidf.strip_accents`,
-`model.logistic_max_iter`, `model.calibration_folds`, `model.svm_c` y
-`model.svm_class_weight`, además de `tfidf.min_df` y `tfidf.max_df`.
-`HISTORY_LIMIT`, si está
-presente en el entorno del proceso, prevalece sobre el límite del YAML y debe
-ser un entero positivo. Los archivos suministrados con `--config` pueden
-sobrescribir valores puntuales; las rutas relativas parten de la carpeta Python.
-
-Cambiar parámetros de TF-IDF o del modelo afecta a los nuevos entrenamientos
-con `src.train`; no modifica los `.pkl` existentes. `src.train_versions`
-crea un pipeline SVM nuevo desde `config.yaml`, sin cargar ningún `.pkl`
-anterior. El entrenamiento de 10, 100 o 200 tampoco necesita el modelo de 300.
-La muestra de 10 necesita al menos tantos correos
-por clase como folds internos; si no alcanza, el comando rechaza la operación.
-Para aplicar cambios en el YAML del portal Docker, reconstruir con
-`docker compose up -d --build`.
-
-La calidad del código se comprueba con `python -m ruff check src app tests`
-y el formato con `python -m ruff format --check src app`. Las reglas están
-guardadas en `pyproject.toml`: límite de 79 caracteres, importaciones ordenadas
-y docstrings de módulos, funciones y clases. Las pruebas mantienen excepciones
-de longitud de línea, docstrings e importaciones; el código de `src` y `app`
-no tiene esas excepciones.
-
-Los parámetros y rutas se cambian en `config.yaml`. Reentrenar sustituye los
-archivos actuales de los mismos nombres. No se debe incorporar el test conocido
-para después presentar sus resultados como si siguiera siendo independiente.
-
-También se puede iniciar la interfaz con `Iniciar_clasificador.cmd`. El [manual de usuario](docs/manual_usuario.md) detalla instalación y uso.
+El portal queda en el puerto 8501 y conserva el historial en un volumen SQLite. Para desplegar la automatización completa, seguir la [guía de integración](../workflows/GUIA_CONFIGURACION.md) y el [despliegue de la API](deploy/README.md); configurar las credenciales antes de activar el flujo, que puede crear tickets y enviar avisos.
 
 ## Interfaz de usuario
 
-Las vistas son **Clasificar**, **Acerca de** e **Historial y comparación**.
-El botón **Prueba con ejemplo** recorre cuatro casos precargados. Cada entrada
-se valida; la predicción tiene indicador de carga, manejo de errores, categoría,
-confianza y gráfico interactivo Altair. Acerca de muestra los parámetros y las
-métricas del archivo elegido, junto con sus limitaciones.
+### Descripción y acceso
 
-Los controles de idioma y tema permiten Español/English y claro/oscuro. El
-modelo sigue entrenado en español. Se puede descargar la predicción actual o
-el historial en CSV o Excel, comparar probabilidades de varias predicciones y borrar
-el historial. En Docker se retienen hasta 50 registros por historial en SQLite
-sobre un volumen persistente, incluso después de recargar o redesplegar. El
-navegador recuerda un identificador privado; el enlace permite recuperar ese
-mismo historial. No compartirlo si incluye datos privados. Sin `HISTORY_DB_PATH`,
-la ejecución local conserva solo memoria de sesión. Los CSV incluyen los textos.
+[**Aplicación desplegada**](http://185.208.207.203:8501) con tres vistas: **Clasificar**, **Acerca de** e **Historial y comparación**. Ofrece validación de entradas, indicador de procesamiento, mensajes de error, categoría, confianza, gráfico interactivo, ejemplos precargados, idioma español/inglés, tema claro/oscuro y descarga CSV/Excel. El selector lee los modelos existentes en `models/` y muestra su archivo.
 
-```cmd
-python -m streamlit run app/app.py --browser.gatherUsageStats false
-```
+### Cómo usarla
 
-La aplicación usa fondo oscuro, tarjetas gris carbón y acentos azules. El
-formulario queda a la izquierda y el resultado a la derecha. Los estilos se
-guardan en `app/assets/style.css` y los elementos visuales en `app/presentation.py`.
-Permite escribir un ticket, cargar ejemplos, obtener categoría
-y probabilidades, y consultar información del modelo.
-El selector Modelo de clasificación permite elegir 10, 100, 200 o 300 correos;
-300 es la opción predeterminada. Cada opción carga su archivo `.pkl`. Cambiar
-el modelo borra el resultado anterior y conserva el texto para reclasificarlo.
-Streamlit se puede ejecutar localmente o en el [portal Docker del VPS](http://185.208.207.203:8501).
-Al usar el portal, el título y cuerpo se procesan en el VPS. El portal usa HTTP
-y no tiene autenticación; utilizar ejemplos sin información sensible.
-La API Python está desplegada en Docker y el
-flujo principal de n8n está activo en el servidor.
+1. Seleccionar uno de los modelos disponibles.
+2. Escribir título y descripción, o pulsar **Prueba con ejemplo**. Ejemplo: «Cuenta bloqueada» / «No puedo iniciar sesión; solicito revisar el bloqueo de mi usuario».
+3. Pulsar **Clasificar** y revisar categoría, confianza y probabilidades.
+4. Descargar el resultado o comparar predicciones en **Historial y comparación**; consultar métricas y limitaciones en **Acerca de**.
+5. Recargar la página después de añadir o quitar modelos. El formulario prueba el clasificador; la creación de tickets pertenece al flujo de correo n8n.
 
-![Interfaz actual con resultado y probabilidades](documentacion/imagenes/app/portal_resultado.png)
+### Capturas de pantalla
 
-![Historial y comparación de modelos](documentacion/imagenes/app/portal_historial.png)
+**Formulario y selección del modelo:**
 
-Las capturas muestran la aplicación actualizada y verificada en el VPS. El
-[manual](docs/manual_usuario.md) explica sus controles y mensajes.
+<img src="documentacion/imagenes/app/modelos_disponibles.png" alt="Formulario Streamlit y archivo del modelo seleccionado" width="760">
+
+**Predicción, probabilidades y exportación:**
+
+<img src="documentacion/imagenes/app/exportacion_excel.png" alt="Resultado de clasificación con confianza, gráfico y descargas" width="760">
 
 ## Estructura del proyecto
 
-| Documento | Contenido |
+| Carpeta | Contenido principal |
 |---|---|
-| [Planificación](docs/planificacion.md) | Objetivos, alcance, etapas, recursos y riesgos |
-| [Datos](docs/analisis_datos.md) | Procedencia, estadísticas, gráficos y datasets por modelo |
-| [Arquitectura](docs/arquitectura.md) | Componentes, flujo, algoritmos y versiones |
-| [Optimización](docs/optimizacion.md) | Grilla, sensibilidad, interacciones y resultados |
-| [Ética](docs/consideraciones_eticas.md) | Sesgos, equidad, privacidad, responsabilidades y límites |
-| [Manual](docs/manual_usuario.md) | Instalación, consola, interfaz y solución de problemas |
-| [Evaluación y pruebas](docs/evaluacion_pruebas.md) | Evidencias, métricas, errores y pruebas automatizadas |
-
-`src/` contiene la lógica; `tests/` las pruebas; `notebooks/` los cinco análisis;
-`models/` únicamente los cuatro `.pkl` y su explicación; `data/raw/` el JSON
-maestro; `data/train/` los cuatro datasets; `data/test/` los 25 nuevos sin
-etiquetas; `data/processed/` las particiones y datos limpios; `results/` las
-métricas e informes; `documentacion/imagenes/` los gráficos y capturas; `app/`
-la interfaz Streamlit; `deploy/` la API y las instrucciones de despliegue.
+| `python/src/` | Procesamiento, modelos, entrenamiento, evaluación y API |
+| `python/app/` | Interfaz Streamlit, estilos, exportación e historial |
+| `python/data/` | Corpus, muestras de entrenamiento y correos de prueba |
+| `python/models/` | Modelos `.pkl` generados, excluidos de Git |
+| `python/results/` | Métricas, predicciones e informes |
+| `python/tests/` | Pruebas automatizadas |
+| `python/notebooks/` | Análisis y experimentos reproducibles |
+| `python/docs/` | Planificación, datos, arquitectura, optimización, ética y manual |
+| `python/deploy/` | Dockerfiles, dependencias y operación del despliegue |
+| `python/documentacion/imagenes/` | Gráficos y capturas |
+| `python/workshop/` | Material de referencia del taller |
+| `workflows/` | Flujos n8n, validaciones JavaScript y pruebas |
+| `n8n/`, `redmine/`, `postgres/` | Configuración de n8n, Redmine e inicialización de bases, respectivamente |
+| `classifier/` | Experimento anterior con PostgreSQL; no es el clasificador Python actual |
+| `Documentacion/` | Diagramas y documentos complementarios |
 
 ## Consideraciones éticas
 
-La confianza es una estimación, no una garantía de acierto. El corpus es pequeño,
-sintético y de un dominio limitado. No se ha demostrado generalización a
-correos reales ni equidad demográfica. No usar para conceder accesos, sancionar
-personas, cerrar tickets o resolver incidentes críticos automáticamente.
-No ingresar contraseñas ni datos personales innecesarios. La limpieza elimina
-algunos identificadores, pero no garantiza anonimización completa.
+- **Privacidad:** usar datos ficticios o autorizados; no introducir contraseñas ni información personal innecesaria. La limpieza del texto no garantiza anonimización.
+- **Servicios externos:** OpenAI puede recibir texto, adjuntos seleccionados y datos consultados en Redmine. Su envío requiere permisos y una política de tratamiento de datos.
+- **Limitaciones y sesgos:** corpus pequeño, simulado, en español y de un dominio limitado; no se ha demostrado generalización a correo real ni equidad demográfica. Una confianza alta no garantiza un acierto.
+- **Supervisión:** baja confianza o desacuerdo marcan revisión. La creación automática de tickets no incluye aprobación humana obligatoria; el equipo debe revisar y corregir errores.
+- **Uso inadecuado:** no usar el resultado para conceder accesos, sancionar personas o resolver incidentes críticos automáticamente. El portal desplegado usa HTTP y no tiene autenticación: utilizar ejemplos sin datos sensibles.
+
+Ver las [consideraciones éticas completas](docs/consideraciones_eticas.md).
 
 ## Autores y contribuciones
 
