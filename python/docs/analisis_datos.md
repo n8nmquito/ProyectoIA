@@ -1,178 +1,129 @@
-# Análisis de los datos
+# Análisis de datos
 
-El proyecto prueba versiones de 10, 100, 200 y 300 correos y adopta
-**modelo_clasificador_300.pkl como modelo final**. Las tres versiones menores
-se conservan para comparación; las métricas por versión se detallan en la evaluación actual.
+## 1. Descripción detallada del dataset
 
-Versión documentada: 26 de octubre de 2026. Fuente numérica: `results/metrics/eda.json`.
+La fuente son **cuatro conjuntos de 10, 100, 200 y 300 correos simulados en español**, creados para entrenar y comparar clasificadores de soporte TI. El [corpus maestro](../data/raw/correos.json) contiene los 300 registros; las [muestras de entrenamiento](../data/train/) son anidadas y se seleccionaron con semilla 42. No representan una muestra aleatoria de correos reales de una organización.
 
-## Descripción detallada del dataset
+| Variable | Tipo y contenido | Uso |
+|---|---|---|
+| `titulo` | Texto del asunto | Entrada del modelo |
+| `cuerpo` | Texto de la solicitud | Entrada del modelo |
+| `clasificacion` | Accesos, aplicaciones, infraestructura u otros | Etiqueta de entrenamiento y evaluación |
+| `texto` | Título y cuerpo normalizados y concatenados; variable derivada | Representación utilizada para calcular TF-IDF |
 
-La fuente son cuatro datasets de **10, 100, 200 y 300 correos simulados en
-español**, utilizados para entrenar y comparar los modelos del proyecto.
-El corpus maestro `data/raw/correos.json` conserva el conjunto de 300.
-No son una muestra aleatoria de una organización ni tickets reales
-recopilados de producción.
+La etiqueta nunca se incorpora al texto de entrada. Las categorías distinguen problemas de identidad/permisos (**accesos**), funcionamiento del software (**aplicaciones**), equipos/red/servicios base (**infraestructura**) y orientación, capacitación u otras solicitudes (**otros**). La causa descrita importa más que mencionar una aplicación: pedir capacitación sobre JDE puede corresponder a otros.
 
-Cada registro de entrenamiento contiene `titulo`, `cuerpo` y `clasificacion`.
-Las únicas etiquetas aceptadas son accesos, aplicaciones, infraestructura y otros.
-Título y cuerpo son entradas; clasificación es la respuesta de entrenamiento y
-nunca se concatena al texto para predecir.
+Los [25 correos de prueba](../data/test/correos_test_25.json) contienen título y cuerpo y no se usan para entrenar. Sirven para pruebas funcionales y revisión manual; su contenido permite reconocer el tipo de solicitud sin necesitar etiquetas para ejecutarlos. Calcular accuracy o F1 exigiría registrar categorías esperadas validadas. Son casos conocidos del desarrollo, no una evaluación externa independiente.
 
-| Categoría | Criterio de etiquetado | Correos | Porcentaje |
-|---|---|---:|---:|
-| Accesos | Identidad, cuentas, autenticación, permisos y roles | 70 | 23.33 % |
-| Aplicaciones | Errores del programa, cálculos, pantallas y reglas funcionales | 90 | 30.00 % |
-| Infraestructura | Equipos, red, almacenamiento y servicios base | 70 | 23.33 % |
-| Otros | Orientación, formación, administración y propuestas | 70 | 23.33 % |
+No se ha declarado una licencia específica de los datos. La [licencia MIT del código](../LICENSE) no se extiende automáticamente al dataset.
 
-Cuando un ticket menciona permisos o conexión, la etiqueta depende de la causa
-descrita. Por ejemplo, un permiso realmente ausente se etiqueta accesos; un
-programa que calcula mal una condición de visibilidad corresponde a aplicaciones.
-La revisión humana sigue siendo necesaria cuando la causa no está clara.
+## 2. Estadísticas descriptivas
 
-## Datasets exactos por modelo
+### Tamaño y distribución por categoría
 
-| Tamaño | Accesos | Aplicaciones | Infraestructura | Otros | Variables TF-IDF aprendidas |
-|---:|---:|---:|---:|---:|---:|
-| 10 | 3 | 3 | 2 | 2 | 867 |
-| 100 | 25 | 25 | 25 | 25 | 6097 |
-| 200 | 50 | 50 | 50 | 50 | 10469 |
-| 300 | 70 | 90 | 70 | 70 | 14409 |
+| Conjunto | Accesos | Aplicaciones | Infraestructura | Otros | Total |
+|---|---:|---:|---:|---:|---:|
+| 10 correos | 3 | 3 | 2 | 2 | 10 |
+| 100 correos | 25 | 25 | 25 | 25 | 100 |
+| 200 correos | 50 | 50 | 50 | 50 | 200 |
+| 300 correos | 70 | 90 | 70 | 70 | 300 |
 
-Los archivos `data/train/correos_10.json`, `correos_100.json`, `correos_200.json`
-y `correos_300.json` conservan los registros y el orden usados por su modelo.
-Se exportaron desde los índices y huellas guardados en cada `.pkl`, sin sortear
-otra muestra. Son conjuntos anidados, seleccionados con semilla 42. Los de
-100 y 200 están balanceados; el de 300 conserva la distribución completa.
+En el conjunto de 300, aplicaciones representa **30,00 %** y cada categoría restante **23,33 %**. La razón entre la clase mayor y una menor es **90/70 = 1,29**. Los conjuntos de 100 y 200 están balanceados; el de 10 contiene solo dos ejemplos en dos de sus clases.
 
-Para seleccionar ajustes se separaron 280 correos de los 20 originales del
-manifiesto de evaluación. Después se ajustó el modelo final con los 300.
-Los **25 de `data/test`** solo tienen título y cuerpo y nunca entraron en fit.
-No se les atribuye un porcentaje de aciertos, porque ya no hay respuestas de
-referencia en ese flujo. Además, se discutieron antes de decidir refuerzos:
-sirven como regresión, no como prueba independiente de todo el desarrollo.
+### Longitudes y calidad del corpus de 300 correos
 
-## Estadísticas descriptivas
+Las siguientes cifras corresponden al **texto limpio combinado**, según [eda.json](../results/metrics/eda.json):
 
-| Medida del texto limpio | Valor |
-|---|---:|
-| Registros únicos cargados | 300 |
-| Campos obligatorios faltantes | 0 |
-| Media de caracteres | 409.26 |
-| Mediana de caracteres | 350 |
-| Mínimo / máximo de caracteres | 279 / 643 |
-| Desviación de caracteres | 112.72 |
-| Media de palabras | 63.84 |
-| Mediana de palabras | 55 |
-| Mínimo / máximo de palabras | 42 / 100 |
-| Correlación caracteres-palabras | 0.9788 |
-| Outliers superiores de longitud con 1.5 IQR | 0 |
+| Estadística | Caracteres | Palabras |
+|---|---:|---:|
+| Media | 409,26 | 63,84 |
+| Mediana | 350 | 55 |
+| Desviación estándar muestral | 112,72 | 18,55 |
+| Mínimo | 279 | 42 |
+| Primer cuartil | 320 | 49 |
+| Tercer cuartil | 532 | 85 |
+| Máximo | 643 | 100 |
 
-La razón entre la clase mayor y las menores es 90/70, aproximadamente 1.29.
-No es un desbalance extremo, pero justifica mirar F1 por clase además de accuracy.
-La alta correlación entre longitud y cantidad de palabras es esperable y no
-implica una relación causal ni demuestra capacidad predictiva.
+Se cargaron **300 registros únicos**, con **0 valores faltantes** en los campos obligatorios. La correlación entre caracteres y palabras es **0,9788**. Se identificaron **0 outliers superiores de longitud** usando el criterio de 1,5 veces el rango intercuartílico.
 
-## Exploración visual: seis gráficos
+## 3. Visualizaciones del EDA (mínimo 5-6 gráficos relevantes)
 
-### 1. Distribución de categorías
+Los seis gráficos se generan mediante la función de EDA de [src/train.py](../src/train.py).
 
-![Distribución de las cuatro clases](../documentacion/imagenes/01_class_distribution.png)
+### Gráfico 1. Distribución de categorías
 
-Aplicaciones tiene más ejemplos por el refuerzo de fallos de software. No se
-debe presentar esa proporción como frecuencia real de incidentes de una empresa.
+![Distribución de categorías](../documentacion/imagenes/01_class_distribution.png)
 
-### 2. Longitud del texto limpio
+Permite comprobar el desbalance moderado: 90 aplicaciones frente a 70 ejemplos de cada categoría restante. Estas proporciones pertenecen al corpus simulado y no representan frecuencias reales de incidentes.
 
-![Distribución de caracteres](../documentacion/imagenes/02_text_lengths.png)
+### Gráfico 2. Distribución de longitud del texto
 
-La longitud varía entre ejemplos iniciales y ampliaciones. Esa diferencia puede
-introducir pistas de estilo relacionadas con el origen sintético de los textos.
+![Distribución de caracteres del texto limpio](../documentacion/imagenes/02_text_lengths.png)
 
-### 3. Cantidad de palabras por clase
+Muestra la variación entre textos de 279 y 643 caracteres. Permite detectar concentraciones de longitudes y posibles diferencias de estilo entre ejemplos.
+
+### Gráfico 3. Cantidad de palabras por categoría
 
 ![Palabras por categoría](../documentacion/imagenes/03_words_by_class.png)
 
-Permite revisar si una categoría se está distinguiendo por textos más largos
-en lugar de por el problema técnico. No se recortaron registros por esa razón.
+El diagrama de cajas compara medianas, dispersión y valores extremos por clase. Ayuda a revisar si la longitud puede actuar como una pista de estilo en lugar de representar el problema técnico.
 
-### 4. Longitudes del título y del cuerpo
+### Gráfico 4. Relación entre longitud del título y del cuerpo
 
-![Relación entre título y cuerpo](../documentacion/imagenes/04_title_body.png)
+![Longitud del título frente a longitud del cuerpo](../documentacion/imagenes/04_title_body.png)
 
-Combinar los dos campos evita perder la descripción breve del título o el
-contexto del cuerpo. Actualmente ambos se concatenan una sola vez, sin pesos distintos.
+Compara los tamaños de los campos originales para observar su variación y complementariedad. Justifica conservar ambos como entrada en lugar de depender solo del asunto.
 
-### 5. Términos frecuentes
+### Gráfico 5. Términos frecuentes
 
-![Frecuencias de términos](../documentacion/imagenes/05_common_terms.png)
+![Frecuencia de términos del corpus](../documentacion/imagenes/05_common_terms.png)
 
-El gráfico incluye palabras funcionales. Se decidió no usar una lista genérica
-de stopwords para conservar negaciones y expresiones relevantes. TF-IDF reduce
-el peso relativo de términos muy comunes, aunque no entiende su significado.
+Presenta las 18 palabras más frecuentes, incluidas palabras funcionales. Permite identificar vocabulario repetido y revisar posibles plantillas; la frecuencia por sí sola no demuestra capacidad predictiva.
 
-### 6. Correlaciones de longitud
+### Gráfico 6. Correlaciones de longitud
 
-![Correlaciones descriptivas](../documentacion/imagenes/06_length_correlations.png)
+![Correlaciones entre caracteres, palabras y longitud del título](../documentacion/imagenes/06_length_correlations.png)
 
-Son relaciones entre medidas de tamaño del texto, no correlaciones entre
-causas de incidentes. Se utilizan para conocer el corpus, no para afirmar causalidad.
+La matriz resume relaciones entre medidas de tamaño del texto. La alta correlación caracteres-palabras describe el corpus; no implica causalidad ni una relación entre causas de incidentes.
 
-## Decisiones de preprocesamiento y control de calidad
+## 4. Identificación de patrones, correlaciones, outliers
 
-Se aplica Unicode NFKC, minúsculas, eliminación de etiquetas HTML y normalización
-de espacios. Algunas direcciones de correo, URLs, IP, números largos y nombres
-de archivos se sustituyen por términos genéricos. Esto reduce identificadores
-y pistas artificiales, pero no garantiza eliminar nombres, secretos o información
-personal escrita de otra forma.
+| Aspecto | Hallazgo | Interpretación y decisión |
+|---|---|---|
+| Distribución de clases | Aplicaciones tiene 90 registros; las demás, 70 | Desbalance moderado; observar F1 macro y resultados por categoría |
+| Estilo y vocabulario | Textos simulados en español con expresiones repetidas | Posible aprendizaje de plantillas; no asumir generalización a otros idiomas o empresas |
+| Términos asociados | El reporte de entrenamiento incluye «referencia omitida» entre términos asociados a aplicaciones | Posible pista espuria; requiere revisión, sin atribuirle influencia causal demostrada |
+| Correlación | Caracteres y palabras: **0,9788** | Ambas medidas describen tamaño; no se incorporan como variables numéricas adicionales al clasificador |
+| Outliers de longitud | Q1=320, Q3=532 e IQR=212; límite superior **850 caracteres**; máximo observado 643 | No hay registros por encima de Q3 + 1,5×IQR; no se eliminan correos por este criterio |
+| Similitud entre conjuntos | Las muestras de 10, 100 y 200 están contenidas en la de 300 | Las comparaciones comparten registros y no son pruebas independientes |
 
-Se rechazan campos ausentes, nulos, no textuales, vacíos, con solo símbolos o
-números, etiquetas fuera del conjunto permitido y campos de más de 20.000
-caracteres. Los duplicados normalizados se eliminan antes de dividir; si un mismo
-texto tiene etiquetas contradictorias se detiene la carga. No se inventan
-etiquetas faltantes ni se imputan automáticamente.
+La ausencia de outliers por longitud no descarta anomalías semánticas, etiquetas discutibles o solicitudes con varias causas. No se calculan correlaciones numéricas arbitrarias entre las categorías, porque son etiquetas nominales. Los términos asociados se registran en [training_summary.json](../results/metrics/training_summary.json).
 
-### Manejo de datos faltantes y desbalanceados
+## 5. Decisiones de preprocesamiento justificadas
 
-Los campos obligatorios faltantes se rechazan para evitar construir entradas
-incompletas o etiquetas supuestas. El corpus cargado registra cero faltantes.
-No se aplican imputación, sobremuestreo ni generación adicional durante el fit.
-Se comparó `class_weight=None` con `balanced`; la configuración seleccionada
-usa `None`. Se conservan la distribución original de 300, las particiones
-estratificadas y F1 macro para observar el rendimiento entre categorías.
+| Decisión | Implementación | Justificación |
+|---|---|---|
+| Validar estructura y contenido | Exigir los campos obligatorios, textos útiles y etiquetas permitidas; máximo de 20.000 caracteres por campo de entrada | Evitar entradas inválidas y errores silenciosos |
+| Normalizar escritura | Decodificar entidades HTML, aplicar Unicode NFKC, minúsculas, retirar etiquetas HTML, puntuación y espacios repetidos | Reducir variantes que no aportan al tipo de incidente |
+| Sustituir identificadores | Reemplazar correos, URLs, IPv4, nombres de archivos y números largos por términos genéricos | Reducir vocabulario irrelevante y pistas artificiales; no equivale a anonimización completa |
+| Combinar título y cuerpo | Concatenar ambos una sola vez | Conservar el resumen breve del asunto y el contexto de la solicitud |
+| Controlar duplicados y conflictos | Eliminar textos normalizados duplicados antes de dividir; detener la carga si tienen etiquetas contradictorias | Evitar repetición entre particiones y supervisión inconsistente |
+| Conservar negaciones | No utilizar una lista genérica de stopwords | Mantener expresiones como «no puedo acceder», relevantes para interpretar la solicitud |
+| Representar con TF-IDF | Unigramas y bigramas, frecuencia sublineal, normalización de acentos y L2 | Capturar términos y expresiones cortas con una representación dispersa adecuada para SVM lineal |
+| Ajustar vocabulario en entrenamiento | Aprender TF-IDF dentro de cada partición externa de validación | Evitar aprender vocabulario de la partición externa de evaluación |
 
-### Justificación de las transformaciones
+Implementación: [data_processing.py](../src/data_processing.py) y [model.py](../src/model.py). La calibración interna de SVM reutiliza el vocabulario del entrenamiento externo; no se ajusta otro vocabulario por subpartición de calibración.
 
-Concatenar título y cuerpo conserva la descripción breve y el contexto del
-incidente. La normalización reduce variantes de escritura y el reemplazo de
-identificadores limita vocabulario irrelevante, sin garantizar anonimización.
-No se eliminan stopwords genéricas para conservar negaciones. TF-IDF con
-unigramas y bigramas representa términos y expresiones cortas sin requerir
-GPU; su vocabulario se aprende solo en el entrenamiento de cada fold externo.
+En el flujo operativo, el nodo de código **Limpiar firma y datos** de n8n añade limpieza de firmas y redacción de datos sensibles antes de enviar el asunto/cuerpo a NexpAPI y OpenAI. Este paso no modifica los datasets de entrenamiento ni anonimiza los adjuntos.
 
-El vocabulario TF-IDF se aprende dentro del fold externo de entrenamiento.
-La calibración interna de SVM reutiliza el TF-IDF de ese train externo; no tiene
-un vocabulario independiente para cada subfold de calibración. Esto debe revisarse
-si se pretende una auditoría estricta de calibración con datos reales.
+## 6. Manejo de datos faltantes o desbalanceados
 
-## Sesgos y límites del dataset
+### Datos faltantes e inválidos
 
-Los textos comparten idioma, dominio y parte del estilo de generación. No hay
-atributos demográficos para medir fairness poblacional. Los marcadores como
-«referencia omitida» aparecen entre términos asociados a aplicaciones y podrían
-actuar como pistas espurias; no se ha demostrado que expliquen un error concreto.
-No hay una evaluación independiente por empresa, conversación o plantilla.
+El corpus cargado tiene **cero campos obligatorios faltantes**. El cargador rechaza campos ausentes, nulos, no textuales, vacíos, sin letras, demasiado largos o etiquetas fuera de las cuatro categorías. No se imputan textos ni se inventan etiquetas: el registro debe corregirse en origen antes de entrenar. Si un texto duplicado presenta etiquetas contradictorias, la carga se detiene para revisión.
 
-La licencia de uso del dataset no se ha especificado por separado. Antes de
-usar o publicar correos reales, revisar permisos, anonimización y retención.
-Ver [consideraciones éticas](consideraciones_eticas.md).
+### Datos desbalanceados
 
-## Fuente licencia y disponibilidad
+Se conserva la distribución del conjunto de 300 y se utilizan particiones estratificadas y **F1 macro**, que da el mismo peso a cada categoría, además de métricas por clase. La optimización comparó `class_weight=None` y `balanced`; la combinación seleccionada usa **`None`**, según [config.yaml](../config.yaml) y la [optimización](optimizacion.md).
 
-La fuente corresponde a los datasets de 10, 100, 200 y 300 correos simulados
-descritos arriba. Por indicación de la responsable del proyecto, se
-incluyen el [corpus maestro](../data/raw/correos.json) y los cuatro datasets
-de [entrenamiento](../data/train/). La [licencia MIT del código](../LICENSE)
-no se extiende automáticamente a los datos. Los modelos, las particiones
-procesadas y la hoja de revisión continúan excluidos de Git.
+No se aplican sobremuestreo, submuestreo ni generación de registros durante el ajuste. Los conjuntos de 100 y 200 se seleccionaron balanceados por clase; esto es una decisión de construcción de muestras, no una técnica de reequilibrio aplicada al conjunto completo durante el entrenamiento. La muestra de 10 es demostrativa y sus clases con solo dos registros limitan la evaluación con calibración interna.
