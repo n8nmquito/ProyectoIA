@@ -12,6 +12,7 @@ from src.data_processing import (
     split_data,
     ticket_fingerprint,
 )
+from src.utils import ROOT, file_hash, load_config, project_path
 
 
 def write_records(tmp_path, rows):
@@ -152,3 +153,31 @@ def test_frozen_holdout_rejects_missing_ticket(tmp_path):
     )
     with pytest.raises(ValueError, match="Faltan tickets"):
         split_data(frame, holdout_manifest=path)
+
+
+def test_delivered_holdout_reproduces_recorded_diagnostic_split():
+    """Require the shipped manifest to recover the historical 280/20 split."""
+    config = load_config()
+    manifest_path = project_path(config["holdout_manifest"])
+    summary = json.loads(
+        (ROOT / "results/metrics/training_summary.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    before = file_hash(manifest_path)
+    assert before == summary["holdout_manifest_sha256"]
+    frame = load_data(project_path(config["data_path"]))
+    training, diagnostic = split_data(
+        frame,
+        config["test_size"],
+        config["seed"],
+        config["cv_folds"],
+        holdout_manifest=manifest_path,
+    )
+    assert len(training) == summary["n_evaluation_train"] == 280
+    assert len(diagnostic) == summary["n_test"] == 20
+    assert diagnostic.index.tolist() == summary["test_indices"]
+    assert training.index.tolist() == summary["evaluation_train_indices"]
+    assert set(training.texto).isdisjoint(diagnostic.texto)
+    assert set(diagnostic.clasificacion) == set(CLASSES)
+    assert file_hash(manifest_path) == before

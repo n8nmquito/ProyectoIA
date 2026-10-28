@@ -164,6 +164,8 @@ python -m pip install -r requirements.txt
 python -m streamlit run app/app.py
 ```
 
+El [manifiesto de partición](data/processed/holdout_original.json) ya está incluido; permite reconstruir la reserva histórica de 280/20 al ejecutar los notebooks. Consulta la [guía de reproducibilidad](data/README.md#reproducir-la-partición-de-diagnóstico).
+
 Abrir [la interfaz local](http://localhost:8501). Consultar el [manual de usuario](docs/manual_usuario.md) para los pasos, las capturas anotadas y la solución de problemas.
 
 ### Comandos y ejemplos de uso

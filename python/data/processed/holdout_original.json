@@ -1,0 +1,86 @@
+{
+  "description": "Original test; already inspected, diagnostic only.",
+  "source_sha256": "ce8f90428b97e84f9d1d10aaacb08ac885af1fc936f749f4eca9fcceab6eb887",
+  "test_tickets": [
+    {
+      "fingerprint": "c1737d3ed50aeeee0867a8cd3fb9748ca24adbde9c6ba17a3c1917c518af29ae",
+      "clasificacion": "aplicaciones"
+    },
+    {
+      "fingerprint": "d58967b14860031da473439c031ecb1758953fd610bb159681192738ee7df451",
+      "clasificacion": "infraestructura"
+    },
+    {
+      "fingerprint": "7d89623092d67c9bd2764c9e6de2eae4481ad6fa49e706d68051a1fd9014f55f",
+      "clasificacion": "aplicaciones"
+    },
+    {
+      "fingerprint": "b8232caf53a97316abec973756b1f29798b5d47a524522ea7ce99c1bab57b47a",
+      "clasificacion": "infraestructura"
+    },
+    {
+      "fingerprint": "1be691b92942d99406f9864db43421c88d2861bcfe279d63990ca86b7769a595",
+      "clasificacion": "aplicaciones"
+    },
+    {
+      "fingerprint": "a88303825c5b87908dd5a7f1dc48d70625ba868221de41edb70077a6bbf207ec",
+      "clasificacion": "aplicaciones"
+    },
+    {
+      "fingerprint": "23814eb2ae0d349313c377a1bcb4df17f29b09fe0bc45aaba261e0460afb81ed",
+      "clasificacion": "aplicaciones"
+    },
+    {
+      "fingerprint": "bbd2da4bdc37a6e1038c1099704dfa39bfc989f2491691a5df13c0f9ab6f17da",
+      "clasificacion": "otros"
+    },
+    {
+      "fingerprint": "9706c758ae9dcdd91157b27f8e9a6e2f4e22c25469c2fb5e1ab5332e35a578f5",
+      "clasificacion": "accesos"
+    },
+    {
+      "fingerprint": "ce0b35aa5c16046cbcb394cf90995add9308255d64a506ccb34dac675be8a9cb",
+      "clasificacion": "accesos"
+    },
+    {
+      "fingerprint": "874c135b267755cda43cfd21fd86bfca993ec555fc7c02b04fa06be1c22617f3",
+      "clasificacion": "aplicaciones"
+    },
+    {
+      "fingerprint": "577a10d08f98d3feb606fa9100a9b9802f431779d861b869f31402f6958c4f8e",
+      "clasificacion": "otros"
+    },
+    {
+      "fingerprint": "4b332f7c857ed827c9070aafc4dc4568ce2ac453850ce4383522bab572c649bf",
+      "clasificacion": "accesos"
+    },
+    {
+      "fingerprint": "b72227a8047c305b50e2b25847bfcff11f1147240d1009e58665dbc37cb658e1",
+      "clasificacion": "aplicaciones"
+    },
+    {
+      "fingerprint": "08475ebeb95362aca17356a02de034b9730b352bca60a6568180bc9c18d7d84f",
+      "clasificacion": "accesos"
+    },
+    {
+      "fingerprint": "c0778e3a1e9dcd39087cffc3da2402948af8f6d1d06556458d53ccd3e0f16022",
+      "clasificacion": "infraestructura"
+    },
+    {
+      "fingerprint": "2f8e6cccef60282e789bcbf8c120b10b7b066008f4e11f545aa861d43688eebc",
+      "clasificacion": "infraestructura"
+    },
+    {
+      "fingerprint": "9bef768c49b024e9fe426423fbbbb8c2dfe70a102946253452d6ebc2621e181c",
+      "clasificacion": "aplicaciones"
+    },
+    {
+      "fingerprint": "b77c3a9e111bdf03323f6b1fa08544d0ee0dd57768de2f3b4693f61f62eaa4c8",
+      "clasificacion": "infraestructura"
+    },
+    {
+      "fingerprint": "e58116510f993f21f23c136bb2a47c7e193884f9a857c62d018b74c96b0b86fb",
+      "clasificacion": "aplicaciones"
+    }
+  ]
+}

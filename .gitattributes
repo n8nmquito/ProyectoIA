@@ -3,3 +3,5 @@
 Dockerfile text eol=lf
 *.pkl binary
 SHA256SUMS text eol=lf
+# Preserve the manifest bytes referenced by the historical evaluation hash.
+python/data/processed/holdout_original.json -text whitespace=trailing-space,space-before-tab,cr-at-eol

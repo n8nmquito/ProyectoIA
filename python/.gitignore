@@ -12,6 +12,7 @@ data/raw/*
 !data/raw/README.md
 !data/raw/correos.json
 data/processed/*
+!data/processed/holdout_original.json
 models/**/*.pkl
 # Modelos autorizados para la entrega y sus copias de producción.
 !models/modelo_clasificador_10.pkl
