@@ -119,5 +119,3 @@ Las versiones están en [arquitectura](arquitectura.md). Se requieren cuentas y 
 | Perder correspondencia entre datos y modelos | Datasets por tamaño, hashes, configuración y reportes registrados | Conservar artefactos anteriores antes de reentrenar y reevaluar cada nueva versión |
 | Costes o dependencia del proveedor externo | El clasificador Python funciona sin OpenAI; la API y el portal ejecutan el modelo localmente | Definir presupuesto y revisar consumo; el análisis del agente depende del servicio externo |
 | Entrega académica incompleta | Código en main, seis documentos ordenados y espacios identificados en el README | Completar integrantes, licencia pendiente y enlaces de los dos videos |
-
-Antes de operar con correos reales, hay que asignar responsables y acordar cómo revisar errores. El [plan de monitoreo](consideraciones_eticas.md) sigue siendo una propuesta, no una rutina automática.
