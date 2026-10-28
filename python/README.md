@@ -102,22 +102,24 @@ Búsqueda con `GridSearchCV` de `C: [0.1, 1.0, 10.0]`, `class_weight: [null, bal
 
 ## 6. Resultados
 
-### Métricas registradas y comparación con baseline
+### Métricas finales del modelo
 
-Evaluación registrada del pipeline mediante **validación cruzada exploratoria de cuatro particiones**. El baseline predice siempre la categoría mayoritaria.
+El modelo de **300 correos utilizado por la API de producción y n8n** obtiene **accuracy de 95,33 % y F1 macro de 0,9543**, mediante validación cruzada exploratoria de **4 particiones**. RMSE no aplica a esta clasificación por categorías.
+
+Se verificaron en el contenedor el modelo (`SHA-256: 2905ce41…1bf6a87`) y sus parámetros: **C = 10.0**, sin ponderación de clases, calibración de **2 particiones**, TF-IDF de **palabras y pares de palabras**, `min_df: 1` y **semilla 42**. Coinciden con [config.yaml](config.yaml) y con el artefacto identificado en [version_evaluation.json](results/metrics/version_evaluation.json). YAML define los parámetros; el reporte contiene las métricas.
+
+### Comparación con baseline y tabla de rendimiento
+
+El baseline predice siempre la categoría mayoritaria.
 
 | Correos de entrenamiento | Accuracy CV | F1 macro CV | F1 macro baseline CV |
 |---:|---:|---:|---:|
 | 10 | No viable | No viable | No viable |
 | 100 | 0.9200 | 0.9201 | 0.0968 |
 | 200 | 0.9450 | 0.9442 | 0.0968 |
-| **300 — modelo final** | 0.9533 | 0.9543 | 0.1154 |
+| **300 — API de producción** | **0.9533** | **0.9543** | **0.1154** |
 
-El pipeline de 300 obtiene **accuracy CV de 95,33 % y F1 macro CV de 0,9543**, frente a **0,1154 de F1 macro del baseline**. En 10 correos la calibración no es viable en todos los folds, por lo que no se publica una cifra de CV.
-
-Estas cifras pertenecen a los artefactos identificados por sus hashes en [version_evaluation.json](results/metrics/version_evaluation.json); no se recalculan automáticamente al reentrenar. Los ajustes se seleccionaron sobre datos relacionados y las muestras son anidadas: los resultados no equivalen a una prueba externa independiente. Los 25 correos se reservan para pruebas funcionales y revisión manual; no se usan para calcular estas métricas.
-
-El diagnóstico histórico del modelo entrenado con 280 correos sobre 20 reservados obtuvo accuracy 0,9500 y F1 macro 0,9511; corresponde a otra etapa, no al modelo final ajustado con 300. Ver [evaluación y pruebas](docs/evaluacion_pruebas.md).
+Las cifras corresponden a los archivos identificados en el reporte; no se actualizan automáticamente al reentrenar. El modelo de 300 correos reentrenado en la carpeta del portal tiene otro hash y necesita su propia evaluación antes de atribuirle estas métricas. La validación cruzada es exploratoria y no sustituye una prueba externa independiente. Los 25 correos se usan para pruebas funcionales y revisión manual.
 
 ## 7. Instalación y uso
 
