@@ -28,7 +28,7 @@ Cambia 100 por 10, 200 o 300 para elegir otra versión. Sin indicar modelo se
 utiliza el de 300. Cada versión guarda sus resultados en una carpeta separada.
 Los 25 correos de prueba están aparte en data/test y no se usaron para entrenar.
 
-El [manual completo](../docs/manual_usuario.md) explica la interfaz y sus advertencias.
+El [README del proyecto](../README.md#8-interfaz-de-usuario) explica la interfaz y sus advertencias.
 
 ## Arquitectura y configuración
 
@@ -53,8 +53,8 @@ python -m src.export_datasets
 ```
 
 Estos comandos reemplazan los artefactos de los mismos nombres. Conservar las
-versiones anteriores antes de entrenar. La [evaluación](../docs/evaluacion_pruebas.md)
-documenta métricas por tamaño, el diagnóstico 280/20 y sus límites.
+versiones anteriores antes de entrenar. La sección de [resultados](../README.md#6-resultados)
+documenta las métricas por tamaño y sus límites.
 
 Para verificar los cuatro modelos y repetir las pruebas sin reentrenarlos:
 
