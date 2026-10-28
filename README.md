@@ -467,15 +467,24 @@ Para acceso público, configurar HTTPS y restringir el acceso a los puertos.
 
 ## Interfaz de usuario
 
+La aplicación cumple los cinco grupos funcionales: entrada validada de título
+y descripción; botón de clasificación con indicador de carga y mensajes de
+error; categoría, confianza y gráfico de probabilidades; sección **Acerca de**
+con métricas y limitaciones; y botón **Prueba con ejemplo** con cuatro casos.
+También incluye diseño adaptable, temas claro/oscuro, interfaz Español/English,
+descarga CSV de predicciones, historial de hasta 50 resultados por sesión y
+comparación de probabilidades mediante gráficos interactivos Altair. El modelo
+sigue entrenado en español; elegir English traduce la interfaz.
+
 La interfaz principal utiliza **Streamlit** y se ejecuta localmente. Presenta el formulario a la izquierda y el resultado a la derecha, con fondo oscuro, tarjetas gris carbón y acentos azules. Permite seleccionar modelos de 10, 100, 200 y 300 correos; el de 300 es el predeterminado.
 
 ### Capturas de pantalla
 
-![Formulario de clasificación de solicitudes](python/documentacion/imagenes/01_formulario.png)
+![Formulario de clasificación de solicitudes](python/documentacion/imagenes/app/portal_resultado.png)
 
-![Resultado con categoría, confianza y probabilidades](python/documentacion/imagenes/03_prediccion.png)
+![Historial de sesión y comparación de modelos](python/documentacion/imagenes/app/portal_historial.png)
 
-Las capturas corresponden a la aplicación ejecutada el 26 de octubre de 2026.
+Las capturas muestran el portal actualizado y la comparación de resultados verificados en el VPS.
 
 ### Instrucciones de uso
 
@@ -483,7 +492,7 @@ Las capturas corresponden a la aplicación ejecutada el 26 de octubre de 2026.
 2. Elegir el tamaño del modelo en el selector de clasificación.
 3. Escribir el título y el cuerpo de la solicitud, o cargar un ejemplo.
 4. Ejecutar la clasificación y revisar la categoría, la confianza y las cuatro probabilidades.
-5. Atender las advertencias de revisión y consultar la vista «Modelo y métricas» para interpretar el resultado. Al cambiar de modelo se conserva el texto y se borra el resultado anterior para volver a clasificarlo.
+5. Atender las advertencias de revisión y consultar la vista «Acerca de» para interpretar el resultado. Al cambiar de modelo se conserva el texto y se borra el resultado anterior para volver a clasificarlo.
 
 La interfaz valida entradas y muestra estados de procesamiento y errores. No crea tickets; la automatización de correo funciona como componente separado. Consultar el [manual de usuario](python/docs/manual_usuario.md).
 

@@ -93,7 +93,7 @@ Después de corregirlos se repitieron solo los cuatro casos afectados: 4/4 crear
 su ticket. No es una nueva medición de accuracy ni una repetición completa de los
 24 con la versión corregida. Evidencia: `results/n8n_produccion/`.
 
-Pruebas actuales: **51 tests Python aprobados**, Ruff sin errores y las tres
+Pruebas actuales: **56 tests Python aprobados**, Ruff sin errores y las tres
 suites JavaScript de normalización, asignación y adjuntos aprobadas. Se verifican también la integridad de los cuatro artefactos, sus probabilidades
 en 25 entradas y la limitación de CV en la versión de 10.
 
@@ -276,6 +276,18 @@ También se puede iniciar la interfaz con `Iniciar_clasificador.cmd`. El [manual
 
 ## Interfaz de usuario
 
+Las vistas son **Clasificar**, **Acerca de** e **Historial y comparación**.
+El botón **Prueba con ejemplo** recorre cuatro casos precargados. Cada entrada
+se valida; la predicción tiene indicador de carga, manejo de errores, categoría,
+confianza y gráfico interactivo Altair. Acerca de muestra los parámetros y las
+métricas del archivo elegido, junto con sus limitaciones.
+
+Los controles de idioma y tema permiten Español/English y claro/oscuro. El
+modelo sigue entrenado en español. Se puede descargar la predicción actual o
+el historial en CSV, comparar probabilidades de varias predicciones y borrar
+el historial de la sesión. Se retienen hasta 50 registros en memoria, sin
+guardarlos en archivos del servidor; los CSV contienen los textos ingresados.
+
 ```cmd
 python -m streamlit run app/app.py --browser.gatherUsageStats false
 ```
@@ -294,11 +306,11 @@ y no tiene autenticación; utilizar ejemplos sin información sensible.
 La API Python está desplegada en Docker y el
 flujo principal de n8n está activo en el servidor.
 
-![Interfaz real: formulario](documentacion/imagenes/01_formulario.png)
+![Interfaz actual con resultado y probabilidades](documentacion/imagenes/app/portal_resultado.png)
 
-![Interfaz real: resultado](documentacion/imagenes/03_prediccion.png)
+![Historial y comparación de modelos](documentacion/imagenes/app/portal_historial.png)
 
-Las capturas son de la aplicación ejecutada el 26 de octubre de 2026. El
+Las capturas muestran la aplicación actualizada y verificada en el VPS. El
 [manual](docs/manual_usuario.md) explica sus controles y mensajes.
 
 ## Estructura del proyecto

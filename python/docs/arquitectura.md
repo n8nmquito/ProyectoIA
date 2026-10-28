@@ -225,7 +225,12 @@ distingue la ruta y la fecha del archivo; el cambio limpia el resultado previo.
 Flujo: formulario local → limpieza → pipeline TF-IDF/SVM → categoría,
 confianza, cuatro probabilidades y aviso de revisión. No hay llamadas HTTP
 ni claves de API en este recorrido. La inferencia se ejecuta en esta computadora.
-La interfaz muestra ejemplos, carga, errores, métricas y limitaciones.
+La interfaz muestra ejemplos, carga, errores, métricas y limitaciones. Incluye
+los controles Español/English y claro/oscuro, exportación CSV e historial de
+hasta 50 predicciones por sesión con comparación mediante gráficos Altair.
+La interfaz en inglés no cambia el idioma del corpus: los ejemplos y el
+modelo siguen centrados en texto español. El historial reside en memoria;
+no se escriben los textos en archivos del servidor.
 `Iniciar_clasificador.cmd` inicia Streamlit ligado a 127.0.0.1; la pantalla se
 abre en el navegador local. No se presenta como una ventana nativa de Windows.
 

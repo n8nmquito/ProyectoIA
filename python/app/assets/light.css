@@ -1,0 +1,58 @@
+:root { color-scheme: light; }
+.stApp { background: #f3f6fb; color: #172b43; }
+.stApp [data-testid="stMarkdownContainer"],
+.stApp [data-testid="stWidgetLabel"] p,
+.stApp h1, .stApp h2, .stApp h3,
+.stApp [data-testid="stMetricLabel"] p,
+.stApp [data-testid="stMetricValue"] { color: #172b43; }
+.stApp [data-testid="stCaptionContainer"] p { color: #465e78 !important; }
+[data-testid="stVerticalBlockBorderWrapper"]:has(> div > .st-key-ticket-panel),
+[data-testid="stVerticalBlockBorderWrapper"]:has(> div > .st-key-result-panel) {
+  background: #ffffff; border-color: #c7d4e4 !important;
+  box-shadow: 0 8px 24px #23436b0d;
+}
+.stApp input, .stApp textarea {
+  background: #ffffff !important; color: #172b43 !important;
+}
+.stApp input::placeholder, .stApp textarea::placeholder { color: #59718d !important; }
+.stApp [data-baseweb="input"], .stApp [data-baseweb="textarea"],
+.stApp [data-baseweb="select"] > div {
+  background: #ffffff !important; color: #172b43 !important;
+  border-color: #bacbdf !important;
+}
+.stApp [data-baseweb="select"] span, .stApp [data-baseweb="select"] svg {
+  color: #172b43;
+}
+.stApp [data-testid="stButton"] button,
+.stApp [data-testid="stDownloadButton"] button {
+  background: #e7effa; color: #163b6a; border-color: #b7cae2;
+}
+.stApp [data-testid="stButton"] button[kind="primary"] {
+  background: #1769df; color: #ffffff;
+}
+.stApp [data-testid="stButton"] button[kind="primary"] [data-testid="stMarkdownContainer"],
+.stApp .stTabs [data-baseweb="tab"][aria-selected="true"] [data-testid="stMarkdownContainer"] {
+  color: #ffffff;
+}
+.stApp .stTabs [data-baseweb="tab-list"] { background: #e4ecf7; border-color: #c2d1e5; }
+.stApp .stTabs [data-baseweb="tab"] { color: #304b6c; }
+.stApp .stTabs [data-baseweb="tab"][aria-selected="true"] {
+  color: #ffffff; background: #1769df;
+}
+.stApp .stTabs [data-baseweb="tab"]:hover:not([aria-selected="true"]) {
+  background: #cdddf2; color: #172b43;
+}
+.stApp .panel-heading svg { color: #1769df; }
+.stApp [data-testid="stMetricValue"] { color: #1455a6; }
+.stApp [data-testid="stExpander"] details { background: #ffffff; color: #172b43; }
+.stApp [data-testid="stExpander"] summary { color: #172b43; }
+.stApp [data-testid="stCode"] pre { background: #e4ecf7; color: #172b43; }
+.stApp [data-testid="stAlertContainer"] {
+  background: #e4effe; border: 1px solid #9fbde7; color: #172b43;
+}
+.stApp [data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]) {
+  background: #fff3d9; border-color: #c7a050; color: #553b08;
+}
+.stApp [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) {
+  background: #fff0f0; border-color: #d69ca5; color: #721c2b;
+}

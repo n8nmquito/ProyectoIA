@@ -44,6 +44,28 @@ Estas diferencias impiden declarar que la entrega completa cumple al 100 %,
 aunque los documentos describan correctamente lo implementado. Esta revisión
 es documental; no constituye una nueva ejecución de pruebas ni del despliegue.
 
+## Funcionalidades obligatorias de la interfaz
+
+| Grupo de la consigna | Implementación |
+|---|---|
+| Input de datos | Título y descripción con límites de longitud, validación de tipos y contenido con letras |
+| Procesamiento | Botón Clasificar, spinner mientras predice y mensajes de error de configuración, modelo, entrada y ejecución |
+| Output y resultados | Categoría sugerida, confianza, revisión recomendada y gráfico interactivo de las cuatro probabilidades |
+| Información del modelo | Vista Acerca de con descripción, parámetros leídos del archivo, métricas por huella y advertencias |
+| Ejemplos de uso | Botón Prueba con ejemplo con cuatro tickets precargados en español |
+
+También se incorporan los elementos adicionales: diseño adaptable, modos claro
+y oscuro, interfaz Español/English, exportación CSV, historial de 50 registros
+por sesión, comparación de predicciones y gráficos interactivos Altair. El
+modelo no se traduce ni se reentrena al cambiar el idioma de la interfaz.
+
+Las pruebas de interfaz incluyen historial sin duplicación al volver a renderizar,
+cambio de idioma/tema conservando resultados, invalidación al editar textos,
+borrado de historial y comparación. Las pruebas de exportación comprueban
+Unicode, saltos de línea, valores reales de probabilidades y protección frente
+a fórmulas en celdas de texto. Se comprueba además el límite de retención sin
+reutilizar identificadores.
+
 ## Pruebas por tamaño y modelo final elegido
 
 Se prepararon cuatro versiones para las pruebas: 10, 100, 200 y 300 correos.
@@ -169,7 +191,7 @@ de haber inspeccionado esos casos.
 
 ## Pruebas automatizadas
 
-Última ejecución verificada: **51 pruebas aprobadas, cero fallos o errores**.
+Última ejecución verificada: **56 pruebas aprobadas, cero fallos o errores**.
 Evidencia legible por herramientas: results/metrics/pytest.xml.
 
 | Archivo | Comportamientos comprobados |

@@ -93,6 +93,17 @@ button:focus-visible { outline: 2px solid #86baff; outline-offset: 3px; }
 
 .stApp { overflow-x: hidden; }
 
+[data-testid="stDownloadButton"] button { min-height: 44px; }
+@media (max-width: 760px) {
+  .stTabs [data-baseweb="tab-list"] {
+    width: 100%; overflow-x: auto; justify-content: flex-start;
+  }
+  .stTabs [data-baseweb="tab"] { flex-shrink: 0; min-width: auto; }
+  [data-testid="stHorizontalBlock"] { flex-wrap: wrap; }
+  [data-testid="stColumn"] { min-width: 100% !important; }
+  .panel-heading { font-size: 21px !important; }
+}
+
 .model-indicator {
   display: inline-flex; align-items: center; background: #202d3c;
   color: #b9d7ff; border: 1px solid #354b65; border-radius: 7px;
@@ -148,4 +159,15 @@ button:focus-visible { outline: 2px solid #86baff; outline-offset: 3px; }
   .stTabs [data-baseweb="tab"] { min-width: 105px; padding: 0 14px; }
   .stTabs [data-baseweb="tab"] p { font-size: 14px; }
   .stTabs [data-baseweb="tab-panel"] { padding-top: 20px; }
+}
+
+@media (max-width: 480px) {
+  .stTabs [data-baseweb="tab-list"] {
+    width: 100%; height: auto; flex-wrap: wrap; overflow: visible;
+    box-sizing: border-box;
+  }
+  .stTabs [data-baseweb="tab"] {
+    flex: 1 1 40%; min-width: 0; padding: 0 8px;
+  }
+  .stTabs [data-baseweb="tab"]:last-child { flex-basis: 100%; }
 }

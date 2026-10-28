@@ -21,12 +21,17 @@ def icon(name):
     )
 
 
-def apply_style():
-    """Load the local stylesheet without external fonts or network calls."""
+def apply_style(theme="dark"):
+    """Apply per-session styling without changing other users' settings."""
     css = (Path(__file__).parent / "assets/style.css").read_text(
         encoding="utf-8"
     )
     st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    if theme == "light":
+        light_css = (Path(__file__).parent / "assets/light.css").read_text(
+            encoding="utf-8"
+        )
+        st.markdown(f"<style>{light_css}</style>", unsafe_allow_html=True)
 
 
 def heading(label, name):

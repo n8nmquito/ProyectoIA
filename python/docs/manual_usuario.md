@@ -56,7 +56,7 @@ el navegador como pantalla. El procesamiento utiliza el modelo guardado en esta 
 
 1. En Clasificar, elige **10, 100, 200 o 300 correos** en el selector. Por defecto se usa 300.
 2. Introduce Título y Descripción. Ambos deben contener letras.
-3. Cargar ejemplo completa el formulario; cada pulsación recorre otro de los cuatro ejemplos.
+3. Prueba con ejemplo completa el formulario; cada pulsación recorre otro de los cuatro ejemplos.
 4. Pulsa Clasificar. En Resultado aparece el indicador de análisis mientras se procesa.
 5. Revisa el modelo usado, la categoría, la confianza y las cuatro probabilidades.
 6. Ante confianza menor al 60 % o vocabulario desconocido, revisa el caso manualmente.
@@ -64,10 +64,15 @@ el navegador como pantalla. El procesamiento utiliza el modelo guardado en esta 
 
 La versión de 300 es la elegida para el proyecto. Las menores permiten observar
 cambios de predicción; más ejemplos no garantizan acertar todos los correos.
-La pantalla no reentrena, no almacena un historial y no ejecuta n8n ni crea tickets.
+La pantalla no reentrena ni ejecuta n8n o crea tickets. Conserva hasta 50
+predicciones en la memoria de la sesión y permite descargarlas en CSV.
 No ingreses contraseñas, secretos o datos personales innecesarios.
 
-## Modelo y métricas
+## Acerca de
+
+Los controles superiores permiten cambiar entre **Español** y **English**, y
+entre tema **Oscuro** y **Claro**. El idioma afecta a la interfaz, no al corpus:
+para clasificar se recomienda texto español o los ejemplos incorporados.
 
 Esta pestaña identifica la versión elegida y su archivo, lista los cuatro
 modelos y explica el pipeline TF-IDF + SVM calibrada. Detalla titulo, cuerpo y
@@ -94,11 +99,60 @@ python -m src.evaluate_versions
 Actualiza `results/metrics/version_evaluation.json` y `.csv`, repite los 25
 correos con cada modelo y exporta el gráfico de CV. No es un test externo.
 
+## Exportación historial y comparación
+
+1. Clasificar un ticket y pulsar **Descargar predicción CSV** para obtener el
+   texto, modelo, categoría, confianza, señal de revisión y cuatro probabilidades.
+2. Abrir **Historial y comparación**. Cada clasificación correcta agrega una
+   fila; cambiar de pestaña, tema o idioma no repite la predicción.
+3. Para comparar modelos sobre el mismo ticket, conservar el texto, cambiar
+   de modelo y pulsar Clasificar. Elegir al menos dos filas en el selector de
+   comparación; el gráfico agrupa sus probabilidades por categoría y muestra
+   valores al pasar el cursor. También admite desplazamiento y zoom.
+4. Pulsar **Descargar historial CSV** para descargar todas las filas retenidas.
+   Se incluyen hasta 50 resultados; al superar ese límite se elimina el más antiguo.
+5. **Borrar historial** elimina las filas de la memoria de la sesión, sin
+   borrar un resultado actual que siga visible ni archivos ya descargados.
+
+Editar título, descripción o modelo invalida el resultado actual para evitar
+descargar una predicción de un texto anterior. El historial conserva sus copias
+independientes hasta que se borra o termina la sesión. Las descargas contienen
+texto ingresado; no incluir secretos. Comparar confianza no mide accuracy.
+
 ## Capturas de la aplicación real
+
+### Portal actual
+
+![Predicción con confianza y gráfico interactivo](../documentacion/imagenes/app/portal_resultado.png)
+
+La vista Clasificar presenta el modelo utilizado, la categoría, la confianza,
+el gráfico de probabilidades y la descarga CSV de la predicción.
+
+![Historial y comparación de modelos](../documentacion/imagenes/app/portal_historial.png)
+
+El historial permite seleccionar resultados del mismo ticket con distintos
+modelos y comparar sus probabilidades. La tabla identifica cada modelo y fecha UTC.
+
+![Interfaz en inglés con tema claro](../documentacion/imagenes/app/portal_ingles_claro.png)
+
+Cambiar idioma y tema conserva el ticket, el modelo y los resultados. El aviso
+superior recuerda que el modelo se entrenó con texto español.
+
+![Navegación móvil sin controles cortados](../documentacion/imagenes/app/portal_movil.png)
+
+En móvil las columnas se apilan y la navegación ocupa dos filas; el resultado
+aparece debajo del formulario.
+
+### Capturas históricas
+
+Las capturas siguientes documentan la versión del 26 de octubre. La versión
+actual agrega controles de idioma y tema, la vista Historial y comparación y
+descargas CSV; renombra Cargar ejemplo a Prueba con ejemplo y Modelo y métricas
+a Acerca de.
 
 ![Formulario con selector](../documentacion/imagenes/01_formulario.png)
 
-El selector centrado superior alterna Clasificar y Modelo y métricas.
+El selector centrado superior alterna Clasificar y Acerca de.
 La tarjeta izquierda contiene el selector del modelo, los dos campos y el botón azul.
 La derecha presenta el resultado y el nombre del modelo que lo produjo.
 
@@ -106,8 +160,8 @@ Anotaciones de lectura del formulario:
 
 | Zona de la captura | Función | Acción del usuario |
 |---|---|---|
-| Selector superior Clasificar / Modelo y métricas | Cambiar de vista | Elegir clasificación o información del modelo |
-| Cargar ejemplo, arriba a la derecha del formulario | Completar los campos con un caso precargado | Pulsar para probar sin escribir un ticket |
+| Selector superior Clasificar / Acerca de | Cambiar de vista | Elegir clasificación o información del modelo |
+| Prueba con ejemplo, arriba a la derecha del formulario | Completar los campos con un caso precargado | Pulsar para probar sin escribir un ticket |
 | Modelo de clasificación | Seleccionar el archivo de 10, 100, 200 o 300 correos | Elegir la versión antes de clasificar |
 | Título y Descripción | Introducir los dos textos obligatorios | Describir el incidente con contexto suficiente |
 | Botón Clasificar, al pie del formulario | Ejecutar la predicción | Pulsar y esperar el indicador de análisis |
@@ -201,8 +255,11 @@ enviar texto y adjuntos al agente y crear tickets.
 **¿25 casos sin etiquetas miden accuracy?** No. Se necesita una referencia revisada;
 además son casos conocidos del desarrollo, no una evaluación independiente.
 
-**¿Se guardan los textos del formulario?** La aplicación no crea un historial de
-textos ni los escribe como resultados. Evita datos sensibles de todos modos.
+**¿Se guardan los textos del formulario?** Se conservan hasta 50 predicciones
+con sus textos en la memoria de la sesión. No se escriben en archivos del
+servidor; la descarga CSV sí incluye esos textos en el equipo del usuario.
+Borrar historial elimina esas filas; el resultado actual puede seguir visible.
+Evita datos sensibles.
 
 ## Operación separada de n8n
 

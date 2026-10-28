@@ -86,7 +86,7 @@ académica, pero siguen pendientes según la documentación actual.
 | Guardar cuatro tamaños exactos | models/ y data/train/; cantidades verificadas |
 | Elegir modelo desde CMD | evaluar_nuevos.py --model 10/100/200/300 |
 | Mostrar dudas y texto del ticket | requiere_revision y detalle en consola |
-| Probar funciones críticas | 51 pruebas automatizadas aprobadas |
+| Probar funciones críticas | 56 pruebas automatizadas aprobadas |
 | Explicar resultados y límites | seis documentos requeridos y evaluación complementaria |
 
 ## Cronograma de desarrollo planificado vs real
@@ -203,5 +203,5 @@ La interfaz usa Streamlit, opción A de la rúbrica. Permite seleccionar modelos
 de 10, 100, 200 o 300 correos, ingresar título y descripción, cargar ejemplos
 y mostrar categoría, confianza y cuatro probabilidades. Incluye validación,
 indicador de procesamiento, manejo de errores e información del modelo.
-La navegación utiliza un selector centrado con Clasificar y Modelo y métricas.
+La navegación utiliza un selector centrado con Clasificar y Acerca de.
 La automatización de correo en n8n funciona como componente separado.
