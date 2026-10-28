@@ -86,28 +86,18 @@ flowchart TD
         NOR -.-> FILES
         FILES --> RM["Crear y asignar ticket en Redmine"]
         RM --> MAIL["Preparar confirmación por correo"]
-        CLEAN -->|Error| REVIEW["Invocar subflujo de revisión y aviso"]
+        CLEAN -->|Error| REVIEW["Revisión sin creación de ticket"]
         API -->|Error| REVIEW
         ATT -->|Respuesta inválida| REVIEW
         CHECK -->|Proyecto, tipo o categoría inválidos| REVIEW
     end
-
-    subgraph ManejoErrores[Subflujo de revisión y aviso]
-        ER_START["Recibir contexto del llamador"] --> ER_REVIEW["Registrar revisión"]
-        ER_REVIEW --> ER_PREPARE["Preparar aviso"]
-        ER_PREPARE --> ER_IF{"¿Notificar?"}
-        ER_IF -->|Sí| ER_SEND["Notificar por correo"]
-        ER_IF -->|No| ER_END["Devolver revisión"]
-        ER_SEND --> ER_END
-    end
-    REVIEW -. "Llamada" .-> ER_START
 
     PG[(PostgreSQL)] --- CAT
     RM --> PG
     AG -. "Ejecuciones de n8n" .-> PG
 ```
 
-**La limpieza ocurre en un nodo de código de n8n, sin otra API**. NexpAPI clasifica. El entrenamiento se ejecuta aparte: el flujo de correo no aprende en línea. El principal reúne las 22 rutas de error en una llamada al subflujo de revisión y aviso; este recibe solo metadatos y devuelve el estado de revisión.
+**La limpieza ocurre en un nodo de código de n8n, sin otra API**. NexpAPI clasifica. El entrenamiento se ejecuta aparte: el flujo de correo no aprende en línea.
 
 ## 4. Pipeline de datos (desde input hasta output)
 

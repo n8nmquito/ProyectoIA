@@ -10,8 +10,7 @@
 | URL desde n8n | `http://nexpapi:8000/predict` |
 | Modelo de la API | 300 correos; SHA-256 `2905ce4167d90281106ff7a37f6211114eccf459c1764d8ac5c61f0b81bf6a87` |
 | Portal | `mquito-portal-streamlit-1`, proyecto `mquito-portal`, puerto 8501 |
-| Flujo principal n8n | `opxBwpGpRDrbQeHn`, 41 nodos y categoría final Python |
-| Subflujo de errores | `OUFLJDy4CYBbKV6d`, 6 nodos; revisión y aviso centralizados |
+| Flujo principal n8n | `opxBwpGpRDrbQeHn`, 44 nodos y categoría final Python |
 
 NexpAPI exige `X-API-Key` y no publica el puerto 8000. Su `.env` permanece privado. La API reutiliza `python/src` y `python/config.yaml`; el modelo desplegado está en `nexpapi/models` mediante `NEXPAPI_MODEL_DIR`.
 
@@ -41,23 +40,22 @@ Ambos servicios utilizan `unless-stopped`. Los volúmenes conservan historial y 
 
 ## Comportamiento del flujo actual
 
-La limpieza de firmas y datos sensibles se ejecuta en un nodo Code JavaScript de n8n. NexpAPI recibe título/cuerpo limpios y determina la categoría. Si la limpieza, la API o su respuesta fallan, se invoca el subflujo de revisión y aviso antes de ejecutar el agente. Las 22 rutas de error comparten el mismo nodo de llamada.
+La limpieza de firmas y datos sensibles se ejecuta en un nodo Code JavaScript de n8n. NexpAPI recibe título/cuerpo limpios y determina la categoría. Si la limpieza, la API o su respuesta fallan, se deriva a revisión antes de ejecutar el agente.
 
 OpenAI prepara el análisis y propone prioridad, tipo y proyecto. El código fija la categoría Python, consulta el responsable y valida los catálogos, la membresía y el rol. Los originales y adjuntos se conservan para Redmine; los adjuntos no se anonimizan.
 
-Las plantillas vigentes son [principal](../../workflows/correo-ia-redmine-python300.json) y [subflujo de errores](../../workflows/revision-aviso-error.json); se importa primero el subflujo y luego se selecciona en el principal. La otra exportación es histórica y no sirve como sustituto de la configuración actual.
+La plantilla vigente es [correo-ia-redmine-python300.json](../../workflows/correo-ia-redmine-python300.json). La otra exportación es histórica y no sirve como sustituto de la configuración actual.
 
 ## Evidencia actual
 
-- Las ejecuciones **28867**, **28870** y **28872** comprobaron el subflujo, la supresión de avisos y el manejo de SMTP mediante simulaciones; no enviaron correos reales y quedaron archivadas.
 - La ejecución aislada n8n **28845** verificó dos correos ficticios, limpieza local, NexpAPI y adjuntos, sin crear tickets ni enviar correos. El diagnóstico se archivó y el flujo principal quedó activo.
 - La evaluación de los modelos reentrenados del portal está en [results/produccion](../results/produccion/metrics/version_evaluation.json). La interfaz muestra métricas solo si el hash coincide con el archivo seleccionado.
 - El reporte de [pruebas Python](../results/metrics/pytest.xml) registra **96 pruebas aprobadas**. Las suites JavaScript y sus alcances están descritos en el [README del flujo](../../workflows/README.md#pruebas-y-diagnóstico).
 
 ## Reversión de una actualización
 
-1. Antes del cambio, guardar las versiones publicadas del principal y del subflujo, el commit y la imagen en uso, la configuración y los hashes de los modelos. Conservar los volúmenes y archivos privados.
-2. Elegir una versión previamente verificada que mantenga la limpieza local, la categoría final Python y el endpoint `nexpapi:8000`, junto con el contrato `context` y la referencia al subflujo de errores. Revisar su compatibilidad con el código y modelo que se va a restaurar.
+1. Antes del cambio, guardar la versión publicada de n8n, el commit y la imagen en uso, la configuración y los hashes de los modelos. Conservar los volúmenes y archivos privados.
+2. Elegir una versión previamente verificada que mantenga la limpieza local, la categoría final Python y el endpoint `nexpapi:8000`. Revisar su compatibilidad con el código y modelo que se va a restaurar.
 3. Probar la versión en una copia aislada, con la creación Redmine y SMTP sustituidas por comprobaciones, antes de publicarla.
 4. Si se restaura código de un servicio, reconstruir solo ese servicio con los comandos anteriores. Comprobar salud, una predicción y su hash; para el portal, verificar también la lectura de métricas y el historial.
 5. Confirmar en n8n que el flujo está activo y que las rutas de error y la validación de categoría siguen presentes. Revisar si existe un ticket antes de reintentar ejecuciones fallidas.
