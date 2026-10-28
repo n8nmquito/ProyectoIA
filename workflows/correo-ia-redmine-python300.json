@@ -32,8 +32,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        176,
-        272
+        192,
+        320
       ],
       "onError": "continueErrorOutput"
     },
@@ -182,25 +182,9 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1240,
-        288
+        912,
+        240
       ]
-    },
-    {
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "let email={};try{email=$('Normalizar correo').item.json;}catch{}\nreturn {json:{estado:'pendiente_revision',asunto:email.asunto||'Solicitud de soporte',message_id:email.message_id,motivo:'No se completó el procesamiento. Revisar la ejecución y comprobar si Redmine creó el ticket antes de reintentar.'}};"
-      },
-      "id": "4bec701a-79f8-4812-9da4-d9ffcb2d5e4d",
-      "name": "Sin análisis IA - Revisión",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2880,
-        656
-      ],
-      "notesInFlow": false,
-      "notes": "Ruta de error del procesamiento: registra revisión y prepara aviso al remitente; no confirma ni niega un alta ante un timeout."
     },
     {
       "parameters": {
@@ -240,8 +224,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4448,
-        80
+        4272,
+        96
       ],
       "onError": "continueErrorOutput"
     },
@@ -324,8 +308,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.5,
       "position": [
-        4208,
-        -144
+        2976,
+        -64
       ],
       "notesInFlow": false,
       "retryOnFail": false,
@@ -864,77 +848,6 @@
     },
     {
       "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "let email={};try {email=$('Normalizar correo').item.json;}catch {try{email=$('Leer buzón IMAP').item.json;}catch{}}\nlet raw={};try{raw=$('Leer buzón IMAP').item.json;}catch{}\nconst sender=String(email.remitente || raw.from?.value?.[0]?.address || raw.from?.text || raw.from || '').trim();\nconst match=sender.match(/<([^<>]+)>$/);const to=(match?match[1]:sender).trim().toLowerCase();\nconst headers=raw.headers||raw.metadata||{};\nconst header=name=>String(Object.entries(headers).find(([key])=>key.toLowerCase()===name)?.[1]||'').toLowerCase();\nconst valid=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9-]+(?:\\.[a-z0-9-]+)+$/i.test(to) && !/[\\r\\n,;]/.test(to);\nconst automatic=(header('auto-submitted') && header('auto-submitted')!=='no') || /bulk|list|junk/.test(header('precedence')) || header('list-id') || /^(no[._-]?reply|mailer-daemon|postmaster)@/.test(to);\nconst reason=!valid?'Remitente no válido':email.demo?'Correo de prueba':to==='n8n.mquito@gmail.com'?'Buzón propio':/@(?:example\\.(?:com|org|net|invalid)|[^@]+\\.invalid)$/.test(to)?'Dirección de ejemplo':automatic?'Mensaje automático':'';\nconst asunto=String(email.asunto||raw.subject||'Solicitud de soporte').replace(/[\\r\\n]/g,' ').slice(0,180);\nconst kind='error';\nlet subject,text;\nif(kind==='ticket') {subject='[Mquito] Ticket #'+$json.ticket_id+' creado';text='Hola,\\n\\nRegistramos tu solicitud: '+asunto+'\\nTicket: #'+$json.ticket_id+'\\nPodés consultar su estado en: '+$json.url+'\\n\\nMesa de soporte TI - Mquito';}\nelse if(kind==='omitido') {subject='[Mquito] Correo sin ticket de soporte';text='Hola,\\n\\nTu correo «'+asunto+'» fue clasificado como contenido ajeno al soporte TI y no se creó un ticket. Si se trata de un problema técnico, enviá una nueva solicitud con el sistema afectado y una descripción del problema.\\n\\nMesa de soporte TI - Mquito';}\nelse {subject='[Mquito] No se pudo completar el procesamiento';text='Hola,\\n\\nNo pudimos completar el procesamiento automático de tu correo «'+asunto+'». El caso quedó registrado en la ejecución para revisión. Antes de reenviar, consultá con soporte si ya existe un ticket para evitar duplicados.\\n\\nMesa de soporte TI - Mquito';}\nreturn {json:{...$json,notificacion:{enviar:!reason,omision:reason,para:valid?to:'',asunto:subject,texto:text}}};"
-      },
-      "id": "76ac16d2-897b-4ac0-89e3-3fe65de911a1",
-      "name": "Preparar aviso - Error de procesamiento",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1856,
-        912
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "86789f2e-ee52-401a-b8d0-419ea8d70365",
-              "leftValue": "={{ $json.notificacion.enviar }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "true",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "403a7336-479c-4d8f-886e-0806231ae5e4",
-      "name": "¿Notificar? - Error de procesamiento",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        2112,
-        912
-      ]
-    },
-    {
-      "parameters": {
-        "fromEmail": "Mquito Soporte <n8n.mquito@gmail.com>",
-        "toEmail": "={{ $json.notificacion.para }}",
-        "subject": "={{ $json.notificacion.asunto }}",
-        "emailFormat": "text",
-        "text": "={{ $json.notificacion.texto }}",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "id": "6dd75cd4-a8a6-41d3-a6d9-4c0787aece1f",
-      "name": "Notificar - Error de procesamiento",
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2.1,
-      "position": [
-        2352,
-        912
-      ],
-      "webhookId": "28af16c4-bde4-4209-b905-9877a90f4034",
-      "onError": "continueRegularOutput",
-      "notes": "Envía al remitente. Si SMTP falla, revisar el error en esta ejecución; no reejecutar la creación del ticket."
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "http://nexpapi:8000/predict",
         "authentication": "genericCredentialType",
@@ -956,8 +869,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        820,
-        160
+        544,
+        64
       ],
       "onError": "continueErrorOutput",
       "notes": "La API determina la categoría final. Recibe texto limpiado localmente en n8n."
@@ -1052,27 +965,71 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        400,
-        288
+        320,
+        192
       ],
       "onError": "continueErrorOutput",
       "notes": "Limpieza local en n8n: firmas y datos sensibles del asunto/cuerpo. No llama a otra API. No anonimiza adjuntos."
     },
     {
-      "id": "ffdfd055-fd67-452d-aac6-6d48be30a00f",
-      "name": "Unir correo y predicción",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
       "parameters": {
         "mode": "combine",
         "combineBy": "combineByPosition",
         "options": {}
       },
+      "id": "ffdfd055-fd67-452d-aac6-6d48be30a00f",
+      "name": "Unir correo y predicción",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
       "position": [
-        1030,
-        288
+        704,
+        256
       ],
       "notes": "Conserva asunto/cuerpo limpios y adjuntos junto con la respuesta de /predict. No ejecuta clasificación."
+    },
+    {
+      "id": "d9d21118-a4f6-40d0-9591-cfb8615f437d",
+      "name": "Revisión y aviso - Subflujo",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3008,
+        848
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "OUFLJDy4CYBbKV6d",
+          "mode": "list",
+          "cachedResultName": "Mquito | Revisión y aviso de error"
+        },
+        "mode": "once",
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "context": "={{ (() => {\n// Pass only notification metadata; sub-workflows cannot read parent nodes.\nlet email = {};\nlet raw = {};\ntry { email = $('Normalizar correo').item.json; } catch {}\ntry { raw = $('Leer buzón IMAP').item.json; } catch {}\nconst headers = Object.fromEntries(Object.entries(raw.headers || raw.metadata || {})\n  .filter(([key]) => ['auto-submitted', 'precedence', 'list-id'].includes(key.toLowerCase())));\nreturn {\n  email: {\n    remitente: email.remitente, asunto: email.asunto,\n    message_id: email.message_id, demo: email.demo === true,\n  },\n  raw: { from: raw.from, subject: raw.subject, headers },\n  origen: {\n    workflow_id: $workflow.id, workflow_nombre: $workflow.name,\n    execution_id: $execution.id,\n  },\n};\n\n})() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "context",
+              "displayName": "context",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "notes": "Revisión y aviso centralizados. Pasa solo metadatos del correo y la ejecución; conserva los filtros del aviso original."
     }
   ],
   "connections": {
@@ -1098,7 +1055,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1138,7 +1095,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1156,7 +1113,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1174,7 +1131,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1192,7 +1149,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1210,7 +1167,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1246,7 +1203,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1264,7 +1221,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1282,7 +1239,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1355,7 +1312,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1373,7 +1330,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1409,7 +1366,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1427,7 +1384,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1445,7 +1402,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1463,7 +1420,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1492,7 +1449,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1528,7 +1485,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1569,40 +1526,6 @@
         ]
       ]
     },
-    "Sin análisis IA - Revisión": {
-      "main": [
-        [
-          {
-            "node": "Preparar aviso - Error de procesamiento",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Preparar aviso - Error de procesamiento": {
-      "main": [
-        [
-          {
-            "node": "¿Notificar? - Error de procesamiento",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "¿Notificar? - Error de procesamiento": {
-      "main": [
-        [
-          {
-            "node": "Notificar - Error de procesamiento",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
     "Consultar API - Modelo 300": {
       "main": [
         [
@@ -1614,7 +1537,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1632,7 +1555,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1650,7 +1573,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1668,7 +1591,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }
@@ -1691,7 +1614,7 @@
         ],
         [
           {
-            "node": "Sin análisis IA - Revisión",
+            "node": "Revisión y aviso - Subflujo",
             "type": "main",
             "index": 0
           }

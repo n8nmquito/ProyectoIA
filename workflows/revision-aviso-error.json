@@ -1,0 +1,196 @@
+{
+  "name": "Mquito | Revisión y aviso de error",
+  "nodes": [
+    {
+      "id": "dcbac69b-1c23-46ae-b7f6-16d14675a61a",
+      "name": "Recibir revisión",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "context",
+              "type": "object"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// A reusable child receives its context explicitly from the calling workflow.\nconst context = $json.context || {};\nconst email = context.email || {};\nreturn { json: {\n  estado: 'pendiente_revision',\n  asunto: email.asunto || 'Solicitud de soporte',\n  message_id: email.message_id,\n  motivo: 'No se completó el procesamiento. Revisar la ejecución y comprobar si Redmine creó el ticket antes de reintentar.',\n  origen: context.origen || {},\n  contexto_aviso: { email, raw: context.raw || {} },\n} };\n"
+      },
+      "id": "ef03b772-8ec7-48da-abf2-7b950901a974",
+      "name": "Sin análisis IA - Revisión",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "notesInFlow": false,
+      "notes": "Ruta de error del procesamiento: registra revisión y prepara aviso al remitente; no confirma ni niega un alta ante un timeout."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const email=$json.contexto_aviso?.email || {};\nconst raw=$json.contexto_aviso?.raw || {};\nconst sender=String(email.remitente || raw.from?.value?.[0]?.address || raw.from?.text || raw.from || '').trim();\nconst match=sender.match(/<([^<>]+)>$/);const to=(match?match[1]:sender).trim().toLowerCase();\nconst headers=raw.headers||raw.metadata||{};\nconst header=name=>String(Object.entries(headers).find(([key])=>key.toLowerCase()===name)?.[1]||'').toLowerCase();\nconst valid=/^[a-z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-z0-9-]+(?:\\.[a-z0-9-]+)+$/i.test(to) && !/[\\r\\n,;]/.test(to);\nconst automatic=(header('auto-submitted') && header('auto-submitted')!=='no') || /bulk|list|junk/.test(header('precedence')) || header('list-id') || /^(no[._-]?reply|mailer-daemon|postmaster)@/.test(to);\nconst reason=!valid?'Remitente no válido':email.demo?'Correo de prueba':to==='n8n.mquito@gmail.com'?'Buzón propio':/@(?:example\\.(?:com|org|net|invalid)|[^@]+\\.invalid)$/.test(to)?'Dirección de ejemplo':automatic?'Mensaje automático':'';\nconst asunto=String(email.asunto||raw.subject||'Solicitud de soporte').replace(/[\\r\\n]/g,' ').slice(0,180);\nconst kind='error';\nlet subject,text;\nif(kind==='ticket') {subject='[Mquito] Ticket #'+$json.ticket_id+' creado';text='Hola,\\n\\nRegistramos tu solicitud: '+asunto+'\\nTicket: #'+$json.ticket_id+'\\nPodés consultar su estado en: '+$json.url+'\\n\\nMesa de soporte TI - Mquito';}\nelse if(kind==='omitido') {subject='[Mquito] Correo sin ticket de soporte';text='Hola,\\n\\nTu correo «'+asunto+'» fue clasificado como contenido ajeno al soporte TI y no se creó un ticket. Si se trata de un problema técnico, enviá una nueva solicitud con el sistema afectado y una descripción del problema.\\n\\nMesa de soporte TI - Mquito';}\nelse {subject='[Mquito] No se pudo completar el procesamiento';text='Hola,\\n\\nNo pudimos completar el procesamiento automático de tu correo «'+asunto+'». El caso quedó registrado en la ejecución para revisión. Antes de reenviar, consultá con soporte si ya existe un ticket para evitar duplicados.\\n\\nMesa de soporte TI - Mquito';}\nconst { contexto_aviso, ...revision } = $json;\nreturn {json:{...revision,notificacion:{enviar:!reason,omision:reason,para:valid?to:'',asunto:subject,texto:text}}};"
+      },
+      "id": "e7123239-3889-4034-8262-49dd0fd62612",
+      "name": "Preparar aviso - Error de procesamiento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "86789f2e-ee52-401a-b8d0-419ea8d70365",
+              "leftValue": "={{ $json.notificacion.enviar }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4850faa5-d32f-48a2-90fd-d47984c1cc4c",
+      "name": "¿Notificar? - Error de procesamiento",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "Mquito Soporte <n8n.mquito@gmail.com>",
+        "toEmail": "={{ $json.notificacion.para }}",
+        "subject": "={{ $json.notificacion.asunto }}",
+        "emailFormat": "text",
+        "text": "={{ $json.notificacion.texto }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "c1869b56-1b3e-48c6-938f-86797031717c",
+      "name": "Notificar - Error de procesamiento",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        -100
+      ],
+      "onError": "continueRegularOutput",
+      "notes": "Envía al remitente. Si SMTP falla, revisar el error en esta ejecución; no reejecutar la creación del ticket.",
+      "webhookId": "8d93dc06-cef9-4825-ade9-7b4a0a1a1f62"
+    },
+    {
+      "id": "6350d2b4-18fa-4ca8-82c5-4c0a91a2dc07",
+      "name": "Devolver revisión",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {json: $('Preparar aviso - Error de procesamiento').item.json};"
+      }
+    }
+  ],
+  "connections": {
+    "Recibir revisión": {
+      "main": [
+        [
+          {
+            "node": "Sin análisis IA - Revisión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sin análisis IA - Revisión": {
+      "main": [
+        [
+          {
+            "node": "Preparar aviso - Error de procesamiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar aviso - Error de procesamiento": {
+      "main": [
+        [
+          {
+            "node": "¿Notificar? - Error de procesamiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Notificar? - Error de procesamiento": {
+      "main": [
+        [
+          {
+            "node": "Notificar - Error de procesamiento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Devolver revisión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificar - Error de procesamiento": {
+      "main": [
+        [
+          {
+            "node": "Devolver revisión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false,
+  "pinData": {}
+}

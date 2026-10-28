@@ -2,7 +2,7 @@
 
 ## Plantilla y servicios
 
-Usar [correo-ia-redmine-python300.json](correo-ia-redmine-python300.json), la plantilla vigente de 44 nodos. `correo-ia-redmine.json` es una referencia histórica con otra lógica de clasificación.
+Importar primero [revision-aviso-error.json](revision-aviso-error.json) y asignar su SMTP. Después usar [correo-ia-redmine-python300.json](correo-ia-redmine-python300.json), la plantilla vigente de 41 nodos, y seleccionar ese subflujo en **Revisión y aviso - Subflujo**. `correo-ia-redmine.json` es una referencia histórica con otra lógica de clasificación.
 
 | Nodo o servicio | Configuración |
 |---|---|
@@ -11,7 +11,8 @@ Usar [correo-ia-redmine-python300.json](correo-ia-redmine-python300.json), la pl
 | Consultar API - Modelo 300 | `POST http://nexpapi:8000/predict`; Header Auth con nombre `X-API-Key` |
 | Agente OpenAI | Credencial del proveedor y modelo `gpt-4.1-mini` |
 | Herramientas y nodos Redmine | Header Auth con nombre `X-Redmine-API-Key` |
-| Avisos de correo | Credencial SMTP y remitente autorizado |
+| Avisos de correo | Credencial SMTP y remitente autorizado; el aviso de error se envía desde el subflujo |
+| Revisión y aviso - Subflujo | Execute Sub-workflow, entrada `context` de tipo objeto, esperar finalización |
 
 Las claves se administran en n8n y en los archivos privados del servicio. `X-API-Key` debe coincidir con `CLASSIFIER_API_KEY` del `.env` de NexpAPI. No escribir secretos en el flujo exportado ni en Git.
 
@@ -25,7 +26,7 @@ NexpAPI comparte la red Docker de n8n y no publica el puerto 8000. El host inter
 4. **Seleccionar adjuntos para IA** verifica que la respuesta corresponda a `modelo_clasificador_300`, con 300 muestras, categoría y probabilidades válidas; luego prepara archivos para el agente.
 5. El agente recibe la categoría Python y analiza el correo. **Aplicar categoría Python** vuelve a fijarla antes de preparar el ticket.
 
-Si falla la limpieza, la API o la validación de la respuesta, la ejecución deriva directamente a **Sin análisis IA - Revisión**. No pasa al agente ni crea un ticket con una categoría de respaldo. Los originales siguen disponibles para Redmine; los adjuntos no se anonimizan.
+Si falla la limpieza, la API o la validación de la respuesta, la ejecución invoca **Revisión y aviso - Subflujo**, que registra el caso y evalúa si corresponde avisar al remitente. No pasa al agente ni crea un ticket con una categoría de respaldo. Los originales siguen disponibles para Redmine; los adjuntos no se anonimizan.
 
 ## Tipo, categoría y responsable
 
@@ -37,9 +38,10 @@ Sin responsable configurado, se valida la propuesta del agente. El flujo puede d
 
 ## Comprobación antes de publicar
 
-- Reasignar las credenciales a la plantilla vigente, que se exporta desactivada.
+- Importar el subflujo antes del principal y reasignar las credenciales. Ambas plantillas se exportan desactivadas.
+- Seleccionar **Mquito | Revisión y aviso de error** en el nodo de llamada y conservar **Wait For Sub-Workflow Completion** activado. El subflujo admite llamadas del mismo propietario.
 - Comprobar que el nodo de limpieza sea Code JavaScript y que la API use `http://nexpapi:8000/predict`.
-- Revisar las conexiones de error hacia **Sin análisis IA - Revisión** y la presencia de **Aplicar categoría Python**.
+- Revisar las conexiones de error hacia **Revisión y aviso - Subflujo** y la presencia de **Aplicar categoría Python**.
 - Ejecutar las pruebas locales indicadas en el [README](README.md#pruebas-y-diagnóstico).
 - Para una prueba completa, preparar una copia aislada que sustituya creación de tickets y SMTP por comprobaciones. La rama manual del flujo principal sí puede generar un ticket real.
 
@@ -48,3 +50,25 @@ Sin responsable configurado, se valida la propuesta del agente. El flujo puede d
 Abrir **Executions** y revisar los nodos de limpieza, API y validación. Un estado `success` no demuestra que exista un ticket: comprobar **Resultado del ticket** y su ID en Redmine antes de reintentar.
 
 La señal de revisión no obliga a una aprobación humana. Las validaciones comprueban formatos y catálogos, no la veracidad completa del resumen. OpenAI puede recibir texto limpio, adjuntos seleccionados y respuestas de herramientas; la limpieza no equivale a anonimización completa.
+
+
+## Datos que recibe el subflujo
+
+La entrada es `context` de tipo objeto. Para probar desde otro flujo, usar datos ficticios y `demo: true`:
+
+```json
+{
+  "context": {
+    "email": {
+      "remitente": "demo@example.invalid",
+      "asunto": "Prueba de revisión",
+      "message_id": "demo-1",
+      "demo": true
+    },
+    "raw": {"headers": {}},
+    "origen": {"workflow_id": "flujo-origen", "execution_id": "ejecucion-origen"}
+  }
+}
+```
+
+Si se usa el remitente del correo sin normalizar, incluir `raw.from` y `raw.subject`. Para conservar el filtro de mensajes automáticos, pasar las cabeceras `auto-submitted`, `precedence` y `list-id` cuando existan. El subflujo no consulta nodos de su llamador: trabaja únicamente con esta entrada y conserva la referencia a la ejecución de origen.

@@ -82,6 +82,6 @@ for (const links of Object.values(workflow.connections)) for (const outputs of O
   for (const output of outputs) for (const link of output) assert.ok(nodes[link.node], link.node);
 for (const name of ['Aplicar categoría Python', 'Consultar categorías para asignación',
   'Consultar miembros para asignación', 'Resolver responsable por categoría']) {
-  assert.equal(workflow.connections[name].main[1][0].node, 'Sin análisis IA - Revisión');
+  assert.equal(workflow.connections[name].main[1][0].node, 'Revisión y aviso - Subflujo');
 }
 console.log('OK: Python final, desacuerdo, baja confianza, API inválida, responsable por categoría, rol verificado y conexiones.');

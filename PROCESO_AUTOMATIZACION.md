@@ -13,13 +13,13 @@ El diseño completo está en [arquitectura](python/docs/arquitectura.md) y los l
 7. El código resuelve `tipo_ticket` por nombre, comprueba proyecto y categoría, y busca el responsable configurado. Valida membresía y rol antes de asignarlo.
 8. Recupera y sube los adjuntos originales, crea el ticket en Redmine y prepara el aviso al remitente.
 
-Si falla la limpieza, la API o la validación de la predicción, el flujo deriva directamente a revisión, sin enviar el correo al agente ni crear el ticket. Un proyecto, tipo o categoría inválidos también bloquean el alta.
+Si falla la limpieza, la API o la validación de la predicción, el flujo invoca **Revisión y aviso - Subflujo**, que registra la revisión y prepara el aviso según los filtros existentes. No envía el correo al agente ni crea un ticket por esa ruta. Un proyecto, tipo o categoría inválidos también bloquean el alta.
 
 Las herramientas del agente son GET. La creación y asignación posteriores son automáticas tras los controles, sin aprobación humana obligatoria. La baja confianza marca revisión, pero no bloquea por sí sola el ticket. El sistema no concede permisos ni resuelve incidentes.
 
 ## Plantilla vigente
 
-Importar [correo-ia-redmine-python300.json](workflows/correo-ia-redmine-python300.json), la plantilla actual de **44 nodos**, desactivada y sin credenciales. Consultar la [guía de configuración](workflows/GUIA_CONFIGURACION.md) antes de publicarla.
+Importar [correo-ia-redmine-python300.json](workflows/correo-ia-redmine-python300.json), la plantilla actual de **41 nodos**, desactivada y sin credenciales. Importar primero el [subflujo de revisión y aviso](workflows/revision-aviso-error.json) y seleccionarlo en el nodo **Revisión y aviso - Subflujo**. Consultar la [guía de configuración](workflows/GUIA_CONFIGURACION.md) antes de publicarla.
 
 `workflows/correo-ia-redmine.json` conserva una versión histórica de 47 nodos. No representa la política actual de categoría final y limpieza; se mantiene como referencia de etapas anteriores.
 

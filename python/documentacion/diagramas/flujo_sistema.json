@@ -18,6 +18,10 @@
       "label": "Automatización de correo en n8n"
     },
     {
+      "id": "ManejoErrores",
+      "label": "Subflujo de revisión y aviso"
+    },
+    {
       "id": "Persistencia",
       "label": "Persistencia compartida"
     }
@@ -181,9 +185,45 @@
     },
     {
       "id": "REVIEW",
-      "label": "Revisión sin creación de ticket",
+      "label": "Invocar subflujo de revisión y aviso",
       "type": "process",
       "group": "Automatizacion"
+    },
+    {
+      "id": "ER_START",
+      "label": "Recibir contexto del llamador",
+      "type": "process",
+      "group": "ManejoErrores"
+    },
+    {
+      "id": "ER_REVIEW",
+      "label": "Registrar revisión",
+      "type": "process",
+      "group": "ManejoErrores"
+    },
+    {
+      "id": "ER_PREPARE",
+      "label": "Preparar aviso",
+      "type": "process",
+      "group": "ManejoErrores"
+    },
+    {
+      "id": "ER_IF",
+      "label": "¿Notificar?",
+      "type": "decision",
+      "group": "ManejoErrores"
+    },
+    {
+      "id": "ER_SEND",
+      "label": "Notificar por correo",
+      "type": "process",
+      "group": "ManejoErrores"
+    },
+    {
+      "id": "ER_END",
+      "label": "Devolver revisión",
+      "type": "process",
+      "group": "ManejoErrores"
     },
     {
       "id": "PG",
@@ -425,20 +465,72 @@
     },
     {
       "id": "e33",
+      "source": "ER_START",
+      "target": "ER_REVIEW",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e34",
+      "source": "ER_REVIEW",
+      "target": "ER_PREPARE",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e35",
+      "source": "ER_PREPARE",
+      "target": "ER_IF",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e36",
+      "source": "ER_IF",
+      "target": "ER_SEND",
+      "directed": true,
+      "style": "solid",
+      "label": "Sí"
+    },
+    {
+      "id": "e37",
+      "source": "ER_IF",
+      "target": "ER_END",
+      "directed": true,
+      "style": "solid",
+      "label": "No"
+    },
+    {
+      "id": "e38",
+      "source": "ER_SEND",
+      "target": "ER_END",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e39",
+      "source": "REVIEW",
+      "target": "ER_START",
+      "directed": true,
+      "style": "dashed",
+      "label": "Llamada"
+    },
+    {
+      "id": "e40",
       "source": "PG",
       "target": "CAT",
       "directed": false,
       "style": "solid"
     },
     {
-      "id": "e34",
+      "id": "e41",
       "source": "RM",
       "target": "PG",
       "directed": true,
       "style": "solid"
     },
     {
-      "id": "e35",
+      "id": "e42",
       "source": "AG",
       "target": "PG",
       "directed": true,
@@ -446,5 +538,5 @@
       "label": "Ejecuciones de n8n"
     }
   ],
-  "mermaid": "flowchart TD\n    subgraph Entrenamiento[Entrenamiento y artefactos]\n        DS[\"Correos simulados etiquetados\"] --> VAL[\"Validar datos y preparar muestras\"]\n        VAL --> OPT[\"Comparar y optimizar TF-IDF y clasificadores\"]\n        OPT --> FIT[\"Entrenar versiones de 10, 100, 200 y 300\"]\n        FIT --> MOD[\"Modelos pkl y datasets de cada versión\"]\n        OPT --> REP[\"Métricas, sensibilidad y gráficos S5\"]\n    end\n\n    subgraph Portal[Portal de pruebas Streamlit]\n        WEB[\"Formulario o ejemplo precargado\"] --> SEL[\"Validar entrada y elegir modelo\"]\n        MOD --> SEL\n        SEL --> INF[\"TF-IDF y SVM calibrada\"]\n        INF --> OUT[\"Categoría, confianza, probabilidades y revisión\"]\n        OUT --> HIST[\"Historial SQLite, comparación y exportación\"]\n    end\n\n    subgraph Automatizacion[Automatización de correo en n8n]\n        IMAP[\"Correo IMAP\"] --> NOR[\"Normalizar y conservar originales\"]\n        NOR --> CLEAN[\"Nodo Code JavaScript: limpiar firmas y datos sensibles\"]\n        CLEAN --> API[\"NexpAPI: predict con modelo de 300\"]\n        MOD --> API\n        CLEAN --> MERGE[\"Unir correo limpio y predicción\"]\n        API --> MERGE\n        MERGE --> ATT[\"Validar predicción y seleccionar adjuntos\"]\n        ATT --> AG[\"Agente OpenAI: analizar y proponer datos del ticket\"]\n        CAT[\"Catálogos Redmine: consultas GET\"] -.-> AG\n        AG --> REL{\"¿Solicitud de soporte?\"}\n        REL -->|No| OMIT[\"Registrar omisión y preparar aviso\"]\n        REL -->|Sí| FINAL[\"Aplicar categoría final de Python\"]\n        FINAL --> CHECK[\"Validar proyecto, tipo, categoría y responsable\"]\n        CAT -.-> CHECK\n        CHECK --> FILES[\"Recuperar y subir adjuntos originales\"]\n        NOR -.-> FILES\n        FILES --> RM[\"Crear y asignar ticket en Redmine\"]\n        RM --> MAIL[\"Preparar confirmación por correo\"]\n        CLEAN -->|Error| REVIEW[\"Revisión sin creación de ticket\"]\n        API -->|Error| REVIEW\n        ATT -->|Respuesta inválida| REVIEW\n        CHECK -->|Proyecto, tipo o categoría inválidos| REVIEW\n    end\n\n    PG[(PostgreSQL)] --- CAT\n    RM --> PG\n    AG -. \"Ejecuciones de n8n\" .-> PG"
+  "mermaid": "flowchart TD\n    subgraph Entrenamiento[Entrenamiento y artefactos]\n        DS[\"Correos simulados etiquetados\"] --> VAL[\"Validar datos y preparar muestras\"]\n        VAL --> OPT[\"Comparar y optimizar TF-IDF y clasificadores\"]\n        OPT --> FIT[\"Entrenar versiones de 10, 100, 200 y 300\"]\n        FIT --> MOD[\"Modelos pkl y datasets de cada versión\"]\n        OPT --> REP[\"Métricas, sensibilidad y gráficos S5\"]\n    end\n\n    subgraph Portal[Portal de pruebas Streamlit]\n        WEB[\"Formulario o ejemplo precargado\"] --> SEL[\"Validar entrada y elegir modelo\"]\n        MOD --> SEL\n        SEL --> INF[\"TF-IDF y SVM calibrada\"]\n        INF --> OUT[\"Categoría, confianza, probabilidades y revisión\"]\n        OUT --> HIST[\"Historial SQLite, comparación y exportación\"]\n    end\n\n    subgraph Automatizacion[Automatización de correo en n8n]\n        IMAP[\"Correo IMAP\"] --> NOR[\"Normalizar y conservar originales\"]\n        NOR --> CLEAN[\"Nodo Code JavaScript: limpiar firmas y datos sensibles\"]\n        CLEAN --> API[\"NexpAPI: predict con modelo de 300\"]\n        MOD --> API\n        CLEAN --> MERGE[\"Unir correo limpio y predicción\"]\n        API --> MERGE\n        MERGE --> ATT[\"Validar predicción y seleccionar adjuntos\"]\n        ATT --> AG[\"Agente OpenAI: analizar y proponer datos del ticket\"]\n        CAT[\"Catálogos Redmine: consultas GET\"] -.-> AG\n        AG --> REL{\"¿Solicitud de soporte?\"}\n        REL -->|No| OMIT[\"Registrar omisión y preparar aviso\"]\n        REL -->|Sí| FINAL[\"Aplicar categoría final de Python\"]\n        FINAL --> CHECK[\"Validar proyecto, tipo, categoría y responsable\"]\n        CAT -.-> CHECK\n        CHECK --> FILES[\"Recuperar y subir adjuntos originales\"]\n        NOR -.-> FILES\n        FILES --> RM[\"Crear y asignar ticket en Redmine\"]\n        RM --> MAIL[\"Preparar confirmación por correo\"]\n        CLEAN -->|Error| REVIEW[\"Invocar subflujo de revisión y aviso\"]\n        API -->|Error| REVIEW\n        ATT -->|Respuesta inválida| REVIEW\n        CHECK -->|Proyecto, tipo o categoría inválidos| REVIEW\n    end\n\n    subgraph ManejoErrores[Subflujo de revisión y aviso]\n        ER_START[\"Recibir contexto del llamador\"] --> ER_REVIEW[\"Registrar revisión\"]\n        ER_REVIEW --> ER_PREPARE[\"Preparar aviso\"]\n        ER_PREPARE --> ER_IF{\"¿Notificar?\"}\n        ER_IF -->|Sí| ER_SEND[\"Notificar por correo\"]\n        ER_IF -->|No| ER_END[\"Devolver revisión\"]\n        ER_SEND --> ER_END\n    end\n    REVIEW -. \"Llamada\" .-> ER_START\n\n    PG[(PostgreSQL)] --- CAT\n    RM --> PG\n    AG -. \"Ejecuciones de n8n\" .-> PG"
 }
