@@ -91,3 +91,30 @@ Git, las configuraciones, hashes, reportes y ejecuciones de n8n permiten investi
 3. Preparar datos nuevos autorizados y etiquetados por personas, con un conjunto de evaluación separado del entrenamiento.
 4. Comparar F1 macro, accuracy, métricas por categoría y baseline antes de aprobar una actualización.
 5. Coordinar la aprobación con la líder del proyecto y soporte; conservar el modelo y la configuración anteriores para poder revertir.
+## 7. Uso dual y mal uso
+
+### ¿Podría el modelo usarse con fines maliciosos?
+
+Podría usarse para desviar solicitudes, restar importancia a reclamos o vigilar a trabajadores. También pueden incluirse instrucciones maliciosas en correos o adjuntos para intentar manipular al agente. Estos usos no forman parte del objetivo del proyecto.
+
+### ¿Qué salvaguardas se han implementado?
+
+El prompt trata los correos y adjuntos como contenido no confiable y prohíbe seguir instrucciones que cambien sus reglas. Las herramientas del agente solo consultan Redmine por GET; el código fija la categoría Python y valida proyecto, tipo, categoría y responsable antes de crear el ticket. Además, n8n limpia firmas y datos sensibles del texto antes de enviarlo al clasificador y a OpenAI. Estos controles no garantizan evitar toda manipulación o filtración.
+
+### Limitaciones de uso claramente documentadas
+
+El sistema apoya la atención de soporte TI. No debe usarse para sancionar personas, ocultar reclamos, conceder o revocar accesos ni cerrar solicitudes automáticamente. La limpieza no autoriza a enviar secretos o adjuntos confidenciales al agente.
+
+## 8. Limitaciones reconocidas
+
+### ¿En qué casos NO debe usarse el modelo?
+
+No debe ser el único criterio en incidentes críticos, decisiones de seguridad, permisos o sanciones. Tampoco debe asumirse que funciona igual fuera del soporte TI o con idiomas distintos del español. No se deben cargar modelos `.pkl` de origen desconocido, porque pueden ejecutar código.
+
+### ¿Qué advertencias deben darse a los usuarios?
+
+La categoría y la confianza pueden ser incorrectas; una probabilidad alta no garantiza un acierto. Los datos de entrenamiento son simulados y las métricas no prueban el rendimiento con correos reales. Los avisos de revisión requieren atención del equipo: no obligan automáticamente a una aprobación humana. Los originales y el historial pueden conservar datos sensibles, y los adjuntos no se anonimizan.
+
+### Casos límite donde el modelo no es confiable
+
+Correos muy breves, ambiguos, con varias solicitudes, vocabulario desconocido, otros idiomas o información importante solo en adjuntos. El clasificador recibe título y cuerpo, no interpreta los archivos. También puede confundir una consulta de capacitación con un fallo de aplicación o un problema de permisos con uno de software. En estos casos debe revisarse el correo completo y corregirse la clasificación si corresponde.
