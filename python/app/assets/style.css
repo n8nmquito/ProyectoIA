@@ -171,3 +171,51 @@ button:focus-visible { outline: 2px solid #86baff; outline-offset: 3px; }
   }
   .stTabs [data-baseweb="tab"]:last-child { flex-basis: 100%; }
 }
+
+/* Compact, keyboard-accessible language and appearance controls. */
+.st-key-preferences {
+  max-width: 600px; margin: 14px 0 0 auto;
+}
+.st-key-preferences [data-testid="stWidgetLabel"] p {
+  font-size: 12px; font-weight: 600; color: #a6b6ca;
+  letter-spacing: .35px; margin-bottom: 3px;
+}
+.st-key-preferences [role="radiogroup"] {
+  display: flex; flex-wrap: nowrap; gap: 4px;
+  background: #121b25; border: 1px solid #344152;
+  border-radius: 13px; padding: 4px;
+  min-height: 48px; width: 100%; box-sizing: border-box;
+}
+.st-key-preferences label[data-baseweb="radio"] {
+  display: flex; flex: 1 1 0; justify-content: center;
+  align-items: center; margin: 0; padding: 7px 12px;
+  border-radius: 9px; background: transparent; min-height: 36px;
+  cursor: pointer; transition: background .15s ease, box-shadow .15s ease;
+}
+.st-key-preferences label[data-baseweb="radio"] > div:first-child { display: none; }
+.st-key-preferences label[data-baseweb="radio"] > div { margin: 0; padding: 0; }
+.st-key-preferences label[data-baseweb="radio"] p {
+  font-size: 14px; font-weight: 600; white-space: nowrap;
+  color: #a9b9cd; line-height: 1.5;
+}
+.st-key-preferences label[data-baseweb="radio"]:hover { background: #213044; }
+.st-key-preferences label[data-baseweb="radio"]:has(input:checked) {
+  background: #254b7b; box-shadow: 0 2px 7px #00000024;
+}
+.st-key-preferences label[data-baseweb="radio"]:has(input:checked) p {
+  color: #e5f0ff;
+}
+.st-key-preferences label[data-baseweb="radio"]:focus-within {
+  outline: 2px solid #7eb3ff; outline-offset: 2px;
+}
+@media (max-width: 760px) {
+  .st-key-preferences { max-width: none; margin-top: 12px; }
+  .st-key-preferences [data-testid="stColumn"] { min-width: 0 !important; }
+  .st-key-preferences [data-testid="stHorizontalBlock"] { flex-wrap: nowrap; gap: 12px; }
+  .st-key-preferences label[data-baseweb="radio"] { padding: 7px 8px; }
+  .st-key-preferences label[data-baseweb="radio"] p { font-size: 13px; }
+}
+@media (max-width: 480px) {
+  .st-key-preferences [data-testid="stHorizontalBlock"] { flex-wrap: wrap; gap: 8px; }
+  .st-key-preferences [data-testid="stColumn"] { min-width: 100% !important; }
+}

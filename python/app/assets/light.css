@@ -56,3 +56,24 @@
 .stApp [data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]) {
   background: #fff0f0; border-color: #d69ca5; color: #721c2b;
 }
+
+.stApp .st-key-preferences [data-testid="stWidgetLabel"] p { color: #52667e; }
+.stApp .st-key-preferences [role="radiogroup"] {
+  background: #e6edf6; border-color: #cad6e5;
+}
+.stApp .st-key-preferences label[data-baseweb="radio"] p { color: #50647d; }
+.stApp .st-key-preferences label[data-baseweb="radio"]:hover { background: #d6e3f5; }
+.stApp .st-key-preferences label[data-baseweb="radio"]:has(input:checked) {
+  background: #ffffff; box-shadow: 0 2px 7px #19385e18;
+}
+.stApp .st-key-preferences label[data-baseweb="radio"]:has(input:checked) p {
+  color: #1757ad;
+}
+.stApp .st-key-preferences [data-testid="stColumn"]:last-child
+label[data-baseweb="radio"]:last-of-type:has(input:checked) {
+  background: #fff2d5;
+}
+.stApp .st-key-preferences [data-testid="stColumn"]:last-child
+label[data-baseweb="radio"]:last-of-type:has(input:checked) p {
+  color: #82580a;
+}

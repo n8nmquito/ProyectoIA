@@ -149,8 +149,8 @@ def test_english_and_light_theme_preserve_model_and_session_results():
     before = app.session_state["last_result"]
     before_title = app.text_input(key="title").value
     before_body = app.text_area(key="body").value
-    app.selectbox(key="language").select("English").run()
-    app.selectbox(key="theme").select("light").run()
+    app.radio(key="language").set_value("English").run()
+    app.radio(key="theme").set_value("light").run()
     assert app.button(key="classify").label == "Classify"
     assert app.button(key="load_example").label == "Try an example"
     assert any("trained on Spanish tickets" in item.value for item in app.info)

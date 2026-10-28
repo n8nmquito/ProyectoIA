@@ -382,13 +382,18 @@ def main():
     for key in ("title", "body", "model_size", "theme"):
         if key in st.session_state:
             st.session_state[key] = st.session_state[key]
-    language_column, theme_column = st.columns(2)
-    with language_column:
-        st.selectbox("Idioma / Language", ("Español", "English"), key="language")
-    with theme_column:
-        theme_labels = {"dark": tr("Oscuro", "Dark"),
-                        "light": tr("Claro", "Light")}
-        st.selectbox(tr("Tema", "Theme"), ("dark", "light"), key="theme",
+    with st.container(key="preferences"):
+        language_column, theme_column = st.columns([1.15, 1], gap="medium")
+        with language_column:
+            st.radio("Idioma / Language", ("Español", "English"),
+                     key="language", horizontal=True,
+                     format_func=lambda value: "ES · Español" if value == "Español"
+                     else "EN · English")
+        with theme_column:
+            theme_labels = {"dark": "☾  " + tr("Oscuro", "Dark"),
+                            "light": "☀  " + tr("Claro", "Light")}
+            st.radio(tr("Apariencia", "Appearance"), ("dark", "light"),
+                     key="theme", horizontal=True,
                      format_func=lambda mode: theme_labels[mode])
     apply_style(st.session_state.theme)
     classify_tab, about_tab, history_tab = st.tabs([

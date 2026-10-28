@@ -74,6 +74,11 @@ Los controles superiores permiten cambiar entre **Español** y **English**, y
 entre tema **Oscuro** y **Claro**. El idioma afecta a la interfaz, no al corpus:
 para clasificar se recomienda texto español o los ejemplos incorporados.
 
+La apariencia se cambia con un selector de dos botones: luna para Oscuro y sol
+para Claro. La opción activa aparece resaltada y ambos controles admiten teclado.
+
+![Controles de idioma y apariencia con iconos](../documentacion/imagenes/app/controles_apariencia.png)
+
 Esta pestaña identifica la versión elegida y su archivo, lista los cuatro
 modelos y explica el pipeline TF-IDF + SVM calibrada. Detalla titulo, cuerpo y
 la etiqueta clasificacion; limpieza y conversión a variables TF-IDF; cantidad
