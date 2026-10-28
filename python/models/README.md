@@ -24,7 +24,7 @@ La carpeta [reentrenados_produccion/](reentrenados_produccion/) conserva los cua
 - [Modelo reentrenado de 200](reentrenados_produccion/modelo_clasificador_200.pkl).
 - [Modelo reentrenado de 300](reentrenados_produccion/modelo_clasificador_300.pkl).
 
-Sus hashes son distintos de los del reporte de referencia; **sus métricas siguen pendientes de evaluación**. Se guardan aparte para no reemplazar los modelos evaluados. El selector Streamlit no recorre subcarpetas, por lo que estas copias no se mezclan con las opciones principales.
+Sus hashes son distintos de los de referencia y ya tienen un [reporte de evaluación propio](../results/produccion/metrics/version_evaluation.json). El portal selecciona las métricas por hash, sin confundir las dos series. El selector de modelos no recorre subcarpetas, por lo que estas copias no se mezclan con las opciones principales.
 
 ## Cómo obtenerlos y usarlos
 
@@ -83,3 +83,29 @@ python -m src.train_versions --size 300
 ```
 
 Cambia `300` por `10`, `100` o `200`; sin `--size` se entrenan los cuatro. Se reemplaza el archivo del tamaño indicado. Después debes actualizar la evaluación y los hashes antes de atribuirle métricas del modelo anterior. Estos pasos no despliegan ni cambian por sí solos NexpAPI o el portal del servidor.
+
+
+## Repetir la evaluación del portal
+
+Desde `python/`, evalúa las copias entregadas sin reemplazar los reportes de referencia:
+
+```bash
+python -m src.evaluate_versions --models-dir models/reentrenados_produccion --output-root results/produccion
+```
+
+En el servidor, los modelos activos ya están en `models/`:
+
+```bash
+python -m src.evaluate_versions --output-root results/produccion
+```
+
+La evaluación verifica los datasets y hashes, mide ajuste sobre entrenamiento, realiza CV exploratoria cuando es viable y prueba los 25 correos. La CV ajusta copias en memoria; los `.pkl` originales no se modifican. Los resultados quedan en `results/produccion/`: métricas JSON/CSV, predicciones y gráfico. El reporte registra Python 3.12.3 y scikit-learn 1.5.2 del entorno de evaluación; el contenedor del portal sigue usando Python 3.10.22.
+
+| Correos | Accuracy CV | F1 macro CV | F1 macro baseline CV |
+|---:|---:|---:|---:|
+| 10 | No viable | No viable | No viable |
+| 100 | 0.9200 | 0.9201 | 0.0968 |
+| 200 | 0.9450 | 0.9442 | 0.0968 |
+| 300 | 0.9533 | 0.9543 | 0.1154 |
+
+La falta de CV del modelo de 10 se debe a los pocos ejemplos por clase para la calibración interna. Los resultados de entrenamiento y de CV tienen alcances distintos; los 25 correos no tienen etiquetas esperadas y no se les atribuye precisión.

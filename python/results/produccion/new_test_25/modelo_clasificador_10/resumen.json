@@ -1,0 +1,11 @@
+{
+  "mode": "predictions_only",
+  "model_refitted": false,
+  "n_training": 10,
+  "n_test": 25,
+  "model_sha256": "e4e985546945113f5fecd53e3aac97a3237f7c851176c128ba888bf970122124",
+  "model_path": "/mquito/mquito-ticket/python/models/modelo_clasificador_10.pkl",
+  "test_sha256": "d0757418c3eb63f61801ea140b0480a6ad86bd66be0a55d6520c6a0fa49971e6",
+  "exact_training_test_overlap": 0,
+  "predictions_csv": "predicciones.csv"
+}

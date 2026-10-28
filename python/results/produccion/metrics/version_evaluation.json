@@ -1,0 +1,110 @@
+{
+  "evaluated_at_utc": "2026-10-28T05:38:14.779163+00:00",
+  "models_directory": "models",
+  "configuration": {
+    "seed": 42,
+    "cv_folds": 4,
+    "confidence_threshold": 0.6
+  },
+  "environment": {
+    "python": "3.12.3",
+    "scikit-learn": "1.5.2",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "joblib": "1.4.2"
+  },
+  "models_and_datasets_unchanged": true,
+  "input_hashes": {
+    "data/raw/correos.json": "ad36ec355f910610f4caf9f1f8c3184164c346db2314001bcab3b155d3dac7d0",
+    "data/test/correos_test_25.json": "d0757418c3eb63f61801ea140b0480a6ad86bd66be0a55d6520c6a0fa49971e6",
+    "models/modelo_clasificador_10.pkl": "e4e985546945113f5fecd53e3aac97a3237f7c851176c128ba888bf970122124",
+    "models/modelo_clasificador_100.pkl": "8fb15ca66a72e173f806418d06296983582a4a2dd232a40429a6f6bee573211f",
+    "models/modelo_clasificador_200.pkl": "1c2b2c0c6b984a9d860879fbfc57703d6efb36c1b5490f9fcc86a06a5d5bd1b4",
+    "models/modelo_clasificador_300.pkl": "bd745b50ccb4884dcb110ab381c4b2250d4745dee60663a3a177c100efe6988e",
+    "data/train/correos_10.json": "923b6afe91e2cb7ef0a5b5196f18a6964901ea614f60090acf40ff87dca0bff9",
+    "data/train/correos_100.json": "93937a7837e0f346a2c39171432c4fac7d36ec993d8ffea7f431d04bf23d75cf",
+    "data/train/correos_200.json": "4863d166327c08caa6fd4245fee2d81597b76b865d6f6f5e05417757d2017b5d",
+    "data/train/correos_300.json": "78588dc5246cc0d5b93a76c9f755538139703baede020b3d7326be84e458f421",
+    "config.yaml": "322cfdccf7206d8e587adbb2c54d0dcf8f9abbbc0f48b2587861e3007cb856bd"
+  },
+  "versions": [
+    {
+      "correos": 10,
+      "model_sha256": "e4e985546945113f5fecd53e3aac97a3237f7c851176c128ba888bf970122124",
+      "train_accuracy": 0.4,
+      "train_f1_macro": 0.5,
+      "cv_status": "not_feasible",
+      "cv_reason": "Algún fold deja menos correos por clase que los 2 folds de calibración interna.",
+      "cv_folds": null,
+      "cv_f1_macro": null,
+      "cv_f1_std": null,
+      "cv_accuracy": null,
+      "baseline_cv_f1_macro": null,
+      "test_25_count": 25,
+      "test_25_review_count": 22,
+      "test_25_mean_confidence_pct": 47.52736020092659,
+      "test_25_accuracy": null,
+      "test_25_f1_macro": null
+    },
+    {
+      "correos": 100,
+      "model_sha256": "8fb15ca66a72e173f806418d06296983582a4a2dd232a40429a6f6bee573211f",
+      "train_accuracy": 1.0,
+      "train_f1_macro": 1.0,
+      "cv_status": "exploratory",
+      "cv_reason": "CV interna con ajustes previamente seleccionados; no es un test externo ni validación anidada de la búsqueda.",
+      "cv_folds": 4,
+      "cv_f1_macro": 0.9200653513153514,
+      "cv_f1_std": 0.02739851391836106,
+      "cv_accuracy": 0.9199999999999999,
+      "baseline_cv_f1_macro": 0.0967741935483871,
+      "test_25_count": 25,
+      "test_25_review_count": 2,
+      "test_25_mean_confidence_pct": 81.92104344863851,
+      "test_25_accuracy": null,
+      "test_25_f1_macro": null
+    },
+    {
+      "correos": 200,
+      "model_sha256": "1c2b2c0c6b984a9d860879fbfc57703d6efb36c1b5490f9fcc86a06a5d5bd1b4",
+      "train_accuracy": 1.0,
+      "train_f1_macro": 1.0,
+      "cv_status": "exploratory",
+      "cv_reason": "CV interna con ajustes previamente seleccionados; no es un test externo ni validación anidada de la búsqueda.",
+      "cv_folds": 4,
+      "cv_f1_macro": 0.9442247778389082,
+      "cv_f1_std": 0.027445960723248893,
+      "cv_accuracy": 0.945,
+      "baseline_cv_f1_macro": 0.0967741935483871,
+      "test_25_count": 25,
+      "test_25_review_count": 1,
+      "test_25_mean_confidence_pct": 88.78399316594864,
+      "test_25_accuracy": null,
+      "test_25_f1_macro": null
+    },
+    {
+      "correos": 300,
+      "model_sha256": "bd745b50ccb4884dcb110ab381c4b2250d4745dee60663a3a177c100efe6988e",
+      "train_accuracy": 1.0,
+      "train_f1_macro": 1.0,
+      "cv_status": "exploratory",
+      "cv_reason": "CV interna con ajustes previamente seleccionados; no es un test externo ni validación anidada de la búsqueda.",
+      "cv_folds": 4,
+      "cv_f1_macro": 0.9542864681191887,
+      "cv_f1_std": 0.006922158298981251,
+      "cv_accuracy": 0.9533333333333334,
+      "baseline_cv_f1_macro": 0.11537450031559016,
+      "test_25_count": 25,
+      "test_25_review_count": 2,
+      "test_25_mean_confidence_pct": 91.56983121058875,
+      "test_25_accuracy": null,
+      "test_25_f1_macro": null
+    }
+  ],
+  "limits": [
+    "Training metrics measure fit on known training examples only.",
+    "Exploratory CV: shared settings tuned on overlapping data.",
+    "Datasets are nested and do not isolate sample size causally.",
+    "The 25 known tickets have no reviewed labels: no accuracy/F1."
+  ]
+}

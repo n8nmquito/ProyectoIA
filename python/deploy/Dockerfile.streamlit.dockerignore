@@ -12,5 +12,8 @@
 !results/metrics/
 !results/metrics/test_metrics.json
 !results/metrics/version_evaluation.json
+!results/produccion/
+!results/produccion/metrics/
+!results/produccion/metrics/version_evaluation.json
 **/__pycache__/
 **/*.pyc

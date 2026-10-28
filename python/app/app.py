@@ -182,25 +182,35 @@ def read_metrics():
 
 def read_version_metrics(size):
     """Only show metrics whose model fingerprint matches the selected file."""
+    path = ROOT / "models" / f"modelo_clasificador_{size}.pkl"
     try:
-        results = json.loads(
-            (ROOT / "results/metrics/version_evaluation.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        path = ROOT / "models" / f"modelo_clasificador_{size}.pkl"
-        return next(
-            (
-                row
-                for row in results["versions"]
-                if row["correos"] == size
-                and row["model_sha256"] == file_hash(path)
-            ),
-            None,
-        )
-    except (OSError, ValueError, KeyError, TypeError) as exc:
-        LOGGER.warning("Evaluación no disponible: %s", exc)
+        model_hash = file_hash(path)
+    except OSError as exc:
+        LOGGER.warning("Modelo no disponible: %s", exc)
         return None
+    reports = (
+        ROOT / "results/metrics/version_evaluation.json",
+        ROOT / "results/produccion/metrics/version_evaluation.json",
+    )
+    for report in reports:
+        if not report.is_file():
+            continue
+        try:
+            results = json.loads(report.read_text(encoding="utf-8"))
+            row = next(
+                (
+                    row
+                    for row in results["versions"]
+                    if row["correos"] == size
+                    and row["model_sha256"] == model_hash
+                ),
+                None,
+            )
+            if row is not None:
+                return row
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            LOGGER.warning("Evaluación no disponible en %s: %s", report, exc)
+    return None
 
 
 def probability_chart(entries, compare=False):

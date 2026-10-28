@@ -119,7 +119,11 @@ El baseline predice siempre la categoría mayoritaria.
 | 200 | 0.9450 | 0.9442 | 0.0968 |
 | **300 — API de producción** | **0.9533** | **0.9543** | **0.1154** |
 
-Las cifras corresponden a los archivos identificados en el reporte; no se actualizan automáticamente al reentrenar. El modelo de 300 correos reentrenado en la carpeta del portal tiene otro hash y necesita su propia evaluación antes de atribuirle estas métricas. La validación cruzada es exploratoria y no sustituye una prueba externa independiente. Los 25 correos se usan para pruebas funcionales y revisión manual.
+Los cuatro modelos reentrenados del portal ya tienen su [evaluación propia](results/produccion/metrics/version_evaluation.json), vinculada a sus hashes. El de 300 (`bd745b50…6988e`) obtuvo **accuracy CV de 95,33 % y F1 macro CV de 0,9543**. Los de 100 y 200 obtuvieron F1 macro de **0,9201 y 0,9442**; para 10 la CV no es viable. Los valores coinciden con los de referencia, pero se calcularon sobre los archivos actuales del portal.
+
+![Evaluación de los modelos reentrenados del portal](results/produccion/figures/comparacion_modelos_cv.png)
+
+La interfaz muestra las métricas solo si el hash coincide con el modelo seleccionado. La CV es exploratoria, no una prueba externa independiente; los 25 correos siguen siendo pruebas funcionales sin accuracy o F1.
 
 ## 7. Instalación y uso
 
@@ -186,6 +190,9 @@ Probar un modelo con los 25 correos incluidos y actualizar la comparación por t
 ```bash
 python evaluar_nuevos.py --model 300
 python -m src.evaluate_versions
+
+# Ejecutar las pruebas automatizadas
+python -m pytest tests -q
 ```
 
 El primer comando muestra título, categoría, confianza y revisión; guarda el CSV y el resumen en `results/new_test_25/modelo_clasificador_300/`. Cambiar `300` por `10`, `100` o `200` para probar otra versión.

@@ -28,7 +28,7 @@ Usa las referencias **1–4** para cargar y clasificar el correo, y **5–7** pa
 
 ![Captura anotada: preferencias, pestaña Acerca de, archivo, variables y datos del modelo](../documentacion/imagenes/app/manual/02_acerca.svg)
 
-Aquí puedes identificar el modelo y revisar sus entradas. Más abajo aparecen parámetros, métricas disponibles y limitaciones. Si no hay un reporte que corresponda al archivo actual, se informa en pantalla.
+Aquí puedes identificar el modelo y revisar sus entradas. Más abajo aparecen parámetros, métricas disponibles y limitaciones. Los modelos reentrenados del portal ya tienen su reporte por hash; para el de 10 se explica por qué no hay CV viable. Si se cambia un archivo sin reevaluarlo, se informa en pantalla.
 
 ### Revisar el historial
 

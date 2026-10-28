@@ -76,7 +76,7 @@ Faltan los nombres del resto del equipo, el apartado de licencia del README y lo
 
 El cronograma informa cierre el **25/10/2026**, cinco días antes del **30/10/2026** previsto, sin explicar los adelantos. Esa fecha no demuestra que se hayan implementado todos los entregables mencionados.
 
-Hubo revisiones hasta el **28/10/2026**, después del cierre informado. La última comprobación registró **91 pruebas Python aprobadas**, más pruebas JavaScript y de n8n. Los videos y datos pendientes del equipo siguen por completar.
+Hubo revisiones hasta el **28/10/2026**, después del cierre informado. La última comprobación registró **96 pruebas Python aprobadas**, más pruebas JavaScript y de n8n. Los videos y datos pendientes del equipo siguen por completar.
 
 **María Quito Castillo** es Líder del Proyecto y Desarrollador TI (desarrolladora full stack). Los otros nombres quedan pendientes; se mantienen los roles del cronograma.
 
