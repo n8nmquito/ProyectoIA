@@ -93,7 +93,7 @@ Después de corregirlos se repitieron solo los cuatro casos afectados: 4/4 crear
 su ticket. No es una nueva medición de accuracy ni una repetición completa de los
 24 con la versión corregida. Evidencia: `results/n8n_produccion/`.
 
-Pruebas actuales: **77 tests Python aprobados**, Ruff sin errores y las tres
+Pruebas actuales: **83 tests Python aprobados**, Ruff sin errores y las tres
 suites JavaScript de normalización, asignación y adjuntos aprobadas. Se verifican también la integridad de los cuatro artefactos, sus probabilidades
 en 25 entradas y la limitación de CV en la versión de 10.
 
@@ -262,8 +262,22 @@ python -m src.evaluate_versions
 python -m pytest -q
 ```
 
+Para reentrenar una versión individual en Linux, desde la carpeta `python`:
+
+```bash
+.venv/bin/python -m src.train_versions --size 10
+.venv/bin/python -m src.train_versions --size 100
+.venv/bin/python -m src.train_versions --size 200
+.venv/bin/python -m src.train_versions --size 300
+```
+
+Cada comando sustituye solo el modelo y dataset del tamaño elegido, conserva
+las otras versiones y guarda `results/metrics/model_versions_<tamaño>.json`
+y `.csv`. Sin `--size` se reentrenan las cuatro versiones. La selección usa
+las mismas muestras anidadas del corpus de 300; no agrega los 25 de prueba.
+
 `src.train` selecciona ajustes y vuelve a entrenar el modelo de 300. Después,
-`src.train_versions` actualiza los cuatro modelos con las mismas opciones y
+`src.train_versions` actualiza los modelos seleccionados con las mismas opciones y
 guarda sus datasets. `src.export_datasets` solo exporta los datos exactos de los
 modelos actuales, sin reentrenarlos. `src.evaluate` reconstruye en memoria el
 modelo diagnóstico de 280 y repite sus métricas, sin guardar otro `.pkl`.

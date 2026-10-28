@@ -13,6 +13,51 @@ from src.train_versions import attach_training_manifest, nested_subsets
 from src.utils import ROOT
 
 
+@pytest.mark.parametrize("size", [None, 10, 100, 200, 300])
+def test_training_selection_preserves_other_models(tmp_path, monkeypatch, size):
+    """Train fixture models and verify only requested artifacts are replaced."""
+    import json
+
+    import src.train_versions as training
+    from src.utils import load_config
+
+    frame = corpus()
+    source = tmp_path / "correos.json"
+    source.write_text(frame.drop(columns="texto").to_json(orient="records"),
+                      encoding="utf-8")
+    for folder in ("models", "data/train", "results/metrics"):
+        (tmp_path / folder).mkdir(parents=True)
+    selected = training.SIZES if size is None else (size,)
+    preserved = {}
+    for other in set(training.SIZES) - set(selected):
+        path = tmp_path / "models" / f"modelo_clasificador_{other}.pkl"
+        path.write_bytes(b"modelo previo intacto")
+        preserved[path] = path.read_bytes()
+    settings = load_config()
+    settings["data_path"] = str(source)
+    monkeypatch.setattr(training, "ROOT", tmp_path)
+    monkeypatch.setattr(training, "load_model", lambda _: build_pipeline("svm"))
+    table = training.train_versions(settings, size=size)
+    assert table.correos.tolist() == list(selected)
+    for path, original in preserved.items():
+        assert path.read_bytes() == original
+    for count in selected:
+        model = load_model(tmp_path / "models" / f"modelo_clasificador_{count}.pkl")
+        assert model.training_sample_count_ == count
+        dataset = tmp_path / "data/train" / f"correos_{count}.json"
+        assert len(json.loads(dataset.read_text(encoding="utf-8"))) == count
+    report = "model_versions" if size is None else f"model_versions_{size}"
+    assert (tmp_path / "results/metrics" / f"{report}.json").exists()
+
+
+def test_training_rejects_unsupported_size_before_loading(monkeypatch):
+    """Reject invalid sizes before any model or dataset is accessed."""
+    from src.train_versions import train_versions
+
+    with pytest.raises(ValueError, match="10, 100, 200 o 300"):
+        train_versions({}, size=25)
+
+
 def corpus():
     """Build a 300-row fixture with the current class distribution."""
     counts = {

@@ -61,11 +61,18 @@ def attach_training_manifest(model, subset, source_hash):
     return model
 
 
-def train_versions(config):
-    """Fit all four sizes with one selected algorithm and configuration."""
+def train_versions(config, size=None):
+    """Fit one selected size or all four using the saved model settings."""
+    if size is not None and size not in SIZES:
+        raise ValueError("El tamaño debe ser 10, 100, 200 o 300.")
+    report_name = (
+        "model_versions" if size is None else f"model_versions_{size}"
+    )
     source = project_path(config["data_path"])
     frame = load_data(source)
     subsets = nested_subsets(frame, config["seed"])
+    if size is not None:
+        subsets = {size: subsets[size]}
     template = load_model(project_path(config["model_path"]))
     classifier = template.named_steps["classifier"]
     calibration_folds = config["model"]["calibration_folds"]
@@ -111,7 +118,7 @@ def train_versions(config):
             summary["config"]["model_path"] = config["model_path"]
             save_json(summary_path, summary)
     save_json(
-        ROOT / "results/metrics/model_versions.json",
+        ROOT / f"results/metrics/{report_name}.json",
         {
             "source_sha256": source_hash,
             "seed": config["seed"],
@@ -139,7 +146,7 @@ def train_versions(config):
         },
     )
     table = pd.DataFrame(rows)
-    table.to_csv(ROOT / "results/metrics/model_versions.csv", index=False)
+    table.to_csv(ROOT / f"results/metrics/{report_name}.csv", index=False)
     return table
 
 
@@ -147,12 +154,19 @@ def main():
     """Expose repeatable training of the four saved size variants."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default=None)
+    parser.add_argument(
+        "--size",
+        type=int,
+        choices=SIZES,
+        default=None,
+        help="Entrenar solo 10, 100, 200 o 300; sin esta opción, los cuatro.",
+    )
     args = parser.parse_args()
     logging.basicConfig(
         level=logging.INFO, format="%(levelname)s: %(message)s"
     )
     try:
-        table = train_versions(load_config(args.config))
+        table = train_versions(load_config(args.config), size=args.size)
     except (ValueError, OSError, KeyError) as exc:
         parser.exit(1, f"Error al entrenar versiones: {exc}\n")
     print(table[["correos", "archivo"]].to_string(index=False))
