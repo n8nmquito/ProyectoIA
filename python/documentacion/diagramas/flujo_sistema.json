@@ -1,0 +1,450 @@
+{
+  "schemaVersion": "1.0",
+  "format": "flowchart.nodes-edges",
+  "title": "Mquito Ticket - Flujo del sistema completo",
+  "direction": "top-to-bottom",
+  "source": "python/docs/arquitectura.md",
+  "groups": [
+    {
+      "id": "Entrenamiento",
+      "label": "Entrenamiento y artefactos"
+    },
+    {
+      "id": "Portal",
+      "label": "Portal de pruebas Streamlit"
+    },
+    {
+      "id": "Automatizacion",
+      "label": "Automatización de correo en n8n"
+    },
+    {
+      "id": "Persistencia",
+      "label": "Persistencia compartida"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "DS",
+      "label": "Correos simulados etiquetados",
+      "type": "process",
+      "group": "Entrenamiento"
+    },
+    {
+      "id": "VAL",
+      "label": "Validar datos y preparar muestras",
+      "type": "process",
+      "group": "Entrenamiento"
+    },
+    {
+      "id": "OPT",
+      "label": "Comparar y optimizar TF-IDF y clasificadores",
+      "type": "process",
+      "group": "Entrenamiento"
+    },
+    {
+      "id": "FIT",
+      "label": "Entrenar versiones de 10, 100, 200 y 300",
+      "type": "process",
+      "group": "Entrenamiento"
+    },
+    {
+      "id": "MOD",
+      "label": "Modelos pkl y datasets de cada versión",
+      "type": "process",
+      "group": "Entrenamiento"
+    },
+    {
+      "id": "REP",
+      "label": "Métricas, sensibilidad y gráficos S5",
+      "type": "process",
+      "group": "Entrenamiento"
+    },
+    {
+      "id": "WEB",
+      "label": "Formulario o ejemplo precargado",
+      "type": "process",
+      "group": "Portal"
+    },
+    {
+      "id": "SEL",
+      "label": "Validar entrada y elegir modelo",
+      "type": "process",
+      "group": "Portal"
+    },
+    {
+      "id": "INF",
+      "label": "TF-IDF y SVM calibrada",
+      "type": "process",
+      "group": "Portal"
+    },
+    {
+      "id": "OUT",
+      "label": "Categoría, confianza, probabilidades y revisión",
+      "type": "process",
+      "group": "Portal"
+    },
+    {
+      "id": "HIST",
+      "label": "Historial SQLite, comparación y exportación",
+      "type": "process",
+      "group": "Portal"
+    },
+    {
+      "id": "IMAP",
+      "label": "Correo IMAP",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "NOR",
+      "label": "Normalizar y conservar originales",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "CLEAN",
+      "label": "Nodo Code JavaScript: limpiar firmas y datos sensibles",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "API",
+      "label": "NexpAPI: predict con modelo de 300",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "MERGE",
+      "label": "Unir correo limpio y predicción",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "ATT",
+      "label": "Validar predicción y seleccionar adjuntos",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "AG",
+      "label": "Agente OpenAI: analizar y proponer datos del ticket",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "CAT",
+      "label": "Catálogos Redmine: consultas GET",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "REL",
+      "label": "¿Solicitud de soporte?",
+      "type": "decision",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "OMIT",
+      "label": "Registrar omisión y preparar aviso",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "FINAL",
+      "label": "Aplicar categoría final de Python",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "CHECK",
+      "label": "Validar proyecto, tipo, categoría y responsable",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "FILES",
+      "label": "Recuperar y subir adjuntos originales",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "RM",
+      "label": "Crear y asignar ticket en Redmine",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "MAIL",
+      "label": "Preparar confirmación por correo",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "REVIEW",
+      "label": "Revisión sin creación de ticket",
+      "type": "process",
+      "group": "Automatizacion"
+    },
+    {
+      "id": "PG",
+      "label": "PostgreSQL",
+      "type": "database",
+      "group": "Persistencia"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e01",
+      "source": "DS",
+      "target": "VAL",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e02",
+      "source": "VAL",
+      "target": "OPT",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e03",
+      "source": "OPT",
+      "target": "FIT",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e04",
+      "source": "FIT",
+      "target": "MOD",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e05",
+      "source": "OPT",
+      "target": "REP",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e06",
+      "source": "WEB",
+      "target": "SEL",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e07",
+      "source": "MOD",
+      "target": "SEL",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e08",
+      "source": "SEL",
+      "target": "INF",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e09",
+      "source": "INF",
+      "target": "OUT",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e10",
+      "source": "OUT",
+      "target": "HIST",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e11",
+      "source": "IMAP",
+      "target": "NOR",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e12",
+      "source": "NOR",
+      "target": "CLEAN",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e13",
+      "source": "CLEAN",
+      "target": "API",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e14",
+      "source": "MOD",
+      "target": "API",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e15",
+      "source": "CLEAN",
+      "target": "MERGE",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e16",
+      "source": "API",
+      "target": "MERGE",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e17",
+      "source": "MERGE",
+      "target": "ATT",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e18",
+      "source": "ATT",
+      "target": "AG",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e19",
+      "source": "CAT",
+      "target": "AG",
+      "directed": true,
+      "style": "dashed"
+    },
+    {
+      "id": "e20",
+      "source": "AG",
+      "target": "REL",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e21",
+      "source": "REL",
+      "target": "OMIT",
+      "directed": true,
+      "style": "solid",
+      "label": "No"
+    },
+    {
+      "id": "e22",
+      "source": "REL",
+      "target": "FINAL",
+      "directed": true,
+      "style": "solid",
+      "label": "Sí"
+    },
+    {
+      "id": "e23",
+      "source": "FINAL",
+      "target": "CHECK",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e24",
+      "source": "CAT",
+      "target": "CHECK",
+      "directed": true,
+      "style": "dashed"
+    },
+    {
+      "id": "e25",
+      "source": "CHECK",
+      "target": "FILES",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e26",
+      "source": "NOR",
+      "target": "FILES",
+      "directed": true,
+      "style": "dashed"
+    },
+    {
+      "id": "e27",
+      "source": "FILES",
+      "target": "RM",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e28",
+      "source": "RM",
+      "target": "MAIL",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e29",
+      "source": "CLEAN",
+      "target": "REVIEW",
+      "directed": true,
+      "style": "solid",
+      "label": "Error"
+    },
+    {
+      "id": "e30",
+      "source": "API",
+      "target": "REVIEW",
+      "directed": true,
+      "style": "solid",
+      "label": "Error"
+    },
+    {
+      "id": "e31",
+      "source": "ATT",
+      "target": "REVIEW",
+      "directed": true,
+      "style": "solid",
+      "label": "Respuesta inválida"
+    },
+    {
+      "id": "e32",
+      "source": "CHECK",
+      "target": "REVIEW",
+      "directed": true,
+      "style": "solid",
+      "label": "Proyecto, tipo o categoría inválidos"
+    },
+    {
+      "id": "e33",
+      "source": "PG",
+      "target": "CAT",
+      "directed": false,
+      "style": "solid"
+    },
+    {
+      "id": "e34",
+      "source": "RM",
+      "target": "PG",
+      "directed": true,
+      "style": "solid"
+    },
+    {
+      "id": "e35",
+      "source": "AG",
+      "target": "PG",
+      "directed": true,
+      "style": "dashed",
+      "label": "Ejecuciones de n8n"
+    }
+  ],
+  "mermaid": "flowchart TD\n    subgraph Entrenamiento[Entrenamiento y artefactos]\n        DS[\"Correos simulados etiquetados\"] --> VAL[\"Validar datos y preparar muestras\"]\n        VAL --> OPT[\"Comparar y optimizar TF-IDF y clasificadores\"]\n        OPT --> FIT[\"Entrenar versiones de 10, 100, 200 y 300\"]\n        FIT --> MOD[\"Modelos pkl y datasets de cada versión\"]\n        OPT --> REP[\"Métricas, sensibilidad y gráficos S5\"]\n    end\n\n    subgraph Portal[Portal de pruebas Streamlit]\n        WEB[\"Formulario o ejemplo precargado\"] --> SEL[\"Validar entrada y elegir modelo\"]\n        MOD --> SEL\n        SEL --> INF[\"TF-IDF y SVM calibrada\"]\n        INF --> OUT[\"Categoría, confianza, probabilidades y revisión\"]\n        OUT --> HIST[\"Historial SQLite, comparación y exportación\"]\n    end\n\n    subgraph Automatizacion[Automatización de correo en n8n]\n        IMAP[\"Correo IMAP\"] --> NOR[\"Normalizar y conservar originales\"]\n        NOR --> CLEAN[\"Nodo Code JavaScript: limpiar firmas y datos sensibles\"]\n        CLEAN --> API[\"NexpAPI: predict con modelo de 300\"]\n        MOD --> API\n        CLEAN --> MERGE[\"Unir correo limpio y predicción\"]\n        API --> MERGE\n        MERGE --> ATT[\"Validar predicción y seleccionar adjuntos\"]\n        ATT --> AG[\"Agente OpenAI: analizar y proponer datos del ticket\"]\n        CAT[\"Catálogos Redmine: consultas GET\"] -.-> AG\n        AG --> REL{\"¿Solicitud de soporte?\"}\n        REL -->|No| OMIT[\"Registrar omisión y preparar aviso\"]\n        REL -->|Sí| FINAL[\"Aplicar categoría final de Python\"]\n        FINAL --> CHECK[\"Validar proyecto, tipo, categoría y responsable\"]\n        CAT -.-> CHECK\n        CHECK --> FILES[\"Recuperar y subir adjuntos originales\"]\n        NOR -.-> FILES\n        FILES --> RM[\"Crear y asignar ticket en Redmine\"]\n        RM --> MAIL[\"Preparar confirmación por correo\"]\n        CLEAN -->|Error| REVIEW[\"Revisión sin creación de ticket\"]\n        API -->|Error| REVIEW\n        ATT -->|Respuesta inválida| REVIEW\n        CHECK -->|Proyecto, tipo o categoría inválidos| REVIEW\n    end\n\n    PG[(PostgreSQL)] --- CAT\n    RM --> PG\n    AG -. \"Ejecuciones de n8n\" .-> PG"
+}
