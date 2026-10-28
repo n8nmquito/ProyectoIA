@@ -1,103 +1,60 @@
-# Planificación del sistema de clasificación de tickets TI
+# Planificación del proyecto
 
-El proyecto prueba versiones de 10, 100, 200 y 300 correos y adopta
-**modelo_clasificador_300.pkl como modelo final**. Las tres versiones menores
-se conservan para comparación; las métricas por versión se detallan en la evaluación actual.
+## 1. Definición del problema y objetivos
 
-Versión: 27 de octubre de 2026.
+### Definición del problema
 
-## Definición del problema y objetivos
-
-Los correos de soporte mezclan consultas sobre cuentas, errores de aplicaciones,
-equipos, redes y dudas generales. El operador debe leerlos y decidir quién los
-atiende. El proyecto propone una categoría inicial para apoyar esa tarea y
-facilitar su supervisión. En la automatización actual, Python determina la
-categoría final; el agente prepara el análisis y el código crea el ticket
-después de resolver el responsable por categoría y validar los datos de Redmine.
+La mesa de ayuda recibe correos sobre cuentas, aplicaciones, equipos, redes y consultas generales. Leerlos, clasificarlos, preparar el ticket y derivarlo manualmente son tareas repetitivas que pueden producir asignaciones inconsistentes y demoras. El proyecto automatiza ese recorrido con un clasificador Python, un agente OpenAI y validaciones antes del registro en Redmine.
 
 ### Objetivo general
 
-Desarrollar un sistema de clasificación de solicitudes de soporte TI que permita
-entrenar, guardar y probar un clasificador de texto reproducible e integrarlo al
-flujo de correo, n8n y Redmine para apoyar la derivación inicial de tickets.
+Desarrollar e integrar un sistema reproducible de clasificación de correos de soporte TI que determine su categoría y automatice la preparación, validación y registro de tickets en Redmine mediante n8n, con una interfaz para probar y revisar los modelos.
 
 ### Objetivos específicos
 
-- Preparar y validar los correos, combinar título y cuerpo y analizar la calidad
-  y distribución de las cuatro categorías.
-- Comparar una referencia mayoritaria, regresión logística y SVM calibrada
-  mediante métricas de clasificación y validación cruzada.
-- Optimizar los hiperparámetros y conservar modelos y datasets correspondientes
-  a 10, 100, 200 y 300 correos, con trazabilidad entre ambos.
-- Permitir pruebas por consola y Streamlit, mostrando categoría, probabilidades
-  y advertencias cuando la predicción requiere revisión.
-- Exponer el modelo de 300 mediante una API interna e integrarlo con la
-  automatización para comparar su predicción con la propuesta del agente.
-- Documentar resultados, limitaciones, pruebas, recursos y riesgos del sistema.
+- Preparar los datasets simulados de **10, 100, 200 y 300 correos**, validar su calidad y analizar las cuatro categorías.
+- Comparar baseline, regresión logística y SVM calibrada; seleccionar hiperparámetros mediante F1 macro y documentar el análisis del Workshop S5.
+- Entrenar y conservar las cuatro versiones con trazabilidad entre datos, configuración, modelos y resultados.
+- Ofrecer pruebas por consola y Streamlit con categoría, confianza, probabilidades, ejemplos, historial, comparación y exportación.
+- Integrar el modelo de 300 mediante **NexpAPI**; limpiar firmas y datos sensibles en n8n antes de consultar el clasificador y OpenAI.
+- Aplicar la categoría final de Python, validar los datos de Redmine y registrar el ticket con el responsable configurado cuando sea válido.
+- Documentar la planificación, los datos, la arquitectura, la optimización y las consideraciones éticas.
 
-## Justificación de la relevancia del proyecto
+## 2. Justificación de la relevancia del proyecto
 
-La relevancia está en reducir trabajo repetitivo y hacer visible cuándo hace
-falta revisión manual. No se midieron ahorros de tiempo ni beneficios económicos;
-son objetivos de uso futuro, no resultados comprobados.
+Una solicitud mal clasificada o derivada puede tardar más en llegar al equipo adecuado. Automatizar las tareas repetitivas y aplicar criterios uniformes permite organizar la atención y conservar la trazabilidad de categoría, análisis y asignación en Redmine.
 
-Comparar modelos con distintas cantidades de correos permite estudiar el
-comportamiento del clasificador con un corpus reducido. La integración con
-Redmine permite comprobar el circuito de registro y asignación de solicitudes,
-mientras que la consola y Streamlit facilitan la demostración y revisión de
-predicciones. Su utilidad en una mesa de ayuda real requiere validación con
-datos autorizados y supervisión del personal de soporte.
+El portal facilita que operadores, técnicos y supervisores prueben las predicciones y revisen sus limitaciones. Comparar tamaños de dataset permite explorar el comportamiento del clasificador con pocos ejemplos. **La reducción de tiempos y la mejora de la atención son objetivos; todavía no se han medido con usuarios finales externos.** La utilidad en una organización requiere validación con datos autorizados y supervisión de soporte.
 
-## Alcance del proyecto
+## 3. Alcance (qué incluye y qué NO incluye)
 
 ### Qué incluye
 
-Incluye cuatro categorías; un JSON maestro de 300 correos simulados; datasets
-de 10/100/200/300; cuatro modelos guardados; pruebas por consola con selección
-de modelo; entrenamiento y evaluación; gráficos, notebooks y documentación.
-Las categorías son accesos, aplicaciones, infraestructura y otros.
-También incluye Streamlit, una API Python en Docker y la integración con n8n,
-OpenAI y Redmine para registrar solicitudes y comprobar asignaciones.
+- Clasificación de solicitudes en **accesos, aplicaciones, infraestructura y otros**.
+- Corpus simulado de 300 correos, muestras anidadas de 10/100/200/300 y 25 correos separados para pruebas funcionales y revisión manual.
+- Preprocesamiento, EDA, comparación de modelos, optimización, entrenamiento, evaluación y trazabilidad de artefactos.
+- Portal Streamlit local o desplegado en Docker, con selección de modelos disponibles, ejemplos, resultados, temas, idiomas, descargas, historial y comparación.
+- NexpAPI interna con el modelo de 300 y autenticación; n8n para recibir correo, limpiar texto, consultar el clasificador y ejecutar el agente OpenAI.
+- Preparación y validación de tickets, resolución de responsables, carga de adjuntos y registro en Redmine, con avisos según el flujo configurado.
+- Código versionado en **main** y los cinco documentos requeridos en `python/docs/`.
 
-El flujo desplegado lee el buzón, envía texto y adjuntos seleccionados al agente,
-crea tickets y puede enviar avisos. Streamlit continúa local; la API está
-desplegada en una red Docker interna. Python clasifica la categoría; el agente
-propone también prioridad y responsable, sujetos a las validaciones del flujo.
+### Qué NO incluye
 
-### Qué no incluye
+- Resolver automáticamente incidentes, modificar cuentas o conceder/revocar permisos.
+- Cerrar tickets o tomar decisiones críticas basándose únicamente en el modelo.
+- Entrenar un modelo Python independiente de prioridad o grupo; esos datos se gestionan mediante el agente y las validaciones del flujo.
+- Embeddings semánticos, entrenamiento de redes neuronales o ajuste de un LLM; la representación implementada es TF-IDF.
+- Exponer NexpAPI directamente en Internet; se comunica por la red interna Docker.
+- Garantizar anonimización completa, fairness demográfica, exactitud o generalización a correos reales.
+- Monitoreo automático de deriva, aprendizaje en línea o aprobación humana obligatoria antes de cada ticket.
 
-- Resolución automática de incidentes o modificación real de permisos y cuentas.
-- Entrenamiento de un predictor Python independiente de prioridad o grupo.
-- Implementación de embeddings semánticos: la representación actual usa TF-IDF.
-- Despliegue público de Streamlit o exposición pública de la API Python.
-- Demostración de ahorro de tiempo, beneficios económicos o generalización a
-  correos reales; no hay una evaluación con usuarios finales externos.
+Los nombres del resto del equipo, la licencia pendiente del README y los enlaces de videos permanecen por completar en sus espacios de entrega. La publicación de cambios en Git ya está realizada.
 
-La publicación del repositorio y los videos forman parte de la entrega
-académica, pero siguen pendientes según la documentación actual.
+## 4. Cronograma de desarrollo (planificado vs real)
 
-### Criterios de aceptación y estado real
+**Fuente: Cronograma.docx, proporcionado por el equipo.** Las fechas y roles siguientes corresponden a sus tablas de planificación y ejecución real. Todos los períodos son de **2026**; la variación compara las fechas de cierre en días calendario.
 
-| Criterio | Evidencia actual |
-|---|---|
-| Cargar y validar correos | src/data_processing.py y pruebas asociadas |
-| Combinar título y cuerpo | combine_text aplicado antes de entrenar o predecir |
-| Comparar baseline, LR y SVM | results/metrics/model_comparison.csv |
-| Buscar hiperparámetros | grid_search.csv y sensitivity.json |
-| Guardar cuatro tamaños exactos | models/ y data/train/; cantidades verificadas |
-| Elegir modelo desde CMD | evaluar_nuevos.py --model 10/100/200/300 |
-| Mostrar dudas y texto del ticket | requiere_revision y detalle en consola |
-| Probar funciones críticas | 102 pruebas automatizadas aprobadas |
-| Explicar resultados y límites | seis documentos requeridos y evaluación complementaria |
-
-## Cronograma de desarrollo planificado vs real
-
-Fuente: **Cronograma.docx**, proporcionado por el equipo. Las fechas siguientes
-reproducen sus tablas de planificación y ejecución real. Todos los períodos
-corresponden a 2026; los adelantos se calculan en días calendario respecto de
-la fecha de fin planificada.
-
-| Fase | Período planificado | Período real informado | Variación del cierre | Responsable |
+| Fase | Período planificado | Período real informado | Variación del cierre | Responsable del cronograma |
 |---|---|---|---|---|
 | Exploración de Datos | 14/09/2026 al 20/09/2026 | 14/09/2026 al 20/09/2026 | Sin variación | Data Scientist + Experto Soporte TI |
 | Prototipo/MVP | 21/09/2026 al 27/09/2026 | 21/09/2026 al 27/09/2026 | Sin variación | Data Scientist |
@@ -106,103 +63,61 @@ la fecha de fin planificada.
 | Deploy Piloto | 21/10/2026 al 23/10/2026 | 19/10/2026 al 22/10/2026 | 1 día antes | TI + Mesa de Ayuda |
 | Deploy Completo | 26/10/2026 al 30/10/2026 | 23/10/2026 al 25/10/2026 | 5 días antes | TI + Líder del Proyecto |
 
-### Entregables y diferencias de ejecución
+### Entregables y correspondencia con la implementación
 
-| Fase | Entregable planificado | Entregable real registrado en el cronograma |
+| Fase | Entregable del cronograma | Implementación y estado documentados |
 |---|---|---|
-| Exploración de Datos | Acceso a datos, anonimización, EDA y Data Quality Report | Acceso a datos, sintetización de datos preclasificados, EDA y Data Quality Report |
-| Prototipo/MVP | Dataset preparado, baseline TF-IDF y regresión logística | Sin cambio de entregable |
-| Desarrollo | Embeddings, clasificador, comparación de modelos y API simulada | Sin cambio de descripción en el cronograma |
-| Testing | Validación de categoría, prioridad/grupo por separado y Testing Plan | Sin cambio de entregable |
-| Deploy Piloto | Prueba controlada del agente | Sin cambio de entregable |
-| Deploy Completo | MVP final, documentación y monitoreo inicial | Sin cambio de entregable |
+| Exploración de Datos | Plan: acceso, anonimización, EDA y Data Quality Report. Real: acceso, sintetización de datos preclasificados, EDA y Data Quality Report | Datasets simulados, validaciones, estadísticas y seis gráficos EDA |
+| Prototipo/MVP | Dataset preparado, baseline TF-IDF y regresión logística | Comparación de referencia mayoritaria, regresión logística y SVM |
+| Desarrollo | Embeddings, clasificador, comparación de modelos y API simulada | Se implementaron TF-IDF, SVM calibrada y NexpAPI real en Docker; no embeddings |
+| Testing | Categoría, prioridad/grupo por separado y Testing Plan | Métricas de categoría, pruebas Python y validaciones de integración/asignación; no modelo Python separado de prioridad/grupo |
+| Deploy Piloto | Prueba controlada del agente | Ejecuciones diagnósticas con datos ficticios y controles que evitan crear tickets o enviar correos durante esas pruebas |
+| Deploy Completo | MVP final, documentación y monitoreo inicial | Portal, NexpAPI y flujo desplegados; código en main y cinco documentos. El monitoreo automático de deriva no está implementado |
 
-El cronograma informa un cierre global el **25 de octubre de 2026**, cinco días
-antes del 30 de octubre previsto. La exploración y el prototipo mantienen sus
-fechas; el adelanto del cierre de Desarrollo permite anticipar las fases
-siguientes. No se registran causas adicionales que expliquen los cambios.
+El documento informa cierre de Deploy Completo el **25/10/2026**, cinco días antes del **30/10/2026** previsto. No registra causas adicionales para los adelantos. La tabla reproduce lo informado; no convierte en implementados los entregables que la evidencia técnica no demuestra.
 
-La descripción de entregables del cronograma debe leerse junto con la evidencia
-técnica actual: se implementó TF-IDF con SVM calibrada y una API Python interna
-en Docker. La mención de embeddings y API simulada se conserva como descripción
-del cronograma, sin atribuirles una implementación que no existe. La prioridad
-y el grupo se gestionan en el flujo del agente y Redmine; las métricas del
-clasificador Python corresponden a categoría.
+Las revisiones de documentación e integración continuaron hasta el **28/10/2026**, después del cierre informado. La última verificación de código registró **91 pruebas Python aprobadas**, además de suites JavaScript y pruebas aisladas de n8n. Los videos y datos pendientes del equipo no se consideran completados por el cierre del cronograma.
 
-El cierre informado de Deploy Completo no equivale a una entrega académica
-íntegra: al 27 de octubre siguen pendientes los datos de integrantes, la
-publicación del código y los enlaces de los videos. La documentación y las
-verificaciones actuales incluyen revisiones posteriores al cierre informado.
-El monitoreo inicial figura como entregable del cronograma; su inclusión no
-demuestra por sí sola una operación prolongada ni una evaluación externa.
+María Quito Castillo asume los roles **Líder del Proyecto y Desarrollador TI** (desarrolladora full stack). Los demás nombres de responsables quedan pendientes de completar; se conservan los roles originales del cronograma.
 
-## Recursos necesarios
+## 5. Recursos necesarios (datos, hardware, software)
 
 ### Datos
 
-- JSON maestro con 300 correos simulados y cuatro categorías: 70 de accesos,
-  90 de aplicaciones, 70 de infraestructura y 70 de otros.
-- Datasets anidados de 10, 100, 200 y 300 correos y los cuatro modelos asociados.
-- Conjunto de 25 correos sin etiquetas, separado del entrenamiento, para
-  comparar predicciones y revisar regresiones; no permite calcular aciertos.
-- Etiquetado humano y autorización de uso para una futura evaluación con
-  correos reales. El corpus y los datasets se incluyen en Git por indicación
-  de la responsable del proyecto; su licencia de uso se distingue de la del código.
+- [Corpus maestro de 300 correos simulados](../data/raw/correos.json): 70 de accesos, 90 de aplicaciones, 70 de infraestructura y 70 de otros.
+- [Muestras de entrenamiento de 10, 100, 200 y 300](../data/train/), modelos correspondientes y configuración reproducible.
+- [25 correos de prueba](../data/test/correos_test_25.json) para ejecutar predicciones y revisarlas manualmente, sin exigir etiquetas para esa finalidad.
+- Para una evaluación futura con datos reales: autorización de uso y etiquetas esperadas revisadas por personas, separadas del entrenamiento.
 
 ### Hardware
 
-Una computadora con CPU y almacenamiento para el corpus, los modelos, las
-dependencias y los resultados permite entrenar y ejecutar consola y Streamlit.
-No se usa GPU. La operación integrada necesita un servidor capaz de ejecutar
-los contenedores Docker y conectividad con el buzón y los servicios externos.
-No se han establecido mínimos medidos de RAM, CPU o espacio en disco.
+Se necesita una computadora con CPU y almacenamiento para los datos, modelos, dependencias y resultados; **no se requiere GPU**. La integración necesita un VPS con Docker y conectividad con el buzón, OpenAI y los servicios del proyecto.
 
-### Software y servicios
+El Compose de NexpAPI asigna un límite de **1 CPU y 512 MiB de memoria a ese contenedor**. Es una configuración de despliegue, no un mínimo medido para todo el sistema. No se han determinado requisitos mínimos globales de RAM, CPU o disco. Los volúmenes persistentes almacenan PostgreSQL, adjuntos de Redmine e historial SQLite.
 
-Python 3.10/3.11 y las dependencias de `requirements.txt`: pandas, scikit-learn,
-joblib, Streamlit, pytest, matplotlib y seaborn, entre otras. Para la operación
-integrada se necesitan Docker y Compose, n8n, Redmine, PostgreSQL, acceso al
-buzón y una credencial OpenAI. El servidor y el consumo de servicios pueden
-generar costes; no se ha fijado un presupuesto en la documentación.
+### Software
 
-### Recursos humanos
+- **Python 3.10.22** en los contenedores, con las dependencias fijadas de clasificación, análisis e interfaz.
+- **scikit-learn, pandas, NumPy, SciPy, joblib y PyYAML** para datos, modelos y configuración; **Streamlit y Altair** para la interfaz y visualizaciones.
+- **FastAPI y Uvicorn** para NexpAPI; **Docker y Compose** para despliegue y reinicio de servicios.
+- **n8n, Redmine y PostgreSQL**, más acceso IMAP/SMTP al buzón y credencial del agente **OpenAI gpt-4.1-mini**.
+- **Git** para versionamiento; **pytest y Ruff** para pruebas y revisión del código.
 
-Se requiere que una persona del área revise la definición de categorías y que
-los integrantes del equipo validen los resultados y expliquen las decisiones.
-No se registró una evaluación con usuarios finales externos.
+Las versiones están detalladas en [arquitectura](arquitectura.md). Se necesitan cuentas y permisos válidos para los servicios. El VPS y el consumo de OpenAI generan costes; no hay un presupuesto cuantificado registrado.
 
-María Quito Castillo asume los roles Líder del Proyecto y Desarrollador TI
-(desarrolladora full stack). Los nombres de los responsables de Data Scientist,
-Experto Soporte TI, Equipo IA, Soporte TI, TI y Mesa de Ayuda quedan por completar
-en la sección de autores del README.
+## 6. Riesgos identificados y mitigación
 
-## Riesgos identificados y mitigación
+| Riesgo | Mitigación implementada | Acción pendiente o límite |
+|---|---|---|
+| Clasificación incorrecta o datos poco representativos | Comparación con baseline, métricas por clase, probabilidades y avisos de baja confianza | Validar con datos reales autorizados y revisión humana |
+| Sobreajuste al estilo de correos simulados | Procedencia declarada, validación cruzada y separación de casos funcionales | Incorporar una prueba externa nueva; no presentar los 25 conocidos como evaluación independiente |
+| Confundir confianza con certeza | Advertencias en el portal y señal de revisión bajo 60 % o sin vocabulario conocido | La señal no obliga a una revisión humana; acordar un procedimiento operativo |
+| Exposición de datos sensibles | Nodo local n8n que limpia firmas y redacta datos antes de NexpAPI/OpenAI; API interna y claves fuera de Git | No anonimiza adjuntos ni todos los datos; revisar accesos, transporte y retención antes de usar información real |
+| Fallos del buzón, NexpAPI o servicios externos | Comprobaciones de salud, manejo de errores y derivación a revisión; reinicio de contenedores unless-stopped | Investigar y reintentar sin duplicar tickets; acordar seguimiento operativo |
+| Categoría, tipo, proyecto o responsable incorrectos | Categoría Python obligatoria y validación contra catálogos, membresías y roles reales de Redmine | Supervisar asignaciones y corregir tickets cuando corresponda |
+| Duplicar tickets al reprocesar correos | Cursor IMAP que evita reprocesar mensajes antiguos ya considerados | No existe garantía global de idempotencia; comprobar Redmine antes de reintentar una ejecución |
+| Perder correspondencia entre datos y modelos | Datasets por tamaño, hashes, configuración y reportes registrados | Conservar artefactos anteriores antes de reentrenar y reevaluar cada nueva versión |
+| Costes o dependencia del proveedor externo | El clasificador Python funciona sin OpenAI; la API y el portal ejecutan el modelo localmente | Definir presupuesto y revisar consumo; el análisis del agente depende del servicio externo |
+| Entrega académica incompleta | Código en main, cinco documentos ordenados y espacios identificados en el README | Completar integrantes, licencia pendiente y enlaces de los dos videos |
 
-| Riesgo | Medida aplicada o pendiente |
-|---|---|
-| Confundir permisos con fallos de aplicación | Ejemplos contrastados y revisión manual; el riesgo continúa |
-| Pocos datos o estilo sintético repetido | Procedencia declarada; se requiere validación real futura |
-| Mezclar entrenamiento y prueba | Los 25 permanecen fuera de fit; se comprueban coincidencias exactas |
-| Presentar confianza como certeza | Avisos en consola, interfaz y documentación |
-| Exponer información sensible | Ejemplos ficticios y limpieza parcial; revisar antes de usar datos reales |
-| Perder correspondencia modelo/dataset | Índices, etiquetas, huellas y hashes verificables |
-| Cambiar archivos al volver a entrenar | Nombres estables y trazabilidad; conservar versiones antes de cambios importantes |
-| Entrega académica incompleta | Lista explícita de autores, repositorio, soporte y videos pendientes |
-| Fallos de API, buzón o servicios externos | Autenticación y validación de entradas, manejo de fallos del flujo y pruebas de recuperación; revisar la operación y los costes |
-| Asignación incorrecta de prioridad o responsable | Validación de catálogos, membresía y rol antes del alta; supervisión del personal de soporte |
-
-### Próximo trabajo recomendado
-
-Recoger un conjunto realmente nuevo y autorizado, etiquetado por una persona
-que no use las predicciones como respuesta esperada. Mantenerlo separado mientras
-se evalúan cambios. Antes de usar el sistema en una organización, acordar
-responsables, retención de datos y un proceso de revisión de errores.
-
-### Interfaz de usuario para la revisión
-
-La interfaz usa Streamlit, opción A de la rúbrica. Permite seleccionar modelos
-de 10, 100, 200 o 300 correos, ingresar título y descripción, cargar ejemplos
-y mostrar categoría, confianza y cuatro probabilidades. Incluye validación,
-indicador de procesamiento, manejo de errores e información del modelo.
-La navegación utiliza un selector centrado con Clasificar y Acerca de.
-La automatización de correo en n8n funciona como componente separado.
+El equipo debe acordar responsables de seguimiento y una revisión periódica de errores antes de operar con solicitudes reales. El plan de monitoreo y actualización está descrito como propuesta en [consideraciones éticas](consideraciones_eticas.md); no se presenta como una rutina automática implementada.
