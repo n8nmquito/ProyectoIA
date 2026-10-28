@@ -17,14 +17,20 @@ def write_config(path, settings):
 
 def test_model_overrides_reach_the_estimators(tmp_path):
     path = write_config(tmp_path / "custom.yaml", {
-        "model": {"logistic_max_iter": 345, "calibration_folds": 3},
-        "tfidf": {"ngram_range": [1, 3], "sublinear_tf": False},
+        "model": {"logistic_max_iter": 345, "calibration_folds": 3,
+                  "svm_c": 2.5, "svm_class_weight": "balanced"},
+        "tfidf": {"ngram_range": [1, 3], "sublinear_tf": False,
+                  "min_df": 2, "max_df": 0.9},
     })
     settings = load_config(path)
     logistic = build_pipeline(config=settings)
     svm = build_pipeline("svm", config=settings)
     assert logistic.named_steps["classifier"].max_iter == 345
     assert svm.named_steps["classifier"].cv == 3
+    assert svm.named_steps["classifier"].estimator.C == 2.5
+    assert svm.named_steps["classifier"].estimator.class_weight == "balanced"
+    assert svm.named_steps["tfidf"].min_df == 2
+    assert svm.named_steps["tfidf"].max_df == 0.9
     assert logistic.named_steps["tfidf"].ngram_range == (1, 3)
     assert logistic.named_steps["tfidf"].sublinear_tf is False
     assert logistic.named_steps["tfidf"].strip_accents == "unicode"
@@ -35,6 +41,10 @@ def test_model_overrides_reach_the_estimators(tmp_path):
     {"history_limit": True},
     {"model": {"calibration_folds": 1}},
     {"model": {"logistic_max_iter": -1}},
+    {"model": {"svm_c": 0}},
+    {"model": {"svm_class_weight": "invalid"}},
+    {"tfidf": {"min_df": 0}},
+    {"tfidf": {"max_df": 2.0}},
     {"tfidf": {"ngram_range": [3, 1]}},
     {"tfidf": {"sublinear_tf": "false"}},
     {"tfidf": {"strip_accents": "invalid"}},

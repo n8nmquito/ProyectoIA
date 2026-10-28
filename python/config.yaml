@@ -8,9 +8,13 @@ tfidf:
   ngram_range: [1, 2]
   sublinear_tf: true
   strip_accents: unicode
+  min_df: 1
+  max_df: 1.0
 model:
   logistic_max_iter: 2000
   calibration_folds: 2
+  svm_c: 10.0
+  svm_class_weight: null
 data_path: data/raw/correos.json
 model_path: models/modelo_clasificador_300.pkl
 fit_all: true

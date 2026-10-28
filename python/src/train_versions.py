@@ -1,7 +1,6 @@
 """Train comparable, nested models with 10, 100, 200 and 300 tickets."""
 
 import argparse
-import json
 import logging
 
 import joblib
@@ -10,7 +9,7 @@ import pandas as pd
 
 from src.data_processing import CLASSES, load_data, ticket_fingerprint
 from src.export_datasets import export_dataset
-from src.model import load_model, refit_pipeline
+from src.model import build_pipeline, refit_pipeline
 from src.utils import ROOT, file_hash, load_config, project_path, save_json
 
 LOGGER = logging.getLogger(__name__)
@@ -62,7 +61,7 @@ def attach_training_manifest(model, subset, source_hash):
 
 
 def train_versions(config, size=None):
-    """Fit one selected size or all four using the saved model settings."""
+    """Create and fit one size or all four directly from configuration."""
     if size is not None and size not in SIZES:
         raise ValueError("El tamaño debe ser 10, 100, 200 o 300.")
     report_name = (
@@ -73,13 +72,8 @@ def train_versions(config, size=None):
     subsets = nested_subsets(frame, config["seed"])
     if size is not None:
         subsets = {size: subsets[size]}
-    template = load_model(project_path(config["model_path"]))
-    classifier = template.named_steps["classifier"]
+    template = build_pipeline("svm", config=config)
     calibration_folds = config["model"]["calibration_folds"]
-    if getattr(classifier, "cv", None) != calibration_folds:
-        raise ValueError(
-            "Primero ejecuta src.train con la calibración configurada."
-        )
     if any(
         subset.clasificacion.value_counts().min() < calibration_folds
         for subset in subsets.values()
@@ -94,6 +88,7 @@ def train_versions(config, size=None):
         model = refit_pipeline(template, subset.texto, subset.clasificacion)
         attach_training_manifest(model, subset, source_hash)
         path = ROOT / "models" / f"modelo_clasificador_{size}.pkl"
+        path.parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(model, path)
         dataset_path = ROOT / "data/train" / f"correos_{size}.json"
         export_dataset(subset, dataset_path)
@@ -106,21 +101,14 @@ def train_versions(config, size=None):
                 "clases": model.training_class_counts_,
             }
         )
-    summary_path = ROOT / "results/metrics/training_summary.json"
-    if summary_path.exists():
-        summary = json.loads(summary_path.read_text(encoding="utf-8"))
-        if summary.get("source_sha256") == source_hash and summary.get(
-            "n_train"
-        ) == len(frame):
-            summary["model_sha256"] = file_hash(
-                project_path(config["model_path"])
-            )
-            summary["config"]["model_path"] = config["model_path"]
-            save_json(summary_path, summary)
     save_json(
         ROOT / f"results/metrics/{report_name}.json",
         {
             "source_sha256": source_hash,
+            "configuration": {
+                "model": config["model"],
+                "tfidf": config["tfidf"],
+            },
             "seed": config["seed"],
             "algorithm": (
                 "TF-IDF + LinearSVC with sigmoid calibration, "

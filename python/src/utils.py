@@ -3,6 +3,7 @@
 import hashlib
 import json
 import logging
+import math
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -74,6 +75,24 @@ def validate_settings(config):
         raise ValueError("tfidf.sublinear_tf debe ser true o false.")
     if tfidf.get("strip_accents") not in (None, "ascii", "unicode"):
         raise ValueError("tfidf.strip_accents debe ser null, ascii o unicode.")
+    svm_c = model.get("svm_c")
+    if (
+        type(svm_c) not in (int, float)
+        or not math.isfinite(svm_c)
+        or svm_c <= 0
+    ):
+        raise ValueError("model.svm_c debe ser un número positivo finito.")
+    if model.get("svm_class_weight") not in (None, "balanced"):
+        raise ValueError("model.svm_class_weight debe ser null o balanced.")
+    for field in ("min_df", "max_df"):
+        value = tfidf.get(field)
+        if not (
+            (type(value) is int and value >= 1)
+            or (type(value) is float and 0 < value <= 1)
+        ):
+            raise ValueError(
+                f"tfidf.{field} debe ser un entero >= 1 o fracción (0, 1]."
+            )
 
 
 def history_limit():

@@ -25,19 +25,25 @@ def test_training_selection_preserves_other_models(tmp_path, monkeypatch, size):
     source = tmp_path / "correos.json"
     source.write_text(frame.drop(columns="texto").to_json(orient="records"),
                       encoding="utf-8")
-    for folder in ("models", "data/train", "results/metrics"):
+    for folder in ("data/train", "results/metrics"):
         (tmp_path / folder).mkdir(parents=True)
+    summary = tmp_path / "results/metrics/training_summary.json"
+    summary.write_bytes(b"reporte previo no debe reasignarse al modelo nuevo")
     selected = training.SIZES if size is None else (size,)
     preserved = {}
     for other in set(training.SIZES) - set(selected):
         path = tmp_path / "models" / f"modelo_clasificador_{other}.pkl"
+        path.parent.mkdir(exist_ok=True)
         path.write_bytes(b"modelo previo intacto")
         preserved[path] = path.read_bytes()
     settings = load_config()
     settings["data_path"] = str(source)
     monkeypatch.setattr(training, "ROOT", tmp_path)
-    monkeypatch.setattr(training, "load_model", lambda _: build_pipeline("svm"))
+    settings["model_path"] = str(tmp_path / "modelo_base_que_no_existe.pkl")
     table = training.train_versions(settings, size=size)
+    assert summary.read_bytes() == (
+        b"reporte previo no debe reasignarse al modelo nuevo"
+    )
     assert table.correos.tolist() == list(selected)
     for path, original in preserved.items():
         assert path.read_bytes() == original

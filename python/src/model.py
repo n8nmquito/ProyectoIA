@@ -38,7 +38,12 @@ def build_pipeline(kind="logistic", seed=None, config=None):
             max_iter=model["logistic_max_iter"], random_state=seed
         ),
         "svm": CalibratedClassifierCV(
-            LinearSVC(random_state=seed, dual="auto"),
+            LinearSVC(
+                random_state=seed,
+                dual="auto",
+                C=model["svm_c"],
+                class_weight=model["svm_class_weight"],
+            ),
             cv=model["calibration_folds"],
         ),
     }
@@ -52,6 +57,8 @@ def build_pipeline(kind="logistic", seed=None, config=None):
                     ngram_range=tuple(tfidf["ngram_range"]),
                     sublinear_tf=tfidf["sublinear_tf"],
                     strip_accents=tfidf["strip_accents"],
+                    min_df=tfidf["min_df"],
+                    max_df=tfidf["max_df"],
                 ),
             ),
             ("classifier", estimators[kind]),

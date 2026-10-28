@@ -93,7 +93,7 @@ Después de corregirlos se repitieron solo los cuatro casos afectados: 4/4 crear
 su ticket. No es una nueva medición de accuracy ni una repetición completa de los
 24 con la versión corregida. Evidencia: `results/n8n_produccion/`.
 
-Pruebas actuales: **83 tests Python aprobados**, Ruff sin errores y las tres
+Pruebas actuales: **87 tests Python aprobados**, Ruff sin errores y las tres
 suites JavaScript de normalización, asignación y adjuntos aprobadas. Se verifican también la integridad de los cuatro artefactos, sus probabilidades
 en 25 entradas y la limitación de CV en la versión de 10.
 
@@ -272,27 +272,30 @@ Para reentrenar una versión individual en Linux, desde la carpeta `python`:
 ```
 
 Cada comando sustituye solo el modelo y dataset del tamaño elegido, conserva
-las otras versiones y guarda `results/metrics/model_versions_<tamaño>.json`
+las otras versiones, crea `models/` si hace falta y guarda `results/metrics/model_versions_<tamaño>.json`
 y `.csv`. Sin `--size` se reentrenan las cuatro versiones. La selección usa
 las mismas muestras anidadas del corpus de 300; no agrega los 25 de prueba.
 
 `src.train` selecciona ajustes y vuelve a entrenar el modelo de 300. Después,
-`src.train_versions` actualiza los modelos seleccionados con las mismas opciones y
+`src.train_versions` crea los modelos seleccionados desde cero usando el YAML y
 guarda sus datasets. `src.export_datasets` solo exporta los datos exactos de los
 modelos actuales, sin reentrenarlos. `src.evaluate` reconstruye en memoria el
 modelo diagnóstico de 280 y repite sus métricas, sin guardar otro `.pkl`.
 
 La configuración central incluye `history_limit` (50 por defecto),
 `tfidf.ngram_range`, `tfidf.sublinear_tf`, `tfidf.strip_accents`,
-`model.logistic_max_iter` y `model.calibration_folds`. `HISTORY_LIMIT`, si está
+`model.logistic_max_iter`, `model.calibration_folds`, `model.svm_c` y
+`model.svm_class_weight`, además de `tfidf.min_df` y `tfidf.max_df`.
+`HISTORY_LIMIT`, si está
 presente en el entorno del proceso, prevalece sobre el límite del YAML y debe
 ser un entero positivo. Los archivos suministrados con `--config` pueden
 sobrescribir valores puntuales; las rutas relativas parten de la carpeta Python.
 
 Cambiar parámetros de TF-IDF o del modelo afecta a los nuevos entrenamientos
 con `src.train`; no modifica los `.pkl` existentes. `src.train_versions`
-reutiliza los ajustes del modelo guardado y comprueba que su calibración
-coincida con la configurada. La muestra de 10 necesita al menos tantos correos
+crea un pipeline SVM nuevo desde `config.yaml`, sin cargar ningún `.pkl`
+anterior. El entrenamiento de 10, 100 o 200 tampoco necesita el modelo de 300.
+La muestra de 10 necesita al menos tantos correos
 por clase como folds internos; si no alcanza, el comando rechaza la operación.
 Para aplicar cambios en el YAML del portal Docker, reconstruir con
 `docker compose up -d --build`.
