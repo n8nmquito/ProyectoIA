@@ -26,7 +26,7 @@
 ![Streamlit 1.41.1](https://img.shields.io/badge/Streamlit-1.41.1-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
 [![En producción](https://img.shields.io/badge/Estado-En_producción-2563EB?style=for-the-badge)](http://185.208.207.203:8501)
 
-Clasifica correos de soporte TI con Python y automatiza su registro en Redmine mediante n8n. Incluye una interfaz Streamlit para probar modelos, visualizar predicciones y consultar el historial.
+Automatiza la gestión de correos de soporte TI con n8n: un clasificador Python determina la categoría y un agente de OpenAI analiza la solicitud, genera el resumen y propone prioridad, tipo y proyecto del ticket en Redmine. Antes del análisis, un nodo Python filtra firmas y datos sensibles del texto; el flujo valida la categoría y el responsable antes de registrar el ticket. Incluye un portal Streamlit para probar modelos, comparar predicciones, consultar el historial y exportar resultados, con despliegue en contenedores Docker.
 
 ## 2. Tabla de contenidos
 
