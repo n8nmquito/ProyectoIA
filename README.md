@@ -472,7 +472,7 @@ y descripción; botón de clasificación con indicador de carga y mensajes de
 error; categoría, confianza y gráfico de probabilidades; sección **Acerca de**
 con métricas y limitaciones; y botón **Prueba con ejemplo** con cuatro casos.
 También incluye diseño adaptable, temas claro/oscuro, interfaz Español/English,
-descarga CSV de predicciones, historial persistente de hasta 50 resultados por enlace y
+descarga CSV e informes Excel de predicciones, historial persistente de hasta 50 resultados por enlace y
 comparación de probabilidades mediante gráficos interactivos Altair. El modelo
 sigue entrenado en español; elegir English traduce la interfaz.
 

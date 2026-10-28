@@ -46,6 +46,13 @@ es documental; no constituye una nueva ejecución de pruebas ni del despliegue.
 
 ## Funcionalidades obligatorias de la interfaz
 
+La exportación ofrece CSV y un informe Excel con resumen, gráfico nativo,
+porcentajes numéricos y tabla completa. Las nuevas predicciones conservan el
+umbral, la señal de vocabulario desconocido, archivo y SHA-256 del modelo y
+tiempo de inferencia. Los registros antiguos no se completan con supuestos.
+Las pruebas de Excel verifican valores tipados, datos de las series del gráfico,
+protección del texto contra fórmulas y tratamiento de metadatos ausentes.
+
 | Grupo de la consigna | Implementación |
 |---|---|
 | Input de datos | Título y descripción con límites de longitud, validación de tipos y contenido con letras |
@@ -55,7 +62,7 @@ es documental; no constituye una nueva ejecución de pruebas ni del despliegue.
 | Ejemplos de uso | Botón Prueba con ejemplo con cuatro tickets precargados en español |
 
 También se incorporan los elementos adicionales: diseño adaptable, modos claro
-y oscuro, interfaz Español/English, exportación CSV, historial de 50 registros
+y oscuro, interfaz Español/English, exportación CSV/Excel, historial de 50 registros
 por sesión, comparación de predicciones y gráficos interactivos Altair. El
 modelo no se traduce ni se reentrena al cambiar el idioma de la interfaz.
 
@@ -206,13 +213,14 @@ de haber inspeccionado esos casos.
 
 ## Pruebas automatizadas
 
-Última ejecución verificada: **59 pruebas aprobadas, cero fallos o errores**.
+Última ejecución verificada: **63 pruebas aprobadas, cero fallos o errores**.
 Evidencia legible por herramientas: results/metrics/pytest.xml.
 
 | Archivo | Comportamientos comprobados |
 |---|---|
 | test_data_processing.py | Limpieza, entradas inválidas, faltantes, etiquetas, duplicados, particiones y manifiesto |
 | test_model.py | Cuatro probabilidades normalizadas, persistencia, vocabulario desconocido, refit y CSV bloqueado |
+| test_excel_export.py | Excel con valores numéricos, gráfico, tabla, metadatos ausentes explícitos, textos literales y descarga estable |
 | test_app.py | Formulario vacío, ejemplo, modelo ausente y predicción en la aplicación real mediante AppTest |
 | test_evaluate_new.py | Entradas sin etiquetas, duplicados, solapamiento y predicción sin fit ni cambio del modelo |
 | test_api.py | Autenticación, validación y paridad de los 25 entre HTTP y Python |
@@ -326,3 +334,5 @@ aplicación. Mostró el aviso de revisión. Es un ejemplo de limitación por tam
 y vocabulario; no una métrica agregada ni una etiqueta humana de los 25.
 
 ![Caso de revisión con el modelo de 10](../documentacion/imagenes/app/resultado_revision.png)
+
+La descarga CSV se comprobó en el navegador integrado. La descarga XLSX quedó pendiente en ese navegador; se verificaron la generación del archivo, sus datos y su presentación mediante renderizado.

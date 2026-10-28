@@ -43,7 +43,7 @@ def test_excel_export_keeps_multiple_long_emails_in_separate_records():
     assert stream.readline() == "sep=;\r\n"
     reader = csv.DictReader(stream, delimiter=";")
     rows = list(reader)
-    assert len(reader.fieldnames) == 12
+    assert len(reader.fieldnames) == 18
     assert len(rows) == 2
     assert [row["titulo"] for row in rows] == ["Correo 0", "Correo 1"]
     assert all(None not in row for row in rows)

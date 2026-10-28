@@ -93,7 +93,7 @@ Después de corregirlos se repitieron solo los cuatro casos afectados: 4/4 crear
 su ticket. No es una nueva medición de accuracy ni una repetición completa de los
 24 con la versión corregida. Evidencia: `results/n8n_produccion/`.
 
-Pruebas actuales: **59 tests Python aprobados**, Ruff sin errores y las tres
+Pruebas actuales: **63 tests Python aprobados**, Ruff sin errores y las tres
 suites JavaScript de normalización, asignación y adjuntos aprobadas. Se verifican también la integridad de los cuatro artefactos, sus probabilidades
 en 25 entradas y la limitación de CV en la versión de 10.
 
@@ -284,7 +284,7 @@ métricas del archivo elegido, junto con sus limitaciones.
 
 Los controles de idioma y tema permiten Español/English y claro/oscuro. El
 modelo sigue entrenado en español. Se puede descargar la predicción actual o
-el historial en CSV, comparar probabilidades de varias predicciones y borrar
+el historial en CSV o Excel, comparar probabilidades de varias predicciones y borrar
 el historial. En Docker se retienen hasta 50 registros por historial en SQLite
 sobre un volumen persistente, incluso después de recargar o redesplegar. El
 navegador recuerda un identificador privado; el enlace permite recuperar ese

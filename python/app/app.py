@@ -4,6 +4,7 @@ import json
 import logging
 import sqlite3
 import sys
+from time import perf_counter
 from pathlib import Path
 
 import altair as alt
@@ -17,6 +18,7 @@ sys.path.insert(0, str(ROOT))
 
 from app.presentation import apply_style, empty_result, heading  # noqa: E402
 from app.browser_history import browser_history_token  # noqa: E402
+from app.excel_export import xlsx_bytes  # noqa: E402
 from app.persistent_history import configured_store, history_token  # noqa: E402
 from app.session_results import (  # noqa: E402
     HISTORY_LIMIT, csv_bytes, remember_prediction,
@@ -255,6 +257,10 @@ def render_history():
     st.download_button(tr("Descargar historial CSV", "Download history CSV"),
                        csv_bytes(history), "historial_clasificador.csv", "text/csv",
                        key="download_history")
+    st.download_button(tr("Descargar historial Excel", "Download history Excel"),
+                       xlsx_bytes(history), "historial_clasificador.xlsx",
+                       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                       key="download_history_excel")
     lookup = {entry["id"]: entry for entry in history}
     ids = st.multiselect(
         tr("Predicciones para comparar", "Predictions to compare"),
@@ -501,9 +507,14 @@ def main():
                     path = ROOT / "models" / f"modelo_clasificador_{size}.pkl"
                     with st.spinner(tr("Analizando el ticket…", "Analyzing the ticket…")):
                         model = cached_model(str(path), path.stat().st_mtime_ns)
+                        started = perf_counter()
                         result = predict_ticket(model, st.session_state.title,
                                                 st.session_state.body,
                                                 config["confidence_threshold"])
+                        result["duracion_ms"] = round((perf_counter() - started) * 1000, 3)
+                        result["umbral_revision"] = config["confidence_threshold"]
+                        result["modelo_archivo"] = path.name
+                        result["modelo_sha256"] = file_hash(path)
                     st.session_state.update(last_result=result, result_model_size=size)
                     try:
                         remember_prediction(st.session_state, st.session_state.title,
@@ -542,6 +553,11 @@ def main():
                                   "Review recommended: low confidence or unknown vocabulary."))
                 probability_chart([st.session_state.last_entry])
                 st.caption(tr("La confianza no garantiza acierto.", "Confidence does not guarantee correctness."))
+                st.download_button(tr("Descargar informe Excel", "Download Excel report"),
+                                   xlsx_bytes([st.session_state.last_entry]),
+                                   "informe_prediccion.xlsx",
+                                   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                   key="download_prediction_excel")
                 st.download_button(tr("Descargar predicción CSV", "Download prediction CSV"),
                                    csv_bytes([st.session_state.last_entry]),
                                    "prediccion.csv", "text/csv", key="download_prediction")

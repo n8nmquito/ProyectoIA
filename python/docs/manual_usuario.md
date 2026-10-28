@@ -108,12 +108,23 @@ correos con cada modelo y exporta el gráfico de CV. No es un test externo.
 
 ## Exportación historial y comparación
 
+**Descargar informe Excel** genera un archivo con un resumen de la última
+predicción, porcentajes, gráfico, texto completo y datos del modelo. La hoja
+Historial reúne todos los registros incluidos, con filtros y encabezados fijos.
+En Historial y comparación también se ofrece **Descargar historial Excel**.
+
+Las nuevas predicciones guardan archivo y SHA-256 del modelo, umbral aplicado,
+tiempo de inferencia, señal de vocabulario desconocido y motivo de revisión.
+Cuando un registro anterior no contiene estos datos, el informe indica
+**No registrado**. La confianza pertenece al correo y no equivale a accuracy.
+
 1. Clasificar un ticket y pulsar **Descargar predicción CSV** para obtener el
    texto, modelo, categoría, confianza, señal de revisión y cuatro probabilidades.
    El archivo usa UTF-8 con BOM, separador de punto y coma y una primera línea
    `sep=;` para que Excel detecte las columnas al abrirlo. Los campos entrecomillados
    conservan los párrafos del correo dentro de una sola celda. Para importarlo
    con otra herramienta, omitir esa primera línea y elegir el separador `;`.
+   El CSV contiene 18 campos, incluidos los metadatos y el motivo de revisión.
 2. Abrir **Historial y comparación**. Cada clasificación correcta agrega una
    fila; cambiar de pestaña, tema o idioma no repite la predicción.
 3. Para comparar modelos sobre el mismo ticket, conservar el texto, cambiar
