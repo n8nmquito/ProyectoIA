@@ -53,9 +53,18 @@ Automatiza la gestión de correos de soporte TI con n8n: un clasificador Python 
 
 ## 4. Dataset
 
-### Descripción, tamaño y variables
+### Descripción de los datos utilizados
 
-Se utilizan **cuatro conjuntos de 10, 100, 200 y 300 correos simulados en español**. El conjunto de 300 contiene 70 de accesos, 90 de aplicaciones, 70 de infraestructura y 70 de otros.
+Correos simulados en español que representan solicitudes de soporte TI de cuatro categorías: **accesos, aplicaciones, infraestructura y otros**. Se usan para entrenar los modelos y probar la clasificación de nuevas solicitudes.
+
+### Fuente y licencia de los datos
+
+- **Fuente:** conjuntos de **10, 100, 200 y 300 correos simulados**, creados para el proyecto. No proceden de correos reales de producción.
+- **Licencia de los datos:** no se ha declarado una licencia específica. La licencia MIT del código no concede automáticamente derechos sobre el dataset.
+
+### Características principales (tamaño y variables)
+
+Hay cuatro muestras anidadas de **10, 100, 200 y 300 correos**, cada una con su modelo. El conjunto de 300 contiene **70 de accesos, 90 de aplicaciones, 70 de infraestructura y 70 de otros**.
 
 | Variable | Contenido | Uso |
 |---|---|---|
@@ -63,13 +72,13 @@ Se utilizan **cuatro conjuntos de 10, 100, 200 y 300 correos simulados en españ
 | `cuerpo` | Texto de la solicitud | Entrada del modelo |
 | `clasificacion` | Una de las cuatro categorías | Etiqueta para entrenar y evaluar |
 
-Hay muestras anidadas de **10, 100, 200 y 300 correos**, cada una con su modelo. Los **25 correos de prueba** contienen título y cuerpo y se utilizan para comprobar el funcionamiento del clasificador y revisar manualmente sus predicciones. Su contenido permite reconocer el tipo de solicitud; no necesitan etiquetas para ejecutar estas pruebas funcionales. Para calcular accuracy o F1 sí sería necesario registrar y validar una categoría esperada para cada correo.
+Los **25 correos de prueba** contienen título y cuerpo y se utilizan para comprobar el funcionamiento del clasificador y revisar manualmente sus predicciones. Su contenido permite reconocer el tipo de solicitud; no necesitan etiquetas para ejecutar estas pruebas funcionales. Para calcular accuracy o F1 sí sería necesario registrar y validar una categoría esperada para cada correo.
 
-### Fuente, licencia y acceso
+### Link a los datos si son públicos
 
-- **Fuente:** datasets de **10, 100, 200 y 300 correos simulados**, creados para las pruebas y el entrenamiento del proyecto. No proceden de correos reales de producción.
-- **Licencia de los datos:** no se ha declarado una licencia específica. La licencia MIT del código no concede automáticamente derechos sobre el dataset.
-- **Enlaces:** [corpus de 300 correos](python/data/raw/correos.json), [muestras de entrenamiento](python/data/train/) y [25 correos de prueba](python/data/test/correos_test_25.json).
+- [Corpus de 300 correos](python/data/raw/correos.json).
+- [Muestras de entrenamiento de 10, 100, 200 y 300 correos](python/data/train/).
+- [25 correos de prueba](python/data/test/correos_test_25.json).
 
 Más detalle en el [análisis de datos](python/docs/analisis_datos.md).
 
