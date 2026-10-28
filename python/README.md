@@ -80,8 +80,13 @@ usa calibración sigmoide de dos grupos, compatible con el conjunto de 10.
 El flujo principal es [Mquito | Correo → IA → Ticket Redmine](http://185.208.207.203:5678/workflow/opxBwpGpRDrbQeHn).
 Recibe el correo, consulta `http://clasificador-python:8000/predict` en la red
 Docker, ejecuta el modelo de 300, compara con OpenAI y crea el ticket en Redmine.
-El agente externo conserva la decisión de categoría; la predicción Python es una
-comparación operativa. Coincidir no demuestra exactitud.
+Python determina la categoría final del ticket. El agente recibe esa categoría
+y propone el resto del análisis. El código consulta el responsable configurado
+de la categoría y valida su membresía y rol. Si Python no responde con una
+categoría válida, no se crea el ticket y el flujo deriva a revisión. La baja
+confianza o un desacuerdo del agente marcan revisión sin cambiar la categoría.
+La coincidencia ya no es una comparación independiente: el agente conoce la
+predicción Python.
 
 El agente devuelve el nombre `tipo_ticket` (Errores/Soporte); el código obtiene
 su ID del catálogo habilitado del proyecto. No se acepta un ID supuesto por el

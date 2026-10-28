@@ -11,8 +11,9 @@ Versión: 27 de octubre de 2026.
 Los correos de soporte mezclan consultas sobre cuentas, errores de aplicaciones,
 equipos, redes y dudas generales. El operador debe leerlos y decidir quién los
 atiende. El proyecto propone una categoría inicial para apoyar esa tarea y
-facilitar su supervisión. En la automatización actual, el agente propone la decisión
-y el código crea el ticket después de validar los datos de Redmine.
+facilitar su supervisión. En la automatización actual, Python determina la
+categoría final; el agente prepara el análisis y el código crea el ticket
+después de resolver el responsable por categoría y validar los datos de Redmine.
 
 ### Objetivo general
 

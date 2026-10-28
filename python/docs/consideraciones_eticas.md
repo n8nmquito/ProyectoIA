@@ -72,9 +72,11 @@ incidente como una persona. Se muestran probabilidades y términos asociados,
 con límites explícitos. SHAP/LIME no están implementados. Los PDP S5 explican
 el rendimiento estimado frente a hiperparámetros, no las palabras de un ticket.
 
-OpenAI es un agente aparte que resume y propone categoría, prioridad y
-responsable. La predicción Python se compara con esa propuesta; no decide la
-categoría final del ticket. Coincidir entre ambos no demuestra exactitud.
+OpenAI resume y propone prioridad y otros datos del ticket. Python determina
+la categoría final y el código consulta el responsable configurado para ella.
+El agente conoce esa categoría; su coincidencia no es una comparación
+independiente ni demuestra exactitud. Baja confianza o desacuerdo requieren
+revisión. Si la API Python no devuelve una categoría válida, no se crea ticket.
 El esquema valida formato y catálogos, no la veracidad completa del resumen.
 
 ## 5. Impacto social

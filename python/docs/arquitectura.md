@@ -185,15 +185,18 @@ confianza y señales de revisión. Si no responde o su respuesta no es válida,
 el adaptador conserva el correo y registra clasificación no disponible; continúa
 el agente existente. Python no llama a OpenAI y no concede permisos a usuarios.
 
-El prompt del agente recibe asunto, cuerpo e inventario de adjuntos. Se pueden
+El prompt del agente recibe la categoría final Python, asunto, cuerpo e inventario de adjuntos. Se pueden
 enviar PNG/JPEG/WebP/PDF: hasta 4 archivos, 4 MiB por archivo y 8 MiB acumulados.
 Los originales se conservan para Redmine, incluso si no fueron seleccionados
 para análisis. La selección no garantiza que el agente lea correctamente el archivo.
 
-OpenAI analiza relevancia, resumen, categoría, prioridad y responsable. Consulta
+OpenAI analiza relevancia, resumen, prioridad y una propuesta de responsable. Consulta
 proyectos, miembros, roles, cuenta de integración y categorías en Redmine. Sus
 respuestas pueden contener nombres y otra información de esas consultas.
-La categoría Python no se utiliza para forzar la respuesta del agente.
+La categoría Python es obligatoria y el código la vuelve a aplicar después
+del agente. Luego consulta categorías y miembros del proyecto para resolver
+el responsable configurado de esa categoría y validar membresía y rol.
+Una respuesta Python inválida impide crear el ticket; no se sustituye por IA.
 
 El formato estructurado exige `tipo_ticket`: Errores o Soporte. El código
 resuelve ese nombre contra los tipos realmente habilitados del proyecto; si

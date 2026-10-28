@@ -24,8 +24,10 @@ servicio. Ver python/deploy/DESPLIEGUE_REALIZADO.md para operación y reversión
 El cuerpo JSON del nodo HTTP contiene solo titulo y cuerpo del correo
 normalizado. La respuesta debe identificar modelo_clasificador_300 y 300 muestras,
 además de categoría, confianza y probabilidades. El adaptador comprueba esos
-campos y recupera los adjuntos originales. Si la API falla, marca clasificación
-no disponible y continúa el agente; no inventa una categoría de respaldo.
+campos y recupera los adjuntos originales. La categoría válida es definitiva.
+Si la API falla, el agente puede decidir la relevancia del correo, pero el
+nodo Aplicar categoría Python impide crear un ticket sin categoría Python
+válida y deriva a revisión; no adopta la categoría del agente como respaldo.
 
 ## Tipo, categoría y responsable
 
@@ -36,8 +38,11 @@ es ambiguo o no está habilitado, detiene la creación; no se fuerza otro tipo.
 
 Redmine debe tener las categorías Accesos, Aplicaciones, Infraestructura y Otros
 con nombres únicos por proyecto. Puede configurarse responsable predeterminado
-por categoría. El código valida usuario, membresía y rol antes de asignarlo;
-no aplica una asignación que no pueda comprobar.
+por categoría. El código consulta ese responsable después de fijar la categoría
+Python, resuelve su membresía real y valida un rol asignable antes de crear el
+ticket. Las consultas de miembros usan limit=100; si el responsable no aparece,
+no se inventan IDs ni se asigna el responsable de otra categoría: se detiene
+para revisión. Para proyectos con más miembros debe ampliarse la paginación.
 
 ## Prueba y diagnóstico
 

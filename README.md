@@ -86,7 +86,7 @@ La selección histórica utiliza 280 correos y reserva 20 originales para diagn�
 
 ### Integración operativa
 
-n8n recibe el correo, consulta la API Python y envía la solicitud y los adjuntos seleccionados al agente OpenAI. La predicción Python sirve para comparar con la propuesta del agente, que conserva la decisión final de categoría. Antes de crear el ticket en Redmine se validan proyecto, tipo, categoría, membresía y rol asignable.
+n8n recibe el correo, consulta la API Python y envía la solicitud y los adjuntos seleccionados al agente OpenAI. Python determina la categoría final. El agente recibe esa categoría y prepara el análisis; el código resuelve el responsable configurado para ella en Redmine. Antes de crear el ticket en Redmine se validan proyecto, tipo, categoría, membresía y rol asignable.
 
 <img src="Documentacion/Imagenes/c7f36046-5630-4130-9ed5-a623272a4937.png" alt="Flujo de correo, clasificación Python, agente IA, validaciones y creación de ticket en Redmine" width="760">
 

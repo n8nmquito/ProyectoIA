@@ -8,14 +8,24 @@ PostgreSQL. OpenAI analiza el correo y consulta Redmine; Gemini está desconecta
 ## Recorrido
 
 Correo → normalizar → API Python → validar predicción → seleccionar adjuntos →
-agente OpenAI → decidir relevancia → comparar categorías → preparar ticket →
-validar proyecto/tipo/categoría → validar responsable → subir originales → crear
+agente OpenAI → decidir relevancia → aplicar categoría Python → preparar ticket →
+validar proyecto/tipo/categoría → consultar categorías y miembros → resolver y validar responsable → subir originales → crear
 ticket → preparar confirmación.
 
-Python recibe solo título y cuerpo y sirve para comparación. El agente mantiene
-la decisión de categoría y propone prioridad y responsable. No hay aprobación
-humana obligatoria antes de crear el ticket. La baja confianza Python no bloquea
-por sí sola el alta. Coincidir con el agente no demuestra exactitud.
+Python recibe título y cuerpo y determina la categoría final. El agente recibe
+esa categoría y prepara resumen, descripción, relevancia, prioridad, tipo y
+proyecto. El nodo Aplicar categoría Python impide sobrescribir la categoría.
+Si la API falla o su respuesta no es válida, no se crea el ticket y se deriva
+a revisión. La baja confianza o un desacuerdo del agente marcan revisión; no
+cambian la categoría. El agente conoce la predicción: coincidir no constituye
+una evaluación independiente ni demuestra exactitud.
+
+El responsable configurado en la categoría real de Redmine tiene prioridad
+sobre la propuesta del agente. Dos consultas GET recuperan categorías y miembros;
+el código resuelve usuario, membresía y rol, y las consultas existentes validan
+la membresía y el permiso asignable. Si el responsable configurado no puede
+verificarse, se detiene el alta para revisión. Sin responsable configurado se
+puede usar la propuesta del agente, siempre validada.
 
 El agente devuelve tipo_ticket por nombre (Errores/Soporte). El código obtiene
 su ID del catálogo habilitado en el proyecto. No se admite un ID inventado, ni
@@ -59,3 +69,14 @@ ejecución fallida para no duplicar solicitudes.
 
 La privacidad y los límites del agente se documentan en
 [consideraciones éticas](../python/docs/consideraciones_eticas.md).
+
+## Pruebas de categoría final
+
+```bash
+node workflows/test-python-category.cjs
+```
+
+Pruebas locales sin crear tickets: desacuerdo Otros/Aplicaciones, baja confianza,
+API inválida, responsable configurado por categoría, rechazo de rol no asignable
+y conexiones de la plantilla. El ticket histórico #49 conserva su categoría
+anterior; la política nueva se aplica a las siguientes ejecuciones.
