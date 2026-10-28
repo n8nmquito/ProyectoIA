@@ -1,60 +1,47 @@
-# Correo → clasificador Python → OpenAI → Redmine
+# Correo → NexpAPI → OpenAI → Redmine
 
-El flujo principal está activo en [n8n](http://185.208.207.203:5678/workflow/opxBwpGpRDrbQeHn).
-El clasificador usa el archivo real modelo_clasificador_300.pkl (SVM calibrada),
-servido por una API Python dentro de Docker. Ya no carga el modelo demo desde
-PostgreSQL. OpenAI analiza el correo y consulta Redmine; Gemini está desconectado.
+El flujo principal utiliza el modelo de 300 correos de **NexpAPI** y el agente **OpenAI**. Python determina la categoría final; el agente analiza la solicitud y consulta Redmine. La API se consulta en `http://nexpapi:8000/predict` con la credencial Header Auth `X-API-Key`.
 
-## Recorrido
+## Recorrido actual
 
-Correo → normalizar → limpiar firma/datos en Python → validar texto limpio → API Python → validar predicción → seleccionar adjuntos →
-agente OpenAI → decidir relevancia → aplicar categoría Python → preparar ticket →
-validar proyecto/tipo/categoría → consultar categorías y miembros → resolver y validar responsable → subir originales → crear
-ticket → preparar confirmación.
+Correo → normalizar → limpiar firmas y datos con JavaScript en n8n → consultar NexpAPI → unir correo limpio y predicción → validar respuesta y seleccionar adjuntos → agente OpenAI → decidir relevancia → aplicar categoría Python → validar proyecto, tipo y categoría → resolver y validar responsable → subir originales → crear ticket → preparar confirmación.
 
-Python recibe título y cuerpo y determina la categoría final. El agente recibe
-esa categoría y prepara resumen, descripción, relevancia, prioridad, tipo y
-proyecto. El nodo Aplicar categoría Python impide sobrescribir la categoría.
-Si la API falla o su respuesta no es válida, no se crea el ticket y se deriva
-a revisión. La baja confianza o un desacuerdo del agente marcan revisión; no
-cambian la categoría. El agente conoce la predicción: coincidir no constituye
-una evaluación independiente ni demuestra exactitud.
+Si la limpieza o la API fallan, o la predicción no es válida, se deriva directamente a **Sin análisis IA - Revisión** antes de llegar al agente. La baja confianza o el desacuerdo del agente marcan revisión y conservan la categoría Python. La creación no requiere aprobación humana obligatoria.
 
-El responsable configurado en la categoría real de Redmine tiene prioridad
-sobre la propuesta del agente. Dos consultas GET recuperan categorías y miembros;
-el código resuelve usuario, membresía y rol, y las consultas existentes validan
-la membresía y el permiso asignable. Si el responsable configurado no puede
-verificarse, se detiene el alta para revisión. Sin responsable configurado se
-puede usar la propuesta del agente, siempre validada.
+El responsable configurado en la categoría de Redmine tiene prioridad. Se consulta su membresía y rol asignable; si no puede verificarse, se detiene el alta. Si no hay responsable configurado, se valida la propuesta del agente o se deja el ticket sin asignar para revisión. `tipo_ticket` se resuelve por nombre contra el catálogo del proyecto: no se inventan IDs.
 
-El agente devuelve tipo_ticket por nombre (Errores/Soporte). El código obtiene
-su ID del catálogo habilitado en el proyecto. No se admite un ID inventado, ni
-se fija el valor 2 ni se deduce por el orden de una lista. Se comprueban además
-proyecto activo, categoría real, membresía y rol asignable con view_issues.
+## Qué archivo importar
 
-El agente puede recibir imágenes PNG/JPEG/WebP/PDF: hasta cuatro archivos,
-4 MiB por archivo y 8 MiB en total. Todos los originales se conservan para
-Redmine. La selección no anonimiza archivos ni garantiza su lectura.
+| Archivo | Estado y uso |
+|---|---|
+| [correo-ia-redmine-python300.json](correo-ia-redmine-python300.json) | **Plantilla vigente: 44 nodos**, limpieza local y categoría Python obligatoria. Usar para nuevas instalaciones |
+| [correo-ia-redmine.json](correo-ia-redmine.json) | **Referencia histórica: 47 nodos**. Conserva la lógica anterior de comparación y no reproduce el flujo actual |
 
-## Importar y configurar
+Ambas exportaciones están desactivadas y sin credenciales. Reasigna las credenciales antes de publicar la plantilla vigente y guarda la versión activa antes de modificarla. Son versiones diferentes, no copias intercambiables.
 
-correo-ia-redmine.json y correo-ia-redmine-python300.json son exportaciones de la
-misma versión, inactivas y sin credenciales. Hay que reasignarlas al importar.
-No importar una copia sobre un flujo activo sin guardar antes su versión.
-Ver [configuración](GUIA_CONFIGURACION.md), [proyecto Python](../python/README.md)
-y [arquitectura completa](../python/docs/arquitectura.md).
+Consultar [configuración](GUIA_CONFIGURACION.md), [NexpAPI](../nexpapi/README.md) y [arquitectura](../python/docs/arquitectura.md). Las claves permanecen en el `.env` del servicio y en las credenciales cifradas de n8n.
 
-La API interna usa http://nexpapi:8000/predict con X-API-Key en una
-credencial Header Auth de n8n. La clave permanece en .env del servicio y en la
-credencial cifrada; no debe copiarse en documentos, exportaciones ni capturas.
+## Limpieza y adjuntos
 
-## Pruebas verificadas
+El nodo **Limpiar firma y datos** ejecuta [limpiar-correo.js](nodes/limpiar-correo.js) dentro de n8n. Elimina firmas habituales y redacta contactos, IP, enlaces, credenciales y campos personales etiquetados. No llama a un endpoint de limpieza. Si no queda texto útil, deriva a revisión sin usar el original como respaldo.
 
-La prueba inicial de 24 correos creó 20 tickets y bloqueó cuatro propuestas de
-tipo no habilitado. Tras resolver el tipo por nombre se repitieron esos cuatro:
-4/4 crearon tickets DEMO en las ejecuciones 28517–28520, tickets 40–43. No se
-repitieron los otros 20 ni se enviaron confirmaciones. Los resultados iniciales
-y posteriores permanecen separados en python/results/n8n_produccion/.
+**Unir correo y predicción** conserva el texto limpio y los adjuntos junto con la respuesta de NexpAPI. El selector comprueba modelo, categoría y probabilidades antes de pasar al agente; no vuelve a clasificar.
+
+El agente puede recibir PNG, JPEG, WebP y PDF: hasta **4 archivos**, **4 MiB por archivo** y **8 MiB en total**. Los originales se conservan para Redmine. La selección y la limpieza de texto no anonimizan adjuntos ni garantizan detectar todos los datos sensibles.
+
+## Pruebas y diagnóstico
+
+Desde la raíz del repositorio, ejecutar sin crear tickets ni enviar correos:
+
+```bash
+node workflows/test-email-cleaning.cjs
+node workflows/test-python-category.cjs
+node workflows/status-notifications/test.cjs
+```
+
+Las dos primeras suites comprueban la limpieza local, la autoridad de la categoría Python, la asignación y las conexiones de la plantilla vigente. La tercera verifica la lógica del flujo independiente de avisos de estado.
+
+Estas comprobaciones se conservan para la plantilla histórica y sus componentes:
 
 ```bash
 node workflows/test-workflow.cjs
@@ -62,42 +49,8 @@ node workflows/test-assignment.cjs
 node workflows/test-attachments.cjs
 ```
 
-Las herramientas del agente son consultas GET. La creación de tickets y los
-avisos posteriores sí tienen efectos reales. La rama Prueba manual → Correo de
-ejemplo puede crear un ticket DEMO. Revisar si ya existe antes de repetir una
-ejecución fallida para no duplicar solicitudes.
+La ejecución aislada **28845** comprobó NexpAPI y los adjuntos con dos correos ficticios, sin agentes externos, tickets ni SMTP. Las pruebas históricas de 24 correos y la corrección posterior de tipos están registradas en [resultados](../python/results/n8n_produccion/resultados.json) y [regresión](../python/results/n8n_produccion/regresion_tipo_ticket.json).
 
-La privacidad y los límites del agente se documentan en
-[consideraciones éticas](../python/docs/consideraciones_eticas.md).
+La rama manual del flujo principal puede crear tickets reales. Un estado `success` puede contener un rechazo controlado: comprobar el ID en Redmine antes de reintentar. El cursor IMAP evita reprocesar mensajes antiguos ya considerados; no sustituye una garantía global de idempotencia.
 
-## Pruebas de categoría final
-
-```bash
-node workflows/test-python-category.cjs
-```
-
-Pruebas locales sin crear tickets: desacuerdo Otros/Aplicaciones, baja confianza,
-API inválida, responsable configurado por categoría, rechazo de rol no asignable
-y conexiones de la plantilla. El ticket histórico #49 conserva su categoría
-anterior; la política nueva se aplica a las siguientes ejecuciones.
-
-## Limpieza de texto antes del clasificador
-
-El nodo de código **Limpiar firma y datos** ejecuta JavaScript dentro de n8n,
-sin llamadas HTTP para limpiar el correo. Su código está en
-`nodes/limpiar-correo.js`. Envía asunto/cuerpo limpios a `/predict` y al agente;
-si no queda texto útil, deriva a revisión sin usar el original como respaldo.
-**Unir correo y predicción** conserva el texto y los adjuntos junto con la
-respuesta de la API. El selector de adjuntos valida esa respuesta antes del
-agente; no existe un segundo nodo que vuelva a clasificar el correo.
-
-Se quitan firmas habituales, bloques de firma HTML y avisos de confidencialidad.
-Se redactan correos, teléfonos/números largos, IP, enlaces, credenciales y
-campos personales etiquetados. Las reglas no garantizan reconocer todos los
-nombres libres ni toda información sensible. Los adjuntos no se anonimizan.
-El original sigue disponible para el ticket y en los registros de n8n; esta
-limpieza no elimina los datos de esos almacenamientos.
-
-El disparador IMAP usa UNSEEN y conserva `lastMessageUid`: mensajes antiguos
-que sigan sin leer no se reprocesan automáticamente. Para comprobar el flujo
-debe entrar un correo nuevo; reiniciar el cursor puede duplicar tickets.
+Ver [consideraciones éticas](../python/docs/consideraciones_eticas.md) para privacidad, revisión y límites de uso.

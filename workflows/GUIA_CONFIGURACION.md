@@ -1,67 +1,50 @@
 # Configuración del flujo integrado
 
-## Servicios y credenciales
+## Plantilla y servicios
+
+Usar [correo-ia-redmine-python300.json](correo-ia-redmine-python300.json), la plantilla vigente de 44 nodos. `correo-ia-redmine.json` es una referencia histórica con otra lógica de clasificación.
 
 | Nodo o servicio | Configuración |
 |---|---|
-| Leer buzón IMAP | Credencial del buzón, host/puerto/TLS según proveedor, INBOX y formato Resolved |
-| Consultar API - Modelo 300 | POST http://nexpapi:8000/predict; Header Auth con Name X-API-Key |
-| OpenAI - Cargar API key | Credencial OpenAI del agente, sin escribirla en código |
-| Nodos HTTP y herramientas Redmine | Header Auth con Name X-Redmine-API-Key y clave real de Redmine |
+| Leer buzón IMAP | Credencial del buzón, host/puerto/TLS del proveedor, INBOX y formato Resolved |
+| Limpiar firma y datos | Nodo Code JavaScript local; no requiere servicio ni credencial adicional |
+| Consultar API - Modelo 300 | `POST http://nexpapi:8000/predict`; Header Auth con nombre `X-API-Key` |
+| Agente OpenAI | Credencial del proveedor y modelo `gpt-4.1-mini` |
+| Herramientas y nodos Redmine | Header Auth con nombre `X-Redmine-API-Key` |
 | Avisos de correo | Credencial SMTP y remitente autorizado |
 
-Las credenciales IMAP/SMTP/OpenAI/Redmine se administran en n8n. La clave de la
-API Python debe coincidir con CLASSIFIER_API_KEY del .env del servicio. No usar
-la contraseña SSH como clave de API ni publicar secretos en Git.
+Las claves se administran en n8n y en los archivos privados del servicio. `X-API-Key` debe coincidir con `CLASSIFIER_API_KEY` del `.env` de NexpAPI. No escribir secretos en el flujo exportado ni en Git.
 
-La URL del servicio Python se resuelve dentro de la red Docker compartida;
-localhost de la PC no sirve desde el contenedor n8n. La API no necesita publicar
-un puerto a Internet. En otro servidor debe adaptarse la red y el nombre del
-servicio. Ver python/deploy/DESPLIEGUE_REALIZADO.md para operación y reversión.
+NexpAPI comparte la red Docker de n8n y no publica el puerto 8000. El host interno es `nexpapi`, no `localhost`. Consultar [NexpAPI](../nexpapi/README.md) y [operación del despliegue](../python/deploy/DESPLIEGUE_REALIZADO.md).
 
-## Entrada y salida de Python
+## Entrada, salida y errores
 
-Antes de `/predict`, el nodo de código Limpiar firma y datos limpia título y
-cuerpo localmente en n8n. No hay endpoint de limpieza. Si no queda texto útil,
-deriva a revisión. Los originales y adjuntos se conservan para Redmine; las
-reglas de texto no anonimizan archivos adjuntos.
+1. **Limpiar firma y datos** quita firmas y redacta datos sensibles del asunto/cuerpo dentro de n8n.
+2. **Consultar API - Modelo 300** envía solo `titulo` y `cuerpo` limpios a `/predict`.
+3. **Unir correo y predicción** reúne el correo limpio, sus adjuntos y la respuesta.
+4. **Seleccionar adjuntos para IA** verifica que la respuesta corresponda a `modelo_clasificador_300`, con 300 muestras, categoría y probabilidades válidas; luego prepara archivos para el agente.
+5. El agente recibe la categoría Python y analiza el correo. **Aplicar categoría Python** vuelve a fijarla antes de preparar el ticket.
 
-
-El cuerpo JSON del nodo HTTP contiene solo titulo y cuerpo del correo
-normalizado. La respuesta debe identificar modelo_clasificador_300 y 300 muestras,
-además de categoría, confianza y probabilidades. El selector de adjuntos valida esos
-campos después de unir la predicción con el correo limpio. La categoría válida es definitiva.
-Si la API falla, el agente puede decidir la relevancia del correo, pero el
-nodo Aplicar categoría Python impide crear un ticket sin categoría Python
-válida y deriva a revisión; no adopta la categoría del agente como respaldo.
+Si falla la limpieza, la API o la validación de la respuesta, la ejecución deriva directamente a **Sin análisis IA - Revisión**. No pasa al agente ni crea un ticket con una categoría de respaldo. Los originales siguen disponibles para Redmine; los adjuntos no se anonimizan.
 
 ## Tipo, categoría y responsable
 
-El esquema del agente requiere tipo_ticket con Errores o Soporte. El agente no
-devuelve tracker_id. El nodo Validar proyecto y tipo consulta los tipos
-habilitados del proyecto y resuelve el nombre a un ID único. Si el nombre falta,
-es ambiguo o no está habilitado, detiene la creación; no se fuerza otro tipo.
+El agente devuelve `tipo_ticket` como **Errores** o **Soporte**. El código consulta los tipos habilitados y obtiene un ID único. Un nombre ausente, ambiguo o no habilitado impide crear el ticket.
 
-Redmine debe tener las categorías Accesos, Aplicaciones, Infraestructura y Otros
-con nombres únicos por proyecto. Puede configurarse responsable predeterminado
-por categoría. El código consulta ese responsable después de fijar la categoría
-Python, resuelve su membresía real y valida un rol asignable antes de crear el
-ticket. Las consultas de miembros usan limit=100; si el responsable no aparece,
-no se inventan IDs ni se asigna el responsable de otra categoría: se detiene
-para revisión. Para proyectos con más miembros debe ampliarse la paginación.
+Configurar las categorías **Accesos, Aplicaciones, Infraestructura y Otros** con nombres únicos por proyecto. Si una tiene responsable predeterminado, el código lo prioriza y verifica su membresía, rol asignable y permiso `view_issues`. Si esa verificación falla, se detiene el alta para revisión.
 
-## Prueba y diagnóstico
+Sin responsable configurado, se valida la propuesta del agente. El flujo puede dejar el ticket sin asignar y marcado para revisión si no hay una propuesta válida. Las consultas actuales recuperan hasta 100 miembros: proyectos mayores requieren ampliar la paginación.
 
-Abrir el flujo principal y su pestaña Executions. La rama manual usa un correo
-ficticio DEMO, pero puede crear un ticket real. Las pruebas controladas mantienen
-remitente de ejemplo y no envían confirmaciones. No introducir credenciales en
-el cuerpo del correo ni adjuntos sensibles.
+## Comprobación antes de publicar
 
-Un estado success en n8n puede incluir un rechazo controlado por validación.
-Comprobar Resultado del ticket y su ID en Redmine. Si no existe, revisar las
-salidas de error de proyecto, tipo, categoría y asignación antes de reintentar.
-No repetir ciegamente el alta porque podría existir un ticket ya creado.
+- Reasignar las credenciales a la plantilla vigente, que se exporta desactivada.
+- Comprobar que el nodo de limpieza sea Code JavaScript y que la API use `http://nexpapi:8000/predict`.
+- Revisar las conexiones de error hacia **Sin análisis IA - Revisión** y la presencia de **Aplicar categoría Python**.
+- Ejecutar las pruebas locales indicadas en el [README](README.md#pruebas-y-diagnóstico).
+- Para una prueba completa, preparar una copia aislada que sustituya creación de tickets y SMTP por comprobaciones. La rama manual del flujo principal sí puede generar un ticket real.
 
-La señal de revisión Python no obliga a una revisión humana. Los controles
-formales no demuestran que el resumen generado sea verdadero. Texto y adjuntos
-seleccionados, junto con respuestas de herramientas, pueden enviarse a OpenAI.
+## Diagnóstico de una ejecución
+
+Abrir **Executions** y revisar los nodos de limpieza, API y validación. Un estado `success` no demuestra que exista un ticket: comprobar **Resultado del ticket** y su ID en Redmine antes de reintentar.
+
+La señal de revisión no obliga a una aprobación humana. Las validaciones comprueban formatos y catálogos, no la veracidad completa del resumen. OpenAI puede recibir texto limpio, adjuntos seleccionados y respuestas de herramientas; la limpieza no equivale a anonimización completa.

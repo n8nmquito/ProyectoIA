@@ -1,80 +1,75 @@
-# Clasificador Python integrado con n8n
+# Despliegue actual de NexpAPI y Streamlit
 
-Servicio y contenedor: nexpapi
-Directorio: /mquito/mquito-ticket/nexpapi
-Red Docker externa: correo-tickets_automatizacion
-URL desde n8n: http://nexpapi:8000/predict
-No tiene puerto publicado en Internet.
-Modelo: models/modelo_clasificador_300.pkl, SVM calibrada, 300 correos.
-La clave está en .env (permisos 600) y en la credencial cifrada de n8n Clasificador Python 300 - API interna. No incluirla en documentación ni en Git.
+## Estado vigente
+
+| Componente | Configuración actual |
+|---|---|
+| API | Contenedor `nexpapi`, proyecto Compose `mquito-nexpapi` |
+| Directorio de API | `/mquito/mquito-ticket/nexpapi` |
+| Red compartida | `correo-tickets_automatizacion` |
+| URL desde n8n | `http://nexpapi:8000/predict` |
+| Modelo de la API | 300 correos; SHA-256 `2905ce4167d90281106ff7a37f6211114eccf459c1764d8ac5c61f0b81bf6a87` |
+| Portal | `mquito-portal-streamlit-1`, proyecto `mquito-portal`, puerto 8501 |
+| Flujo principal n8n | `opxBwpGpRDrbQeHn`, 44 nodos y categoría final Python |
+
+NexpAPI exige `X-API-Key` y no publica el puerto 8000. Su `.env` permanece privado. La API reutiliza `python/src` y `python/config.yaml`; el modelo desplegado está en `nexpapi/models` mediante `NEXPAPI_MODEL_DIR`.
+
+El portal usa sus modelos de `python/models` en solo lectura y conserva el historial en un volumen SQLite. Los datos y los modelos entregados están disponibles en el repositorio; las claves y las copias privadas del despliegue se mantienen aparte. Consultar [NexpAPI](../../nexpapi/README.md), [modelos](../models/README.md) y [configuración de n8n](../../workflows/GUIA_CONFIGURACION.md).
 
 ## Operación
 
-Desde este directorio:
+Para consultar o reconstruir únicamente NexpAPI:
 
-docker compose -p mquito-nexpapi -f compose.yaml ps
-docker compose -p mquito-nexpapi -f compose.yaml logs --tail=50
-docker compose -p mquito-nexpapi -f compose.yaml up -d --build
+```bash
+cd /mquito/mquito-ticket/nexpapi
+docker compose -p mquito-nexpapi ps
+docker compose -p mquito-nexpapi logs --tail=50
+docker compose -p mquito-nexpapi up -d --build
+```
 
-La política unless-stopped reinicia el servicio con Docker después de reiniciar el servidor, salvo que se haya detenido manualmente. No ejecutar docker compose down en el proyecto principal para administrar este servicio.
+Para el portal:
 
-## n8n
+```bash
+cd /mquito/mquito-ticket/python
+docker compose -p mquito-portal ps
+docker compose -p mquito-portal logs --tail=50 streamlit
+docker compose -p mquito-portal up -d --build --wait streamlit
+```
 
-Flujo activo: opxBwpGpRDrbQeHn
-El flujo publicado utiliza http://nexpapi:8000/predict; las versiones anteriores permanecen en el historial de n8n.
-Consultar API - Modelo 300 llama a NexpAPI; el flujo limpia el texto localmente en n8n y une la predicción con el correo y sus adjuntos.
-Se conservan credenciales, agente, adjuntos y validaciones de Redmine.
-Python determina la categoría final. El agente prepara el análisis y las propuestas de prioridad, tipo y proyecto.
+Ambos servicios utilizan `unless-stopped`. Los volúmenes conservan historial y datos entre recreaciones. Las credenciales, modelos y configuración deben respaldarse antes de actualizar.
 
-La API requiere X-API-Key y recibe solo titulo/cuerpo. No se enviaron datos de entrenamiento al servidor: solo código y modelo. Los 25 casos de prueba sintéticos se guardaron en la carpeta privada de backups para verificar paridad.
-El agente recibe el texto limpiado por el nodo n8n. Los adjuntos no se anonimizan.
+## Comportamiento del flujo actual
 
-## Evidencia
+La limpieza de firmas y datos sensibles se ejecuta en un nodo Code JavaScript de n8n. NexpAPI recibe título/cuerpo limpios y determina la categoría. Si la limpieza, la API o su respuesta fallan, se deriva a revisión antes de ejecutar el agente.
 
-Backups y resultados: /mquito/mquito-ticket/backups/classifier300
-- workflow-opxBwpGpRDrbQeHn-before.json: borrador original.
-- workflow-published-before.json: versión publicada original.
-- workflow-published-after.json: versión integrada.
-- api-test-results.json: 25 predicciones idénticas a Python, autenticación 401 y validación 422.
-- n8n-test-results.json: ejecución aislada 28474 con conservación del adjunto.
-- n8n-failure-test-results.json: ejecución aislada 28475 con API inaccesible y recuperación correcta.
-No se ejecutaron nodos de agente, Redmine ni notificaciones en estas pruebas.
+OpenAI prepara el análisis y propone prioridad, tipo y proyecto. El código fija la categoría Python, consulta el responsable y valida los catálogos, la membresía y el rol. Los originales y adjuntos se conservan para Redmine; los adjuntos no se anonimizan.
 
-## Reversión
+La plantilla vigente es [correo-ia-redmine-python300.json](../../workflows/correo-ia-redmine-python300.json). La otra exportación es histórica y no sirve como sustituto de la configuración actual.
 
-En el historial de versiones de n8n, publicar de nuevo la versión f204482e-dcdd-4259-9398-f7c4cc9f8332, previa a la integración. La credencial PostgreSQL anterior se conserva. Verificar que vuelve la ruta Normalizar correo → Cargar modelo ML - PostgreSQL → Clasificar correo - TF-IDF.
-Después de restaurar el flujo, puede detenerse solo esta API con:
+## Evidencia actual
 
-docker compose -p mquito-nexpapi -f compose.yaml stop
+- La ejecución aislada n8n **28845** verificó dos correos ficticios, limpieza local, NexpAPI y adjuntos, sin crear tickets ni enviar correos. El diagnóstico se archivó y el flujo principal quedó activo.
+- La evaluación de los modelos reentrenados del portal está en [results/produccion](../results/produccion/metrics/version_evaluation.json). La interfaz muestra métricas solo si el hash coincide con el archivo seleccionado.
+- El reporte de [pruebas Python](../results/metrics/pytest.xml) registra **96 pruebas aprobadas**. Las suites JavaScript y sus alcances están descritos en el [README del flujo](../../workflows/README.md#pruebas-y-diagnóstico).
 
-No eliminar las copias de seguridad ni detener el PostgreSQL del proyecto.
+## Reversión de una actualización
 
-## Corrección de tipos y evidencia posterior
+1. Antes del cambio, guardar la versión publicada de n8n, el commit y la imagen en uso, la configuración y los hashes de los modelos. Conservar los volúmenes y archivos privados.
+2. Elegir una versión previamente verificada que mantenga la limpieza local, la categoría final Python y el endpoint `nexpapi:8000`. Revisar su compatibilidad con el código y modelo que se va a restaurar.
+3. Probar la versión en una copia aislada, con la creación Redmine y SMTP sustituidas por comprobaciones, antes de publicarla.
+4. Si se restaura código de un servicio, reconstruir solo ese servicio con los comandos anteriores. Comprobar salud, una predicción y su hash; para el portal, verificar también la lectura de métricas y el historial.
+5. Confirmar en n8n que el flujo está activo y que las rutas de error y la validación de categoría siguen presentes. Revisar si existe un ticket antes de reintentar ejecuciones fallidas.
 
-El agente devuelve tipo_ticket por nombre (Errores/Soporte) y el código resuelve
-el ID desde los tipos habilitados del proyecto. La versión previa a esta corrección
-está en workflow-before-tracker-fix.json y la corregida en workflow-after-tracker-fix.json,
-dentro de la carpeta privada de backups. La reversión histórica de la integración
-indicada arriba es más antigua; para revertir solo este cambio se debe usar la
-versión anterior a la corrección en el historial de n8n.
+El historial de n8n también contiene versiones anteriores a la integración actual. Su antigüedad no las convierte en una reversión compatible: algunas usan el modelo PostgreSQL o dejan la categoría al agente. La reversión debe conservar las reglas vigentes del sistema.
 
-Regresión de casos 5/6/13/22: ejecuciones 28517–28520, tickets DEMO 40–43,
-4/4 correctos sin confirmaciones. No se modificaron modelos ni se reinició la API.
-La nueva documentación está en python/docs y las pruebas S5 se ejecutan localmente.
+## Evidencia histórica
 
-## Organización como NexpAPI
+Estos registros describen etapas anteriores y se conservan para trazabilidad:
 
-El paquete de despliegue está versionado en `nexpapi/`: entrada `app.py`,
-Dockerfile, dependencias, Compose y ejemplo de variables de entorno. Reutiliza
-`python/src` y `python/config.yaml` mediante un contexto de construcción en la
-raíz. En producción conserva el modelo en `nexpapi/models` con
-`NEXPAPI_MODEL_DIR=nexpapi/models`, sin incorporarlo a Git.
+| Etapa | Evidencia registrada |
+|---|---|
+| Integración inicial de API | Ejecuciones **28474** y **28475**: paridad, adjuntos y recuperación ante fallo de API |
+| Corrección del tipo de ticket | Ejecuciones **28517–28520**, tickets DEMO **40–43**: resolución de Errores/Soporte por nombre |
+| Renombrado a NexpAPI | Contenedor anterior retirado; archivos auxiliares conservados en `backups/nexpapi-layout-20261028` |
 
-El contenedor `nexpapi` quedó saludable y las 25 predicciones coincidieron
-exactamente con las del modelo anterior. Se verificó el mismo SHA-256
-`2905ce4167d90281106ff7a37f6211114eccf459c1764d8ac5c61f0b81bf6a87`.
-La ejecución aislada n8n **28845** terminó correctamente con dos correos
-ficticios y adjuntos, sin crear tickets ni enviar correos; se archivó después.
-El flujo principal quedó activo con la URL `http://nexpapi:8000/predict`.
-El contenedor anterior se retiró; sus archivos auxiliares se conservaron en
-`backups/nexpapi-layout-20261028`. Los modelos y las credenciales se conservaron.
+Los respaldos iniciales de API y flujo están en `/mquito/mquito-ticket/backups/classifier300`; son archivos privados del servidor, no componentes necesarios para una instalación nueva. El mecanismo antiguo de PostgreSQL queda como referencia histórica, no como instrucción operativa actual.
