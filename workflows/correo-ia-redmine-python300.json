@@ -812,9 +812,9 @@
       "parameters": {
         "fromEmail": "Mquito Soporte <n8n.mquito@gmail.com>",
         "toEmail": "={{ (() => { const value = String($('Normalizar correo').item.json.remitente || '').trim(); const match = value.match(/<([^<>]+)>$/); return match ? match[1] : value; })() }}",
-        "subject": "[Mquito] Correo omitido",
+        "subject": "[Mquito] Solicitud no válida: correo descartado",
         "emailFormat": "text",
-        "text": "Hola,\n\nNo se creó un ticket porque el correo no contiene una solicitud de soporte TI identificable o fue considerado contenido no pertinente. Si necesitas asistencia, indica qué problema tienes o qué ayuda solicitas; un comando o sus resultados por sí solos no permiten identificar la necesidad.\n\nMesa de soporte TI - Mquito",
+        "text": "Hola,\n\nTu correo fue descartado porque no contiene una solicitud válida de soporte TI. No se creó ningún ticket.\n\nSi necesitas asistencia, envía un nuevo correo indicando el problema o la ayuda que solicitas, el sistema o equipo involucrado y los detalles disponibles. Un comando, código o sus resultados sin una pregunta o solicitud concreta no son suficientes.\n\nMesa de soporte TI - Mquito",
         "options": {
           "appendAttribution": false
         }

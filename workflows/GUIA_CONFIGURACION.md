@@ -27,6 +27,8 @@ NexpAPI comparte la red Docker de n8n y no publica el puerto 8000. El host inter
 
 Si falla la limpieza, la API o la validación de la respuesta, la ejecución deriva directamente a **Sin análisis IA - Revisión**. No pasa al agente ni crea un ticket con una categoría de respaldo. La descripción de Redmine también usa el asunto y cuerpo limpios. Los adjuntos originales y el contacto del solicitante se conservan; no se anonimizan los archivos.
 
+Cuando el agente decide **omitir**, la rama **Correo omitido** registra que no se creó un ticket y envía al remitente una respuesta con el asunto **Solicitud no válida: correo descartado**. El mensaje explica el descarte y cómo enviar una solicitud de soporte concreta. Un fallo técnico del procesamiento sigue la rama de error; no se presenta como un descarte por contenido.
+
 ## Tipo, categoría y responsable
 
 El agente devuelve `tipo_ticket` como **Errores** o **Soporte**. El código consulta los tipos habilitados y obtiene un ID único. Un nombre ausente, ambiguo o no habilitado impide crear el ticket.
