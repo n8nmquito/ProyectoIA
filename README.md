@@ -84,27 +84,21 @@ Más detalle en el [análisis de datos](python/docs/analisis_datos.md).
 
 ## 5. Metodología
 
-| Aspecto | Implementación y justificación |
-|---|---|
-| **Modelo** | Clasificación supervisada multiclase con TF-IDF y SVM lineal calibrada. Se eligió por su F1 macro en la comparación con regresión logística y por ofrecer probabilidades estimadas. |
-| **Preprocesamiento** | Validación de campos y etiquetas; limpieza de HTML, normalización Unicode y minúsculas; sustitución de enlaces, correos, IP y números largos; combinación de título y cuerpo y control de duplicados. |
-| **Representación** | TF-IDF de palabras y pares de palabras, con frecuencia sublineal y normalización de acentos. Se ajusta dentro de cada partición de validación. |
-| **Optimización** | `GridSearchCV` con cuatro particiones estratificadas y semilla 42 sobre `C`, `class_weight` y `min_df`; calibración sigmoide interna de dos particiones. Los comandos por tamaño entrenan desde cero con los parámetros guardados en YAML, sin repetir la búsqueda. |
-| **Métricas** | F1 macro como principal, porque pondera por igual las categorías; accuracy, precisión, recall, F1 por clase y matriz de confusión. También se registran log loss y Brier multiclase para las probabilidades. |
+### Tipo de modelo utilizado y justificación
 
-En n8n, **Python determina la categoría final**. El agente prepara el resumen y propone prioridad, tipo y proyecto; el código consulta el responsable configurado de la categoría y valida membresía y rol. Si Python no devuelve una categoría válida, no se crea el ticket y el caso deriva a revisión.
+Clasificador supervisado multiclase con **TF-IDF y SVM lineal calibrada**. Se eligió por su F1 macro frente a regresión logística y porque permite obtener probabilidades estimadas para las cuatro categorías.
 
-### Arquitectura desplegada
+### Preprocesamiento aplicado
 
-El servidor ejecuta los servicios con Docker Compose. n8n recibe el correo por IMAP, limpia firmas y redacta datos sensibles mediante Python (`/sanitize`) y después consulta el clasificador FastAPI de 300 correos y envía al agente OpenAI el texto, los adjuntos seleccionados y la categoría Python. El código fija esa categoría, resuelve el responsable por el catálogo de Redmine y valida los datos antes de crear el ticket. PostgreSQL guarda los datos de n8n y Redmine; Streamlit funciona como portal independiente, carga sus modelos desde `models/` y guarda el historial en SQLite.
+Validación de campos y etiquetas, limpieza de HTML, normalización Unicode y minúsculas, sustitución de enlaces, correos, IP y números largos, unión de título y cuerpo y control de duplicados. TF-IDF utiliza palabras y pares de palabras (`ngram_range: [1, 2]`), frecuencia sublineal, normalización de acentos, `min_df: 1` y `max_df: 1.0`, según [config.yaml](python/config.yaml).
 
-**Imagen de arquitectura general disponible en la documentación:**
+### Técnicas de optimización empleadas
 
-<img src="python/documentacion/imagenes/arquitectura_general.png" alt="Arquitectura general de n8n, clasificador Python, Redmine y PostgreSQL" width="900">
+Búsqueda con `GridSearchCV` de `C: [0.1, 1.0, 10.0]`, `class_weight: [null, balanced]` y `min_df: [1, 2]`, usando F1 macro, **4 particiones estratificadas** y **semilla 42**. La configuración de entrenamiento en [config.yaml](python/config.yaml) utiliza **C = 10.0**, sin ponderación de clases y calibración sigmoide con **2 particiones**. El entrenamiento por tamaño aplica estos parámetros sin repetir la búsqueda.
 
-La imagen corresponde al esquema inicial de componentes. La descripción anterior detalla el despliegue actual con OpenAI, Streamlit y la categoría final de Python.
+### Métricas de evaluación seleccionadas
 
-Ver [arquitectura](python/docs/arquitectura.md), [optimización](python/docs/optimizacion.md) y [flujo n8n](workflows/README.md).
+**F1 macro** como métrica principal para dar el mismo peso a cada categoría; **accuracy, precisión, recall y F1 por clase**, junto con la **matriz de confusión**, para analizar aciertos y errores. Se registran **log loss y Brier multiclase** para evaluar las probabilidades.
 
 ## 6. Resultados
 
