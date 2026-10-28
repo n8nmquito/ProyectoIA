@@ -302,11 +302,11 @@ Mensaje de error al intentar clasificar sin completar el título.
 
 ## 10. Consideraciones éticas
 
-- **Privacidad:** usar datos ficticios o autorizados; no introducir contraseñas ni información personal innecesaria. La limpieza del texto no garantiza anonimización.
-- **Servicios externos:** OpenAI puede recibir texto, adjuntos seleccionados y datos consultados en Redmine. Su envío requiere permisos y una política de tratamiento de datos.
-- **Limitaciones y sesgos:** corpus pequeño, simulado, en español y de un dominio limitado; no se ha demostrado generalización a correo real ni equidad demográfica. Una confianza alta no garantiza un acierto.
-- **Supervisión:** baja confianza o desacuerdo marcan revisión. La creación automática de tickets no incluye aprobación humana obligatoria; el equipo debe revisar y corregir errores.
-- **Uso inadecuado:** no usar el resultado para conceder accesos, sancionar personas o resolver incidentes críticos automáticamente. El portal desplegado usa HTTP y no tiene autenticación: utilizar ejemplos sin datos sensibles.
+- **Privacidad:** usamos correos simulados. El nodo **Limpiar firma y datos - Python** elimina firmas habituales y redacta datos sensibles del título y cuerpo antes de enviarlos al clasificador Python y a OpenAI. La limpieza es parcial y no anonimiza los adjuntos.
+- **Sesgos y límites:** los datos están en español y cubren escenarios limitados. El modelo puede fallar con otros idiomas o casos diferentes; no se evaluó equidad entre grupos demográficos.
+- **Transparencia:** mostramos categoría, confianza y avisos de revisión. Una confianza alta no garantiza un acierto.
+- **Responsabilidad:** el equipo debe supervisar los resultados y corregir errores que puedan retrasar o desviar solicitudes.
+- **Uso adecuado:** no usar la clasificación como única decisión para cerrar tickets, conceder accesos o resolver incidentes críticos.
 
 Ver las [consideraciones éticas completas](docs/consideraciones_eticas.md).
 
