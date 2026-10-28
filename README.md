@@ -298,7 +298,6 @@ Mensaje de error al intentar clasificar sin completar el título.
 | `python/notebooks/` | Análisis y experimentos reproducibles |
 | `python/docs/` | Planificación, datos, arquitectura, optimización, ética y manual |
 | `python/deploy/` | Dockerfiles, dependencias y operación del despliegue |
-| `python/documentacion/imagenes/` | Gráficos y capturas |
 | `python/workshop/` | Material de referencia del taller |
 | `workflows/` | Flujos n8n, validaciones JavaScript y pruebas |
 | `n8n/`, `redmine/`, `postgres/` | Configuración de n8n, Redmine e inicialización de bases, respectivamente |
