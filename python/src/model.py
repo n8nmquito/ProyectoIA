@@ -14,6 +14,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
 
 from src.data_processing import CLASSES, combine_text
+from src.utils import load_config
 
 
 def refit_pipeline(pipeline, texts, labels):
@@ -25,14 +26,20 @@ def refit_pipeline(pipeline, texts, labels):
     return final
 
 
-def build_pipeline(kind="logistic", seed=42):
-    """Build baseline, logistic or calibrated SVM with bigram TF-IDF."""
+def build_pipeline(kind="logistic", seed=None, config=None):
+    """Build a pipeline using configurable text features and model settings."""
+    config = load_config() if config is None else config
+    seed = config["seed"] if seed is None else seed
+    model = config["model"]
+    tfidf = config["tfidf"]
     estimators = {
         "baseline": DummyClassifier(strategy="most_frequent"),
-        "logistic": LogisticRegression(max_iter=2000, random_state=seed),
+        "logistic": LogisticRegression(
+            max_iter=model["logistic_max_iter"], random_state=seed
+        ),
         "svm": CalibratedClassifierCV(
             LinearSVC(random_state=seed, dual="auto"),
-            cv=2,
+            cv=model["calibration_folds"],
         ),
     }
     if kind not in estimators:
@@ -42,9 +49,9 @@ def build_pipeline(kind="logistic", seed=42):
             (
                 "tfidf",
                 TfidfVectorizer(
-                    ngram_range=(1, 2),
-                    sublinear_tf=True,
-                    strip_accents="unicode",
+                    ngram_range=tuple(tfidf["ngram_range"]),
+                    sublinear_tf=tfidf["sublinear_tf"],
+                    strip_accents=tfidf["strip_accents"],
                 ),
             ),
             ("classifier", estimators[kind]),
@@ -74,8 +81,13 @@ def load_model(path):
     return pipeline
 
 
-def predict_ticket(pipeline, title, body, threshold=0.60):
+def predict_ticket(pipeline, title, body, threshold=None):
     """Return all class probabilities and flag low-confidence or OOV input."""
+    threshold = (
+        load_config()["confidence_threshold"]
+        if threshold is None
+        else threshold
+    )
     text = combine_text(title, body)
     try:
         vector = pipeline.named_steps["tfidf"].transform([text])

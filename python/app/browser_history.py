@@ -1,4 +1,4 @@
-"""Keep the private history identifier in this browser, without external services."""
+"""Keep the private history identifier in this browser."""
 
 from pathlib import Path
 
@@ -12,7 +12,10 @@ _identity = components.declare_component(
 
 
 def browser_history_token(link_token=None):
-    """Restore a browser's history or adopt an explicitly supplied private link."""
-    valid = (link_token if isinstance(link_token, str)
-             and TOKEN_PATTERN.fullmatch(link_token) else None)
+    """Restore browser history or adopt an explicit private link."""
+    valid = (
+        link_token
+        if isinstance(link_token, str) and TOKEN_PATTERN.fullmatch(link_token)
+        else None
+    )
     return _identity(link_token=valid, default=valid, key="history_identity")

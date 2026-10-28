@@ -151,10 +151,23 @@ def analyze_saved_search(path, family="svm", output_dir=None, figure_dir=None):
         "observed_score_max": float(scores.max()),
         "ranking": ranking,
         "limitations": [
-            "Solo 12 configuraciones; el sustituto es una aproximación exploratoria.",
-            "La importancia por permutación se calcula sobre las configuraciones ajustadas, no en una muestra independiente.",
-            "Los PDP explican el rendimiento estimado frente a hiperparámetros, no palabras ni causas de un ticket.",
-            "No se reentrenó ni se modificó ninguno de los cuatro clasificadores.",
+            (
+                "Solo 12 configuraciones; el sustituto es una aproximación "
+                "exploratoria."
+            ),
+            (
+                "La importancia por permutación se calcula sobre las "
+                "configuraciones ajustadas, no en una muestra "
+                "independiente."
+            ),
+            (
+                "Los PDP explican el rendimiento estimado frente a "
+                "hiperparámetros, no palabras ni causas de un ticket."
+            ),
+            (
+                "No se reentrenó ni se modificó ninguno de los cuatro "
+                "clasificadores."
+            ),
         ],
     }
     save_json(output_dir / "s5_surrogate_analysis.json", report)
@@ -177,7 +190,8 @@ def main():
     except (ValueError, OSError) as exc:
         parser.exit(1, f"Error en el análisis S5: {exc}\n")
     print(
-        f"S5: {report['n_trials']} configuraciones; MAE LOO {report['loo_mae']:.6f}."
+        f"S5: {report['n_trials']} configuraciones; "
+        f"MAE LOO {report['loo_mae']:.6f}."
     )
 
 

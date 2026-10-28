@@ -68,9 +68,17 @@ def train_versions(config):
     subsets = nested_subsets(frame, config["seed"])
     template = load_model(project_path(config["model_path"]))
     classifier = template.named_steps["classifier"]
-    if getattr(classifier, "cv", None) != 2:
+    calibration_folds = config["model"]["calibration_folds"]
+    if getattr(classifier, "cv", None) != calibration_folds:
         raise ValueError(
-            "Primero ejecuta src.train con la calibración de 2 folds."
+            "Primero ejecuta src.train con la calibración configurada."
+        )
+    if any(
+        subset.clasificacion.value_counts().min() < calibration_folds
+        for subset in subsets.values()
+    ):
+        raise ValueError(
+            "Las muestras pequeñas no admiten tantos folds de calibración."
         )
     source_hash = file_hash(source)
     rows = []
@@ -107,7 +115,10 @@ def train_versions(config):
         {
             "source_sha256": source_hash,
             "seed": config["seed"],
-            "algorithm": "TF-IDF + LinearSVC with sigmoid calibration, cv=2",
+            "algorithm": (
+                "TF-IDF + LinearSVC with sigmoid calibration, "
+                f"cv={calibration_folds}"
+            ),
             "parameters": {
                 key: value
                 for key, value in template.get_params().items()

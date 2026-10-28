@@ -3,7 +3,8 @@
 import csv
 import io
 
-from app.session_results import HISTORY_LIMIT, csv_bytes, remember_prediction
+from app.session_results import csv_bytes, remember_prediction
+from src.utils import history_limit
 
 
 def sample_result():
@@ -52,9 +53,9 @@ def test_excel_export_keeps_multiple_long_emails_in_separate_records():
 
 def test_retention_drops_oldest_entries_without_reusing_identifiers():
     state = {}
-    for index in range(HISTORY_LIMIT + 2):
+    for index in range(history_limit() + 2):
         remember_prediction(state, str(index), "Descripción", 100, sample_result())
-    assert len(state["prediction_history"]) == HISTORY_LIMIT
+    assert len(state["prediction_history"]) == history_limit()
     assert state["prediction_history"][0]["id"] == 3
-    assert state["prediction_history"][-1]["id"] == HISTORY_LIMIT + 2
+    assert state["prediction_history"][-1]["id"] == history_limit() + 2
     assert state["last_entry"] == state["prediction_history"][-1]

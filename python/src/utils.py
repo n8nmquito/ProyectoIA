@@ -3,6 +3,7 @@
 import hashlib
 import json
 import logging
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -14,7 +15,7 @@ LOGGER = logging.getLogger(__name__)
 
 def load_config(path=None):
     """Load and validate the YAML configuration relative to the project."""
-    source = Path(path) if path else ROOT / "config.yaml"
+    source = project_path(path) if path else ROOT / "config.yaml"
     try:
         config = yaml.safe_load(source.read_text(encoding="utf-8"))
     except (OSError, yaml.YAMLError) as exc:
@@ -23,6 +24,20 @@ def load_config(path=None):
         ) from exc
     if not isinstance(config, dict):
         raise ValueError("La configuración debe ser un objeto YAML.")
+    if path:
+        defaults = load_config()
+        for section in ("model", "tfidf"):
+            if section in config and isinstance(config[section], dict):
+                config[section] = defaults[section] | config[section]
+        config = defaults | config
+    if "HISTORY_LIMIT" in os.environ:
+        try:
+            config["history_limit"] = int(os.environ["HISTORY_LIMIT"])
+        except ValueError as exc:
+            raise ValueError(
+                "HISTORY_LIMIT debe ser un entero positivo."
+            ) from exc
+    validate_settings(config)
     if not 0 < config.get("test_size", 0) < 1:
         raise ValueError("test_size debe estar entre 0 y 1.")
     if config.get("cv_folds", 0) < 2:
@@ -30,6 +45,40 @@ def load_config(path=None):
     if not 0 <= config.get("confidence_threshold", -1) <= 1:
         raise ValueError("confidence_threshold debe estar entre 0 y 1.")
     return config
+
+
+def validate_settings(config):
+    """Validate configurable history, text features and model settings."""
+    limit = config.get("history_limit")
+    if type(limit) is not int or limit < 1:
+        raise ValueError("history_limit debe ser un entero positivo.")
+    model = config.get("model")
+    tfidf = config.get("tfidf")
+    if not isinstance(model, dict) or not isinstance(tfidf, dict):
+        raise ValueError("model y tfidf deben ser objetos YAML.")
+    for field, minimum in (("logistic_max_iter", 1), ("calibration_folds", 2)):
+        value = model.get(field)
+        if type(value) is not int or value < minimum:
+            raise ValueError(f"model.{field} debe ser un entero >= {minimum}.")
+    ngrams = tfidf.get("ngram_range")
+    if (
+        not isinstance(ngrams, (list, tuple))
+        or len(ngrams) != 2
+        or any(type(value) is not int for value in ngrams)
+        or not 1 <= ngrams[0] <= ngrams[1]
+    ):
+        raise ValueError(
+            "tfidf.ngram_range debe ser [mínimo, máximo] válidos."
+        )
+    if type(tfidf.get("sublinear_tf")) is not bool:
+        raise ValueError("tfidf.sublinear_tf debe ser true o false.")
+    if tfidf.get("strip_accents") not in (None, "ascii", "unicode"):
+        raise ValueError("tfidf.strip_accents debe ser null, ascii o unicode.")
+
+
+def history_limit():
+    """Read the retention limit with its environment override."""
+    return load_config()["history_limit"]
 
 
 def project_path(value):

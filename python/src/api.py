@@ -30,14 +30,20 @@ def create_app(model_path=None, api_key=None):
     @asynccontextmanager
     async def lifespan(app):
         """Require authentication configuration and exactly 300 samples."""
-        key = api_key if api_key is not None else os.environ.get(
-            "CLASSIFIER_API_KEY", ""
+        key = (
+            api_key
+            if api_key is not None
+            else os.environ.get("CLASSIFIER_API_KEY", "")
         )
         if len(key) < 32:
-            raise RuntimeError("CLASSIFIER_API_KEY debe tener al menos 32 caracteres.")
+            raise RuntimeError(
+                "CLASSIFIER_API_KEY debe tener al menos 32 caracteres."
+            )
         pipeline = load_model(path)
         if getattr(pipeline, "training_sample_count_", None) != 300:
-            raise RuntimeError("Se requiere el modelo entrenado con 300 correos.")
+            raise RuntimeError(
+                "Se requiere el modelo entrenado con 300 correos."
+            )
         app.state.pipeline = pipeline
         app.state.api_key = key
         yield
@@ -49,14 +55,19 @@ def create_app(model_path=None, api_key=None):
         if not hmac.compare_digest(
             x_api_key.encode(), app.state.api_key.encode()
         ):
-            raise HTTPException(status_code=401, detail="Clave de API inválida.")
+            raise HTTPException(
+                status_code=401, detail="Clave de API inválida."
+            )
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request, exc):
         """Avoid echoing email contents in validation responses."""
-        return JSONResponse(status_code=422, content={
-            "detail": "Envía solo titulo y cuerpo como textos no vacíos."
-        })
+        return JSONResponse(
+            status_code=422,
+            content={
+                "detail": "Envía solo titulo y cuerpo como textos no vacíos."
+            },
+        )
 
     @app.get("/health")
     def health():

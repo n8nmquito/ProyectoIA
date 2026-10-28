@@ -213,13 +213,14 @@ de haber inspeccionado esos casos.
 
 ## Pruebas automatizadas
 
-Última ejecución verificada: **63 pruebas aprobadas, cero fallos o errores**.
+Última ejecución verificada: **77 pruebas aprobadas, cero fallos o errores**.
 Evidencia legible por herramientas: results/metrics/pytest.xml.
 
 | Archivo | Comportamientos comprobados |
 |---|---|
 | test_data_processing.py | Limpieza, entradas inválidas, faltantes, etiquetas, duplicados, particiones y manifiesto |
 | test_model.py | Cuatro probabilidades normalizadas, persistencia, vocabulario desconocido, refit y CSV bloqueado |
+| test_config.py | Parámetros del modelo, configuración relativa, rechazo de valores inválidos y retención coherente en memoria y SQLite |
 | test_excel_export.py | Excel con valores numéricos, gráfico, tabla, metadatos ausentes explícitos, textos literales y descarga estable |
 | test_app.py | Formulario vacío, ejemplo, modelo ausente y predicción en la aplicación real mediante AppTest |
 | test_evaluate_new.py | Entradas sin etiquetas, duplicados, solapamiento y predicción sin fit ni cambio del modelo |
@@ -336,3 +337,5 @@ y vocabulario; no una métrica agregada ni una etiqueta humana de los 25.
 ![Caso de revisión con el modelo de 10](../documentacion/imagenes/app/resultado_revision.png)
 
 La descarga CSV se comprobó en el navegador integrado. La descarga XLSX quedó pendiente en ese navegador; se verificaron la generación del archivo, sus datos y su presentación mediante renderizado.
+
+La revisión estricta de `src` y `app` usa `pyproject.toml`: Ruff comprueba estilo, importaciones y docstrings con líneas de hasta 79 caracteres. Los ajustes nuevos conservan los valores de los modelos existentes; las pruebas no los reentrenan.

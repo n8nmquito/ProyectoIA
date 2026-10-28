@@ -93,7 +93,7 @@ Después de corregirlos se repitieron solo los cuatro casos afectados: 4/4 crear
 su ticket. No es una nueva medición de accuracy ni una repetición completa de los
 24 con la versión corregida. Evidencia: `results/n8n_produccion/`.
 
-Pruebas actuales: **63 tests Python aprobados**, Ruff sin errores y las tres
+Pruebas actuales: **77 tests Python aprobados**, Ruff sin errores y las tres
 suites JavaScript de normalización, asignación y adjuntos aprobadas. Se verifican también la integridad de los cuatro artefactos, sus probabilidades
 en 25 entradas y la limitación de CV en la versión de 10.
 
@@ -267,6 +267,28 @@ python -m pytest -q
 guarda sus datasets. `src.export_datasets` solo exporta los datos exactos de los
 modelos actuales, sin reentrenarlos. `src.evaluate` reconstruye en memoria el
 modelo diagnóstico de 280 y repite sus métricas, sin guardar otro `.pkl`.
+
+La configuración central incluye `history_limit` (50 por defecto),
+`tfidf.ngram_range`, `tfidf.sublinear_tf`, `tfidf.strip_accents`,
+`model.logistic_max_iter` y `model.calibration_folds`. `HISTORY_LIMIT`, si está
+presente en el entorno del proceso, prevalece sobre el límite del YAML y debe
+ser un entero positivo. Los archivos suministrados con `--config` pueden
+sobrescribir valores puntuales; las rutas relativas parten de la carpeta Python.
+
+Cambiar parámetros de TF-IDF o del modelo afecta a los nuevos entrenamientos
+con `src.train`; no modifica los `.pkl` existentes. `src.train_versions`
+reutiliza los ajustes del modelo guardado y comprueba que su calibración
+coincida con la configurada. La muestra de 10 necesita al menos tantos correos
+por clase como folds internos; si no alcanza, el comando rechaza la operación.
+Para aplicar cambios en el YAML del portal Docker, reconstruir con
+`docker compose up -d --build`.
+
+La calidad del código se comprueba con `python -m ruff check src app tests`
+y el formato con `python -m ruff format --check src app`. Las reglas están
+guardadas en `pyproject.toml`: límite de 79 caracteres, importaciones ordenadas
+y docstrings de módulos, funciones y clases. Las pruebas mantienen excepciones
+de longitud de línea, docstrings e importaciones; el código de `src` y `app`
+no tiene esas excepciones.
 
 Los parámetros y rutas se cambian en `config.yaml`. Reentrenar sustituye los
 archivos actuales de los mismos nombres. No se debe incorporar el test conocido

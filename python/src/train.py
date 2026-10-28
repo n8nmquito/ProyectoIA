@@ -196,7 +196,7 @@ def train(config):
     for kind in ("baseline", "logistic", "svm"):
         LOGGER.info("Comparando %s con CV estratificada", kind)
         scores = cross_validate(
-            build_pipeline(kind, seed),
+            build_pipeline(kind, seed, config),
             train_frame["texto"],
             train_frame["clasificacion"],
             cv=cv,
@@ -228,7 +228,7 @@ def train(config):
             "tfidf__min_df": config["search"]["min_df"],
         }
         candidate = GridSearchCV(
-            build_pipeline(family, seed),
+            build_pipeline(family, seed, config),
             grid,
             scoring="f1_macro",
             cv=cv,
@@ -284,10 +284,13 @@ def train(config):
         ROOT / "results/metrics/model_comparison.csv", index=False
     )
     final = evaluate_model(
-        best, test_frame, ROOT / "results/metrics", ROOT / "documentacion/imagenes"
+        best,
+        test_frame,
+        ROOT / "results/metrics",
+        ROOT / "documentacion/imagenes",
     )
     # Seleccionar con validación cruzada; reservar el test para evaluar.
-    baseline = build_pipeline("baseline", seed).fit(
+    baseline = build_pipeline("baseline", seed, config).fit(
         train_frame["texto"], train_frame["clasificacion"]
     )
     baseline_test = evaluate_model(baseline, test_frame)

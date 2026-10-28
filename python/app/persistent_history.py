@@ -9,11 +9,13 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
+from src.utils import history_limit
+
 TOKEN_PATTERN = re.compile(r"[A-Za-z0-9_-]{32,64}\Z")
 
 
 def history_token(value=None):
-    """Keep valid link identifiers or generate an unguessable new identifier."""
+    """Keep valid link identifiers or generate an unguessable one."""
     if isinstance(value, str) and TOKEN_PATTERN.fullmatch(value):
         return value
     return secrets.token_urlsafe(24)
@@ -23,6 +25,7 @@ class HistoryStore:
     """Use transactions to append, prune and clear one link's saved history."""
 
     def __init__(self, path):
+        """Create the SQLite file and initialize its history tables."""
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as connection:
@@ -38,7 +41,7 @@ class HistoryStore:
 
     @contextmanager
     def connect(self):
-        """Open a short-lived connection; never share connections across sessions."""
+        """Open a connection scoped to this transaction and session."""
         connection = sqlite3.connect(self.path, timeout=10)
         try:
             with connection:
@@ -48,7 +51,7 @@ class HistoryStore:
 
     @staticmethod
     def owner(token):
-        """Validate the private identifier and keep only its hash in the database."""
+        """Validate the identifier and store only its hash in the database."""
         if not isinstance(token, str) or not TOKEN_PATTERN.fullmatch(token):
             raise ValueError("Invalid history identifier")
         return hashlib.sha256(token.encode()).hexdigest()
@@ -57,13 +60,19 @@ class HistoryStore:
         """Read only the records belonging to the supplied private link."""
         with self.connect() as connection:
             rows = connection.execute(
-                "SELECT payload FROM histories WHERE owner=? ORDER BY sequence",
+                "SELECT payload FROM histories WHERE owner=? ORDER BY "
+                "sequence",
                 (self.owner(token),),
             ).fetchall()
         return [json.loads(row[0]) for row in rows]
 
-    def append(self, token, entry, limit=50):
-        """Append once, allocate a unique ID and retain the latest records atomically."""
+    def append(self, token, entry, limit=None):
+        """Append with a unique ID and prune old records atomically."""
+        limit = history_limit() if limit is None else limit
+        if type(limit) is not int or limit < 1:
+            raise ValueError(
+                "El límite del historial debe ser un entero positivo."
+            )
         owner = self.owner(token)
         with self.connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
@@ -79,7 +88,8 @@ class HistoryStore:
             ).fetchone()[0]
             saved = {**entry, "id": sequence}
             connection.execute(
-                "INSERT INTO histories(owner, sequence, payload) VALUES (?, ?, ?)",
+                "INSERT INTO histories(owner, sequence, payload) "
+                "VALUES (?, ?, ?)",
                 (owner, sequence, json.dumps(saved, ensure_ascii=False)),
             )
             connection.execute(
@@ -91,7 +101,7 @@ class HistoryStore:
         return saved
 
     def clear(self, token):
-        """Clear this history without deleting another link's records or its counter."""
+        """Clear only this history while retaining its sequence counter."""
         with self.connect() as connection:
             connection.execute(
                 "DELETE FROM histories WHERE owner=?", (self.owner(token),)

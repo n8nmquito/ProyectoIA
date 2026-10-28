@@ -33,7 +33,10 @@ def evaluate_reviewed(
     """Measure known-case regression, never claim an independent test."""
     if not isinstance(reviewer, str) or not reviewer.strip():
         raise ValueError(
-            "Indica quién revisó las etiquetas; no usar el modelo como revisor."
+            (
+                "Indica quién revisó las etiquetas; no usar el modelo como "
+                "revisor."
+            )
         )
     testing = load_new_tickets(test_path)
     try:
@@ -63,11 +66,13 @@ def evaluate_reviewed(
             expected.cuerpo,
         ):
             raise ValueError(
-                f"Fila {index}: el correo de referencia no coincide con el test."
+                f"Fila {index}: el correo de referencia "
+                "no coincide con el test."
             )
         if row["clasificacion"] not in CLASSES:
             raise ValueError(
-                f"Fila {index}: etiqueta pendiente o inválida; requiere revisión humana."
+                f"Fila {index}: etiqueta pendiente o inválida; "
+                "requiere revisión humana."
             )
         labels.append(row["clasificacion"])
     frame = pd.DataFrame({"clasificacion": labels})
@@ -88,7 +93,10 @@ def evaluate_reviewed(
             "test_sha256": file_hash(test_path),
             "model_sha256": original_hash,
             "training_samples": getattr(model, "training_sample_count_", None),
-            "limitation": "Casos previamente inspeccionados durante el desarrollo; no demuestran generalización ni ausencia de sobreajuste.",
+            "limitation": (
+                "Casos previamente inspeccionados durante el desarrollo; "
+                "no demuestran generalización ni ausencia de sobreajuste."
+            ),
         }
     )
     save_json(Path(output_dir) / "reviewed_regression_metrics.json", result)
@@ -118,7 +126,8 @@ def main():
         if args.prepare:
             count = prepare_review(args.data, args.reference)
             print(
-                f"Hoja creada con {count} correos y etiquetas vacías para revisión humana."
+                f"Hoja creada con {count} correos y etiquetas vacías "
+                "para revisión humana."
             )
         else:
             report = evaluate_reviewed(
@@ -129,7 +138,8 @@ def main():
                 args.reviewer,
             )
             print(
-                f"Regresión conocida: F1 macro {report['f1_macro']:.4f}; accuracy {report['accuracy']:.4f}."
+                f"Regresión conocida: F1 macro {report['f1_macro']:.4f}; "
+                f"accuracy {report['accuracy']:.4f}."
             )
             print(report["limitation"])
     except (ValueError, OSError, TypeError) as exc:

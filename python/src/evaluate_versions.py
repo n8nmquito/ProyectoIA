@@ -43,13 +43,16 @@ def cross_validation(pipeline, frame, folds, seed):
     folds = min(folds, int(frame.clasificacion.value_counts().min()))
     splitter = StratifiedKFold(folds, shuffle=True, random_state=seed)
     splits = list(splitter.split(frame.texto, frame.clasificacion))
+    calibration_folds = pipeline.named_steps["classifier"].cv
     for train, _ in splits:
         counts = frame.iloc[train].clasificacion.value_counts()
-        if len(counts) != 4 or counts.min() < 2:
+        if len(counts) != 4 or counts.min() < calibration_folds:
             return {
                 "cv_status": "not_feasible",
-                "cv_reason": "Algún fold deja menos de dos correos por clase "
-                "para la calibración interna de dos particiones.",
+                "cv_reason": (
+                    "Algún fold deja menos correos por clase que los "
+                    f"{calibration_folds} folds de calibración interna."
+                ),
                 "cv_folds": None,
                 "cv_f1_macro": None,
                 "cv_f1_std": None,
