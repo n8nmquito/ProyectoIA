@@ -297,7 +297,6 @@ Mensaje de error al intentar clasificar sin completar el título.
 | `python/workshop/` | Material de referencia del taller |
 | `workflows/` | Flujos n8n, validaciones JavaScript y pruebas |
 | `n8n/`, `redmine/`, `postgres/` | Configuración de n8n, Redmine e inicialización de bases, respectivamente |
-| `classifier/` | Experimento anterior con PostgreSQL; no es el clasificador Python actual |
 | `Documentacion/` | Diagramas y documentos complementarios |
 
 ## 10. Consideraciones éticas
