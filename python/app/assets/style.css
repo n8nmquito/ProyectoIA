@@ -174,28 +174,26 @@ button:focus-visible { outline: 2px solid #86baff; outline-offset: 3px; }
 
 /* Compact, keyboard-accessible language and appearance controls. */
 .st-key-preferences {
-  max-width: 600px; margin: 14px 0 0 auto;
+  width: 330px; max-width: 100%; margin: 0 0 0 auto;
+  position: absolute; top: 8px; right: 0; z-index: 10;
 }
-.st-key-preferences [data-testid="stWidgetLabel"] p {
-  font-size: 12px; font-weight: 600; color: #a6b6ca;
-  letter-spacing: .35px; margin-bottom: 3px;
-}
+.st-key-preferences [data-testid="stHorizontalBlock"] { gap: 8px; }
 .st-key-preferences [role="radiogroup"] {
   display: flex; flex-wrap: nowrap; gap: 4px;
   background: #121b25; border: 1px solid #344152;
-  border-radius: 13px; padding: 4px;
-  min-height: 48px; width: 100%; box-sizing: border-box;
+  border-radius: 10px; padding: 3px;
+  min-height: 34px; width: 100%; box-sizing: border-box;
 }
 .st-key-preferences label[data-baseweb="radio"] {
   display: flex; flex: 1 1 0; justify-content: center;
-  align-items: center; margin: 0; padding: 7px 12px;
-  border-radius: 9px; background: transparent; min-height: 36px;
+  align-items: center; margin: 0; padding: 3px 8px;
+  border-radius: 7px; background: transparent; min-height: 26px;
   cursor: pointer; transition: background .15s ease, box-shadow .15s ease;
 }
 .st-key-preferences label[data-baseweb="radio"] > div:first-child { display: none; }
 .st-key-preferences label[data-baseweb="radio"] > div { margin: 0; padding: 0; }
 .st-key-preferences label[data-baseweb="radio"] p {
-  font-size: 14px; font-weight: 600; white-space: nowrap;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
   color: #a9b9cd; line-height: 1.5;
 }
 .st-key-preferences label[data-baseweb="radio"]:hover { background: #213044; }
@@ -209,15 +207,12 @@ button:focus-visible { outline: 2px solid #86baff; outline-offset: 3px; }
   outline: 2px solid #7eb3ff; outline-offset: 2px;
 }
 @media (max-width: 760px) {
-  .st-key-preferences { max-width: none; margin-top: 12px; }
+  .st-key-preferences { width: 300px; top: 8px; }
   .st-key-preferences [data-testid="stColumn"] { min-width: 0 !important; }
-  .st-key-preferences [data-testid="stHorizontalBlock"] { flex-wrap: nowrap; gap: 12px; }
-  .st-key-preferences label[data-baseweb="radio"] { padding: 7px 8px; }
-  .st-key-preferences label[data-baseweb="radio"] p { font-size: 13px; }
+  .st-key-preferences [data-testid="stHorizontalBlock"] { flex-wrap: nowrap; gap: 8px; }
 }
 @media (max-width: 480px) {
-  .st-key-preferences [data-testid="stHorizontalBlock"] { flex-wrap: wrap; gap: 8px; }
-  .st-key-preferences [data-testid="stColumn"] { min-width: 100% !important; }
+  .st-key-preferences [data-testid="stColumn"] { min-width: 0 !important; }
 }
 
 /* Guided empty state for the result panel. */

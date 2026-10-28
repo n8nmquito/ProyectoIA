@@ -448,17 +448,16 @@ def main():
         if key in st.session_state:
             st.session_state[key] = st.session_state[key]
     with st.container(key="preferences"):
-        language_column, theme_column = st.columns([1.15, 1], gap="medium")
+        language_column, theme_column = st.columns([0.65, 1], gap="small")
         with language_column:
             st.radio("Idioma / Language", ("Español", "English"),
-                     key="language", horizontal=True,
-                     format_func=lambda value: "ES · Español" if value == "Español"
-                     else "EN · English")
+                     key="language", horizontal=True, label_visibility="collapsed",
+                     format_func=lambda value: "ES" if value == "Español" else "EN")
         with theme_column:
             theme_labels = {"dark": "☾  " + tr("Oscuro", "Dark"),
                             "light": "☀  " + tr("Claro", "Light")}
             st.radio(tr("Apariencia", "Appearance"), ("dark", "light"),
-                     key="theme", horizontal=True,
+                     key="theme", horizontal=True, label_visibility="collapsed",
                      format_func=lambda mode: theme_labels[mode])
     apply_style(st.session_state.theme)
     classify_tab, about_tab, history_tab = st.tabs([
