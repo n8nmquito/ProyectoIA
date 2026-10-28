@@ -47,9 +47,9 @@ Automatiza la gestión de correos de soporte TI con n8n: un clasificador Python 
 
 ## 3. Descripción del problema
 
-- **¿Qué problema resuelve?** La lectura y clasificación manual de correos de soporte y su derivación a responsables, tareas repetitivas que pueden generar asignaciones inconsistentes.
-- **¿Por qué es importante?** Ayuda a organizar las solicitudes y mantener trazabilidad de su categoría y asignación. La reducción de tiempos es un objetivo; todavía no se ha medido.
-- **¿Quiénes lo utilizan?** Operadores de mesa de ayuda, personal de soporte TI y responsables que supervisan los tickets; también estudiantes y evaluadores del proyecto.
+- **¿Qué problema resuelve?** Centraliza la atención de solicitudes de soporte TI recibidas por correo. Automatiza su clasificación, la preparación del ticket y su asignación en Redmine para reducir tareas repetitivas y evitar derivaciones inconsistentes.
+- **¿Por qué es importante?** Una solicitud mal clasificada o derivada puede retrasar su atención. El proyecto aplica criterios uniformes de categorización y asignación, conserva la trazabilidad en Redmine y facilita la supervisión del equipo; busca reducir el tiempo de gestión, aunque ese ahorro todavía no se ha medido.
+- **¿Quiénes son los usuarios objetivo?** Operadores de mesa de ayuda que registran y derivan solicitudes, técnicos de soporte TI que atienden los tickets y responsables que supervisan su asignación y seguimiento. El portal Streamlit permite probar los modelos y revisar sus predicciones antes de valorar su uso operativo.
 
 ## 4. Dataset
 
