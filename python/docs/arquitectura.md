@@ -1,270 +1,176 @@
-# Arquitectura y decisiones técnicas
+# Arquitectura del sistema
 
-El proyecto prueba versiones de 10, 100, 200 y 300 correos y adopta
-**modelo_clasificador_300.pkl como modelo final**. Las tres versiones menores
-se conservan para comparación; las métricas por versión se detallan en la evaluación actual.
+## 1. Tipo de modelo seleccionado y justificación
 
-## Vista general
+Se utiliza un clasificador supervisado multiclase formado por **TF-IDF y SVM lineal calibrada** (`TfidfVectorizer`, `LinearSVC` y `CalibratedClassifierCV`). Clasifica las solicitudes en **accesos, aplicaciones, infraestructura y otros**.
 
-El sistema tiene una capa de preparación de datos, una de entrenamiento, una
-de predicción. Se usa desde consola, la interfaz principal Streamlit local y la API HTTP para n8n. La API usa el
-mismo pipeline de clasificación y se integra con n8n. El flujo completo sí emplea
-OpenAI como agente externo y Redmine para registrar y asignar tickets.
+Se comparó con un baseline de categoría mayoritaria y regresión logística. La SVM optimizada obtuvo el mayor F1 macro de la etapa de selección: **0.965000**, frente a **0.964939** de regresión logística optimizada. La diferencia es pequeña; no demuestra una superioridad estadística o en producción. La calibración sigmoide permite obtener probabilidades por categoría y señalar casos de baja confianza.
 
-```mermaid
-flowchart TD
-    A[correos.json: 300 etiquetados] --> B[Validar y limpiar]
-    B --> C[Selección: 280 y diagnóstico: 20]
-    C --> D[CV de 4 folds y búsqueda de ajustes]
-    D --> E[TF-IDF y SVM calibrada seleccionada]
-    E --> F[Ajuste final con 300]
-    F --> G[Versiones con 10, 100, 200 y 300]
-    G --> H[Cuatro modelos pkl y datasets exactos]
-    I[Nuevo título y cuerpo] --> J[Validar y limpiar]
-    J --> K[Cargar el modelo elegido]
-    H --> K
-    K --> L[Categoría, probabilidades y revisión]
-```
+Se conservan modelos entrenados con **10, 100, 200 y 300 correos simulados**, con la misma configuración y vocabularios aprendidos por separado. **NexpAPI utiliza el de 300 correos**; Streamlit permite elegir entre los archivos válidos de `models/`. El agente externo **OpenAI gpt-4.1-mini** analiza la solicitud y propone resumen, prioridad, tipo y proyecto; **Python determina la categoría final**. No se entrenó un LLM ni una red neuronal con estos correos.
 
-## Componentes del código
+Ver el proceso de selección en [optimización](optimizacion.md).
 
-| Archivo | Responsabilidad |
-|---|---|
-| src/data_processing.py | Esquema, limpieza, duplicados y particiones |
-| src/model.py | Pipelines, carga segura de artefactos propios y predicción |
-| src/train.py | Comparación, optimización, gráficos y modelo final de 300 |
-| src/train_versions.py | Misma configuración para tamaños 10/100/200/300 |
-| src/export_datasets.py | Exportar los correos exactos de cada modelo |
-| src/evaluate.py | Reconstruir en memoria el diagnóstico 280/20 y medir |
-| src/evaluate_new.py | Clasificar nuevos correos sin etiquetas, sin fit |
-| src/utils.py | Configuración, rutas, hashes y guardado de resultados |
-| evaluar_nuevos.py | Entrada corta para ejecutar desde CMD |
-| app/app.py | Interfaz Streamlit sobre el modelo configurado |
-| src/api.py | API autenticada del modelo de 300 para n8n |
-| src/optimization_analysis.py | Modelo sustituto, PDP e importancia S5 |
-| src/evaluate_reviewed.py | Regresión con etiquetas humanas revisadas |
+## 2. Arquitectura detallada (capas, parámetros, etc.)
 
-Las rutas predeterminadas se resuelven desde la raíz del proyecto. `config.yaml`
-define datos, modelo, semilla, folds, búsqueda y umbral de revisión. No es
-necesario editar rutas de la unidad F dentro del código para usar otra carpeta.
+### Etapas del modelo
 
-## Arquitectura detallada y representación del texto
+Este modelo no tiene capas neuronales. Su arquitectura es un pipeline de representación del texto y clasificación calibrada:
 
-Se combina título con cuerpo después de validarlos. `TfidfVectorizer` utiliza
-unigramas y bigramas, frecuencia sublineal, normalización Unicode de acentos y
-la normalización L2 predeterminada. El ajuste actual usa min_df=1.
-La salida es una matriz dispersa: no se usa una red neuronal ni embeddings.
-El vocabulario crece de 867 términos en la versión de 10 a 14.409 en la de 300.
+| Etapa | Operación | Parámetros |
+|---|---|---|
+| Preparación | Validar título/cuerpo, limpiar y combinar el texto | Reglas compartidas en `src/data_processing.py` |
+| TF-IDF | Convertir palabras y pares de palabras en una matriz dispersa | `ngram_range=(1, 2)`, `sublinear_tf=True`, `strip_accents=unicode`, `min_df=1`, `max_df=1.0`, normalización L2 |
+| SVM lineal | Aprender las fronteras entre las cuatro categorías | `C=10.0`, `class_weight=None`, `dual=auto`, `random_state=42` |
+| Calibración | Transformar las puntuaciones en probabilidades estimadas | Método sigmoide y `cv=2`; combinación de estimadores calibrados |
+| Decisión | Elegir la categoría de mayor probabilidad | Marcar `requiere_revision` si confianza `< 0.60` o no hay términos conocidos |
 
-## Tipo de modelo seleccionado y justificación
+Los valores configurables se definen en [config.yaml](../config.yaml). El umbral de revisión no garantiza acierto ni exige por sí solo aprobación humana. La búsqueda utiliza **4 particiones de validación cruzada**; estas son distintas de las **2 particiones internas de calibración**.
 
-La selección compara DummyClassifier mayoritario, LogisticRegression y
-LinearSVC envuelta en CalibratedClassifierCV. El resultado actual favorece
-SVM por un margen mínimo de F1 CV frente a LR; no se afirma significancia.
-La SVM se calibra mediante sigmoide y **dos folds internos** para producir
-probabilidades de las cuatro clases y admitir el conjunto de 10, donde dos
-categorías tienen solo dos ejemplos. Los dos estimadores internos se combinan
-según el funcionamiento de la biblioteca.
+### Componentes y responsabilidades
 
-Las cuatro versiones usan C=10, class_weight=None y min_df=1, elegidos en la
-etapa mayor de selección. Se vuelve a aprender vocabulario y clasificador con
-los registros de cada tamaño; no se reutilizan coeficientes ajustados con 300
-para fingir un entrenamiento de 10. Los hiperparámetros sí son compartidos y
-fueron elegidos con el conjunto mayor: las versiones no son experimentos de
-diseño totalmente independientes.
+| Componente | Responsabilidad | Código o configuración |
+|---|---|---|
+| Preparación y modelo | Limpieza, representación, carga y predicción | `python/src/data_processing.py`, `python/src/model.py` |
+| Entrenamiento y análisis | Comparar modelos, optimizar, entrenar por tamaño y evaluar | `python/src/train.py`, `train_versions.py`, `evaluate_versions.py`, `optimization_analysis.py` |
+| Portal Streamlit | Formulario, ejemplos, selector de modelos, resultados, exportación, historial y comparación | `python/app/`, `python/compose.yaml` |
+| NexpAPI | Exponer el modelo de 300 mediante HTTP autenticado | `nexpapi/app.py`, `python/src/api.py`, `nexpapi/Dockerfile`, `nexpapi/compose.yaml` |
+| Orquestación n8n | Recibir correo, limpiar texto, consultar NexpAPI, ejecutar el agente y validar el ticket | `workflows/correo-ia-redmine-python300.json`, `workflows/nodes/` |
+| Agente OpenAI | Analizar relevancia, resumir y proponer datos del ticket; consultar catálogos por GET | Nodo de agente y herramientas de solo lectura de n8n |
+| Redmine | Registrar, asignar y gestionar tickets y adjuntos | Servicio Redmine y API REST |
+| Persistencia | PostgreSQL para n8n/Redmine; SQLite para el historial del portal | Volúmenes Docker; historial limitado por `history_limit: 50` |
 
-El pipeline conserva su cantidad de ejemplos, recuentos por clase, índices,
-huellas de texto y etiquetas. El exportador comprueba esas huellas para obtener
-los datasets exactos. Cargar un `.pkl` ajeno puede ejecutar código; solo se deben
-usar artefactos propios o de una fuente confiable.
+### Despliegue y comunicación
 
-## Decisión y revisión humana
+NexpAPI reside en `/mquito/mquito-ticket/nexpapi`, usa el contenedor `nexpapi` y comparte la red `correo-tickets_automatizacion`. n8n consulta **`POST http://nexpapi:8000/predict`**, con `X-API-Key`; **`GET /health`** comprueba disponibilidad. El puerto 8000 no se publica en Internet. La API carga una vez el modelo de 300 al iniciar; no reentrena ni llama a OpenAI.
 
-La categoría propuesta es la de mayor probabilidad. Si la confianza máxima es
-menor que 0,60 o el texto limpio no contiene términos del vocabulario aprendido,
-se marca `requiere_revision`. Ese umbral es configurable y no fue validado como
-umbral óptimo de seguridad. Un error puede superar 0,60 y un acierto quedar por
-debajo. La confianza no es una medida directa de calidad global.
+Su Compose limita el contenedor a **1 CPU y 512 MiB**, utiliza sistema de archivos de solo lectura, usuario sin privilegios, directorio temporal y reinicio `unless-stopped`. La construcción reutiliza `python/src` y `python/config.yaml`. En producción conserva el modelo en `nexpapi/models`, seleccionado mediante `NEXPAPI_MODEL_DIR`.
 
-## Evaluación y artefactos del modelo
+Streamlit se publica en el puerto **8501**, n8n en **5678**, Redmine en **3000** y Portainer en **9443**. El portal carga el modelo directamente en el proceso Python donde se ejecuta: en la computadora si se inicia localmente o en el contenedor del VPS si está desplegado. No utiliza NexpAPI ni OpenAI para sus predicciones. El historial persistente se guarda en SQLite mediante `HISTORY_DB_PATH`; sin esa configuración se conserva en memoria de sesión.
 
-`src.train` mide el candidato de 280 y luego ajusta el final con 300.
-`src.evaluate` puede reconstruir el candidato en memoria usando su partición
-guardada y los ajustes del final; no crea otro `.pkl`. Las métricas resultantes
-se etiquetan como pertenecientes al modelo diagnóstico, no al final de 300.
-`models/` contiene únicamente las versiones de 10, 100, 200 y 300 correos y su README.
-
-La consola acepta `--model 10`, `100`, `200`, `300` o una ruta a uno de esos
-archivos. Verifica que los registros del corpus coincidan con las huellas de
-la versión seleccionada y guarda las salidas en carpetas separadas.
-
-## Pipeline de datos desde input hasta output
-
-| Paso | Entrada | Transformación o control | Salida |
-|---|---|---|---|
-| 1 | Título y cuerpo | Validar texto, longitud y contenido; limpiar y concatenar | Texto normalizado |
-| 2 | Texto normalizado | TF-IDF con unigramas y bigramas del modelo seleccionado | Vector disperso |
-| 3 | Vector disperso | SVM lineal y calibración sigmoide de dos folds | Cuatro probabilidades |
-| 4 | Probabilidades y vocabulario | Elegir máximo y comprobar umbral de 0.60 y términos conocidos | Categoría, confianza y requiere_revision |
-| 5 | Resultado | Presentación en consola/Streamlit o respuesta de la API | Predicción visible o JSON para n8n |
-
-Este modelo no tiene capas neuronales. Sus etapas son el vectorizador y el
-clasificador calibrado; los parámetros principales son `ngram_range=(1, 2)`,
-`sublinear_tf=True`, `norm=l2`, `strip_accents=unicode`, `min_df=1`, `C=10`,
-`class_weight=None`, `dual=auto` y semilla 42. El flujo completo de n8n agrega
-al pipeline la decisión del agente y las validaciones de Redmine, como muestra
-el diagrama de extremo a extremo.
-
-## Tecnologías y librerías utilizadas con versiones
-
-Python de la ejecución verificada: 3.10.11.
-
-| Biblioteca | Versión fijada |
-|---|---|
-| pandas | 2.2.3 |
-| numpy | 1.26.4 |
-| scipy | 1.14.1 |
-| scikit-learn | 1.5.2 |
-| streamlit | 1.41.1 |
-| joblib | 1.4.2 |
-| pytest | 8.3.4 |
-| matplotlib | 3.9.4 |
-| seaborn | 0.13.2 |
-| nbformat | 5.10.4 |
-| nbclient | 0.10.2 |
-| ipykernel | 6.29.5 |
-| ruff | 0.9.10 |
-| PyYAML | 6.0.2 |
-
-Las versiones principales efectivas se registran en `results/metrics/versions.json`.
-No se ha probado toda combinación de sistema operativo y versión de Python.
-El entorno de trabajo verificado es Windows con Python 3.10.
-
-## Alternativas consideradas
-
-La referencia mayoritaria permite saber si el modelo supera una regla trivial.
-LR ofrece una solución lineal con probabilidades nativas y un resultado casi
-igual al de SVM. Se conservó la SVM calibrada por su F1 CV ligeramente mayor y
-para mantener la comparación de tamaños con el mismo método. No se entrenó una red neuronal ni un LLM con el corpus. El agente OpenAI del
-flujo desplegado es un servicio aparte: resume, propone prioridad y consulta
-catálogos; no sustituye el entrenamiento de los cuatro clasificadores.
-
-La implementación sigue las interfaces documentadas de
-[TF-IDF](https://scikit-learn.org/1.5/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html)
-y [calibración](https://scikit-learn.org/1.5/modules/generated/sklearn.calibration.CalibratedClassifierCV.html).
-
-## Flujo desplegado de extremo a extremo
+## 3. Diagrama de flujo del sistema completo
 
 ```mermaid
 flowchart TD
-    M[Correo IMAP o prueba manual] --> N[Normalizar y conservar originales]
-    N --> L[Python: quitar firma y redactar datos]
-    L --> P[API Python: modelo de 300]
-    P --> B[Validar predicción y conservar adjuntos]
-    B --> S[Seleccionar imágenes y PDF para el agente]
-    S --> A[Agente OpenAI: decidir relevancia y analizar]
-    R[Catálogos Redmine: consultas GET] -. herramientas .-> A
-    A --> D{¿Solicitud de soporte?}
-    D -->|No| O[Registrar omisión y aviso según configuración]
-    D -->|Sí| C[Aplicar categoría final de Python]
-    C --> T[Preparar ticket]
-    T --> V[Resolver tipo por nombre y validar proyecto y categoría]
-    V --> Q[Resolver responsable del catálogo de categorías]
-    Q --> U[Verificar membresía y rol del responsable]
-    U --> F[Recuperar y subir adjuntos originales]
-    F --> K[Crear ticket en Redmine]
-    K --> E[Preparar confirmación al remitente]
+    subgraph Entrenamiento[Entrenamiento y artefactos]
+        DS["Correos simulados etiquetados"] --> VAL["Validar datos y preparar muestras"]
+        VAL --> OPT["Comparar y optimizar TF-IDF y clasificadores"]
+        OPT --> FIT["Entrenar versiones de 10, 100, 200 y 300"]
+        FIT --> MOD["Modelos pkl y datasets de cada versión"]
+        OPT --> REP["Métricas, sensibilidad y gráficos S5"]
+    end
+
+    subgraph Portal[Portal de pruebas Streamlit]
+        WEB["Formulario o ejemplo precargado"] --> SEL["Validar entrada y elegir modelo"]
+        MOD --> SEL
+        SEL --> INF["TF-IDF y SVM calibrada"]
+        INF --> OUT["Categoría, confianza, probabilidades y revisión"]
+        OUT --> HIST["Historial SQLite, comparación y exportación"]
+    end
+
+    subgraph Automatizacion[Automatización de correo en n8n]
+        IMAP["Correo IMAP"] --> NOR["Normalizar y conservar originales"]
+        NOR --> CLEAN["Nodo Code JavaScript: limpiar firmas y datos sensibles"]
+        CLEAN --> API["NexpAPI: predict con modelo de 300"]
+        MOD --> API
+        CLEAN --> MERGE["Unir correo limpio y predicción"]
+        API --> MERGE
+        MERGE --> ATT["Validar predicción y seleccionar adjuntos"]
+        ATT --> AG["Agente OpenAI: analizar y proponer datos del ticket"]
+        CAT["Catálogos Redmine: consultas GET"] -.-> AG
+        AG --> REL{"¿Solicitud de soporte?"}
+        REL -->|No| OMIT["Registrar omisión y preparar aviso"]
+        REL -->|Sí| FINAL["Aplicar categoría final de Python"]
+        FINAL --> CHECK["Validar proyecto, tipo, categoría y responsable"]
+        CAT -.-> CHECK
+        CHECK --> FILES["Recuperar y subir adjuntos originales"]
+        NOR -.-> FILES
+        FILES --> RM["Crear y asignar ticket en Redmine"]
+        RM --> MAIL["Preparar confirmación por correo"]
+        CLEAN -->|Error| REVIEW["Revisión sin creación de ticket"]
+        API -->|Error| REVIEW
+        ATT -->|Respuesta inválida| REVIEW
+        CHECK -->|Proyecto, tipo o categoría inválidos| REVIEW
+    end
+
+    PG[(PostgreSQL)] --- CAT
+    RM --> PG
+    AG -. "Ejecuciones de n8n" .-> PG
 ```
 
-La API está en `/mquito/mquito-ticket/nexpapi`, conectada a la red
-Docker `correo-tickets_automatizacion`. Su dirección desde n8n es
-`http://nexpapi:8000/predict`. No tiene puerto publicado en Internet.
-Exige `X-API-Key`, configurada fuera del código. Carga una vez al iniciar el
-archivo `modelo_clasificador_300.pkl` y comprueba sus 300 muestras.
+El diagrama representa el flujo vigente: **la limpieza se ejecuta en un nodo de código de n8n, sin endpoint adicional**, y NexpAPI realiza la clasificación. Los modelos se entrenan fuera del flujo de correo; no existe aprendizaje automático en línea.
 
-Python recibe solo título y cuerpo. Devuelve categoría, cuatro probabilidades,
-confianza y señales de revisión. Si no responde o su respuesta no es válida,
-el flujo deriva a revisión sin crear un ticket con una categoría de respaldo. Python no llama a OpenAI y no concede permisos a usuarios.
+## 4. Pipeline de datos (desde input hasta output)
 
-El prompt del agente recibe la categoría final Python, asunto, cuerpo e inventario de adjuntos. Se pueden
-enviar PNG/JPEG/WebP/PDF: hasta 4 archivos, 4 MiB por archivo y 8 MiB acumulados.
-Los originales se conservan para Redmine, incluso si no fueron seleccionados
-para análisis. La selección no garantiza que el agente lea correctamente el archivo.
+### Correo → n8n → NexpAPI → OpenAI → Redmine
 
-OpenAI analiza relevancia, resumen, prioridad y una propuesta de responsable. Consulta
-proyectos, miembros, roles, cuenta de integración y categorías en Redmine. Sus
-respuestas pueden contener nombres y otra información de esas consultas.
-La categoría Python es obligatoria y el código la vuelve a aplicar después
-del agente. Luego consulta categorías y miembros del proyecto para resolver
-el responsable configurado de esa categoría y validar membresía y rol.
-Una respuesta Python inválida impide crear el ticket; no se sustituye por IA.
+| Paso | Entrada | Procesamiento | Salida |
+|---:|---|---|---|
+| 1 | Correo y adjuntos del buzón | Normalizar remitente, asunto, cuerpo y metadatos; conservar originales | Correo normalizado |
+| 2 | Asunto y cuerpo | El nodo `Limpiar firma y datos` elimina firmas habituales y redacta datos sensibles localmente en n8n | Texto limpio y contadores de limpieza |
+| 3 | JSON con `titulo` y `cuerpo` limpios | NexpAPI valida la entrada, aplica el preprocesamiento compartido, TF-IDF, SVM y calibración | Categoría, confianza, cuatro probabilidades y aviso de revisión |
+| 4 | Respuesta de la API y correo limpio | Unir datos, validar versión/300 muestras/probabilidades y seleccionar archivos para el agente | Texto limpio, predicción y adjuntos seleccionados |
+| 5 | Resultado anterior y catálogos Redmine | OpenAI analiza relevancia, resume y propone prioridad, tipo y proyecto | Análisis estructurado o decisión de omitir |
+| 6 | Análisis y predicción original | Reaplicar la categoría Python; resolver tipo por nombre, categoría y responsable con datos reales | Ticket validado o caso para revisión |
+| 7 | Ticket validado y adjuntos originales | Verificar membresía y rol; cargar archivos y crear el ticket en Redmine | Ticket registrado, asignación válida si existe y confirmación preparada |
 
-El formato estructurado exige `tipo_ticket`: Errores o Soporte. El código
-resuelve ese nombre contra los tipos realmente habilitados del proyecto; si
-no hay una coincidencia única, detiene el alta. El agente ya no devuelve
-`tracker_id`. En el catálogo verificado, Errores es ID 1 y Soporte ID 3, pero
-esos números no se codifican como regla: se consultan en cada ejecución.
+El agente puede recibir **PNG, JPEG, WebP y PDF**, hasta **4 archivos**, **4 MiB por archivo** y **8 MiB acumulados**. Los adjuntos no se anonimizan; los originales se conservan para Redmine. Si falla la limpieza o la clasificación, no se usa texto original ni una categoría del agente como respaldo para crear el ticket.
 
-Se verifica que el proyecto esté activo, la categoría exista y el responsable
-pertenezca al proyecto con rol asignable y permiso `view_issues`. Un responsable
-inválido se omite y se marca revisión; un proyecto, categoría o tipo inválido
-impide crear el ticket. La creación y asignación son automáticas tras esos
-controles, sin una aprobación humana obligatoria.
+La categoría Python es obligatoria. Un responsable inválido puede dejar el ticket sin asignar y marcado para revisión; un proyecto, tipo o categoría inválidos impide el alta. La creación tras las validaciones es automática: no hay una aprobación humana obligatoria antes de cada ticket.
 
-La señal `requiere_revision` de Python no bloquea por sí sola un ticket ni
-obliga al agente a marcarlo. Cuando el agente solicita revisión, el título lleva
-`[REVISAR]` y la prioridad aplicada es normal. No existe aprendizaje en línea.
+### Formulario Streamlit → modelo → resultado
 
-La versión probada usa OpenAI gpt-4.1-mini; Gemini está desconectado. Las
-credenciales de buzón, modelo, Redmine y avisos se administran en n8n. La API usa
-FastAPI 0.115.6 y Uvicorn 0.34.0; n8n verificado: 2.40.5; Python del contenedor:
-3.10, con scikit-learn 1.5.2.
+1. El usuario escribe título/cuerpo o carga un ejemplo y selecciona un modelo disponible.
+2. El portal valida la entrada, carga el archivo seleccionado y aplica el pipeline compartido TF-IDF/SVM.
+3. Muestra categoría, confianza, probabilidades, gráficos y advertencias.
+4. Guarda la predicción en el historial configurado y permite compararla y descargar resultados.
 
-## Interfaz principal local: Streamlit
+El portal no envía estos datos al flujo de n8n ni al agente OpenAI. Las métricas de cada modelo solo se muestran cuando su hash coincide con el reporte registrado.
 
-Se adopta la opción A de la página 4 de la descripción del proyecto.
-`app/app.py` carga directamente el archivo elegido en el selector: modelos
-de 10, 100, 200 o 300 correos. El de 300 es la opción predeterminada. La caché
-distingue la ruta y la fecha del archivo; el cambio limpia el resultado previo.
-Flujo: formulario local → limpieza → pipeline TF-IDF/SVM → categoría,
-confianza, cuatro probabilidades y aviso de revisión. No hay llamadas HTTP
-ni claves de API en este recorrido. La inferencia se ejecuta en esta computadora.
-La interfaz muestra ejemplos, carga, errores, métricas y limitaciones. Incluye
-los controles Español/English y claro/oscuro, exportación CSV e historial de
-hasta 50 predicciones por sesión con comparación mediante gráficos Altair.
-La interfaz en inglés no cambia el idioma del corpus: los ejemplos y el
-modelo siguen centrados en texto español. Con `HISTORY_DB_PATH`, el historial
-se guarda en SQLite, con transacciones, un contador por historial y retención
-de 50 registros. El componente `app/history_component` recuerda un identificador
-privado en el navegador; el enlace permite recuperar el mismo historial en otro
-navegador. El servidor separa las filas mediante el hash de ese identificador.
-`python/compose.yaml` monta el volumen `prediction_history` en `/history`.
-Sin esa variable, la ejecución local conserva solo memoria de sesión.
-`Iniciar_clasificador.cmd` inicia Streamlit ligado a 127.0.0.1; la pantalla se
-abre en el navegador local. No se presenta como una ventana nativa de Windows.
+## 5. Tecnologías y librerías utilizadas con versiones
 
-La API en Docker y n8n continúan como integración
-separada: no se detienen ni se modifican al ejecutar la aplicación local.
+### Servicios y entorno de producción
 
-## Evaluación reproducible de las versiones
+Versiones verificadas en el servidor y sus contenedores:
 
-`src/evaluate_versions.py` verifica los cuatro manifiestos y datasets exactos,
-calcula ajuste en entrenamiento y CV exploratoria cuando la calibración lo
-permite, compara con baseline y repite los 25 casos por versión. Guarda
-`version_evaluation.json`/`.csv` y el gráfico. No modifica los `.pkl`. La
-interfaz solo muestra resultados por versión si la huella del modelo coincide.
+| Tecnología | Versión | Uso |
+|---|---|---|
+| Python | 3.10.22 | NexpAPI y portal Streamlit |
+| Docker Engine | 29.8.1 | Contenedores |
+| Docker Compose | 5.5.1 | Despliegue de servicios |
+| n8n | 2.40.5 | Orquestación y nodos de código JavaScript |
+| Redmine | 6.1.4 | Gestión de tickets |
+| PostgreSQL | 16.15 | Persistencia de n8n y Redmine |
+| SQLite | 3.46.1 | Historial del portal |
+| Portainer CE | 2.45.1 | Administración de contenedores |
+| OpenAI | `gpt-4.1-mini` | Identificador del modelo externo del agente, no una versión de biblioteca |
 
-La sección de parámetros de la interfaz inspecciona el pipeline seleccionado
-y muestra vocabulario, clases, hiperparámetros TF-IDF/SVM, calibración y umbral
-de revisión. No reutiliza una ficha fija del modelo de 300 para otras versiones.
+### Librerías de clasificación e interfaz
 
-## Limpieza previa de correo
+| Librería | Versión | Uso |
+|---|---|---|
+| scikit-learn | 1.5.2 | TF-IDF, clasificación, calibración y evaluación |
+| NumPy | 1.26.4 | Operaciones numéricas |
+| SciPy | 1.14.1 | Matrices dispersas y soporte científico |
+| pandas | 2.2.3 | Datos tabulares y resultados |
+| joblib | 1.4.2 | Serialización y carga de modelos |
+| PyYAML | 6.0.2 | Lectura de configuración |
+| FastAPI | 0.115.6 | API HTTP |
+| Uvicorn | 0.34.0 | Servidor ASGI de NexpAPI |
+| Streamlit | 1.41.1 | Interfaz web |
+| Altair | 5.5.0 | Visualizaciones interactivas |
+| PyArrow | 17.0.0 | Intercambio de datos tabulares del portal |
 
-El nodo de código **Limpiar firma y datos** ejecuta
-`workflows/nodes/limpiar-correo.js` localmente en n8n después de normalizar.
-El título/cuerpo limpios se envían a `/predict` y al prompt del agente, sin
-endpoint de limpieza. Un nodo Merge une la respuesta de la API con el correo
-limpio y sus adjuntos; el selector valida la predicción antes del agente.
-La detección usa firmas convencionales y patrones de datos sensibles; no
-reconoce necesariamente todos los nombres libres ni anonimiza adjuntos.
-El correo original se conserva en el flujo y en el ticket de Redmine.
+### Herramientas de análisis y verificación
+
+| Herramienta | Versión fijada | Uso |
+|---|---|---|
+| matplotlib | 3.9.4 | Gráficos de evaluación y optimización |
+| seaborn | 0.13.2 | Visualizaciones estadísticas |
+| pytest | 8.3.4 | Pruebas Python |
+| httpx | 0.28.1 | Pruebas de la API |
+| nbformat | 5.10.4 | Formato de notebooks |
+| nbclient | 0.10.2 | Ejecución de notebooks |
+| ipykernel | 6.29.5 | Kernel Python de notebooks |
+| Ruff | 0.9.10 | Estilo, importaciones y docstrings |
+
+Las dependencias se fijan en [requirements.txt](../requirements.txt), [dependencias de NexpAPI](../../nexpapi/requirements.txt) y [dependencias del portal](../deploy/requirements-streamlit.txt). Las versiones de herramientas de análisis son las fijadas para el entorno de desarrollo; no se afirma que estén instaladas en el contenedor de la API.

@@ -14,5 +14,5 @@ nbclient==0.10.2
 ipykernel==6.29.5
 ruff==0.9.10
 PyYAML==6.0.2
--r deploy/requirements.txt
+-r ../nexpapi/requirements.txt
 httpx==0.28.1
