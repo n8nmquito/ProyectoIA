@@ -2,6 +2,8 @@
 
 El diseño completo está en [arquitectura](python/docs/arquitectura.md) y los límites de uso en [consideraciones éticas](python/docs/consideraciones_eticas.md).
 
+La [sección Flujo de automatización](python/docs/arquitectura.md#flujo-de-automatización) reúne la imagen de referencia y la explicación actualizada de sus diez etapas.
+
 ## Recorrido actual
 
 1. n8n recibe el correo por IMAP, normaliza los campos y conserva los originales y adjuntos.

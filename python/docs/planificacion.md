@@ -26,7 +26,7 @@ Una mala derivación retrasa la atención. El sistema busca reducir tareas repet
 
 El portal permite probar las respuestas y comparar modelos con pocos datos. **Todavía no se han medido ahorro de tiempo ni mejoras con usuarios externos.** El uso real requiere datos autorizados y supervisión de soporte.
 
-## 3. Alcance (qué incluye y qué NO incluye)
+## 3. Alcance
 
 ### Qué incluye
 

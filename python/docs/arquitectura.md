@@ -49,6 +49,31 @@ Los puertos son **8501** para Streamlit, **5678** para n8n, **3000** para Redmin
 
 ## 3. Diagrama de flujo del sistema completo
 
+### Flujo de automatización
+
+El flujo transforma los correos de soporte en tickets de Redmine mediante n8n, el clasificador Python de 300 correos y el agente OpenAI. Estas son sus etapas principales:
+
+1. **Leer buzón IMAP.** Recibir el correo con su asunto, cuerpo y adjuntos.
+2. **Normalizar y limpiar el correo.** Ordenar los campos, conservar los originales y limpiar firmas y datos sensibles mediante JavaScript en n8n.
+3. **Consultar API - Modelo 300.** Enviar el título y cuerpo limpios a NexpAPI; recuperar la categoría de Python, confianza y probabilidades. Unir la respuesta con el correo, validar la predicción y seleccionar los adjuntos permitidos para el agente.
+4. **Analizar la solicitud con el agente IA.** OpenAI analiza la relevancia, resume el pedido y propone prioridad, tipo y proyecto con consultas de solo lectura a Redmine.
+5. **Decidir si es una solicitud de soporte.** Si no corresponde, registrar la omisión y preparar el aviso; si corresponde, continuar con la preparación del ticket.
+6. **Aplicar la categoría final de Python.** Conservar la clasificación del modelo aunque el agente discrepe; marcar revisión ante baja confianza o desacuerdo.
+7. **Preparar y validar el ticket.** Resolver el tipo por nombre, comprobar proyecto y categoría, y validar la membresía y el rol del responsable antes de asignarlo.
+8. **Recuperar adjuntos originales.** Recuperar los archivos conservados y subirlos a Redmine para asociarlos al ticket.
+9. **Crear el ticket en Redmine.** Registrar la solicitud con los datos validados y la asignación que corresponda.
+10. **Preparar la notificación de ticket creado.** Incluir el número y enlace del ticket; el envío depende de los filtros de notificación configurados.
+
+Si falla la limpieza, la API o la validación de la predicción, el flujo deriva a revisión antes del agente. Un proyecto, tipo o categoría inválidos bloquean la creación del ticket.
+
+**Imagen de referencia del flujo:**
+
+![Flujo de automatización de referencia: correo IMAP, normalización, API Python, agente IA, decisión de soporte, preparación, adjuntos, Redmine y aviso](../documentacion/imagenes/flujo_automatizacion_referencia.png)
+
+La imagen conserva el esquema anterior de diez pasos. El recorrido vigente descrito arriba incorpora la limpieza previa y aplica la categoría final de Python en la etapa que la imagen llama «Comparar clasificaciones». La confirmación se prepara después de crear el ticket y se envía cuando los filtros lo permiten.
+
+### Diagrama integrado del sistema
+
 ```mermaid
 flowchart TD
     subgraph Entrenamiento[Entrenamiento y artefactos]

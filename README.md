@@ -35,6 +35,7 @@ Automatiza la gestión de correos de soporte TI con n8n: un clasificador Python 
 3. [Descripción del problema](#3-descripción-del-problema)
 4. [Dataset](#4-dataset)
 5. [Metodología](#5-metodología)
+   - [Flujo de automatización](#flujo-de-automatización)
 6. [Resultados](#6-resultados)
 7. [Instalación y uso](#7-instalación-y-uso)
 8. [Interfaz de usuario](#8-interfaz-de-usuario)
@@ -99,6 +100,27 @@ Búsqueda con `GridSearchCV` de `C: [0.1, 1.0, 10.0]`, `class_weight: [null, bal
 ### Métricas de evaluación seleccionadas
 
 **F1 macro** como métrica principal para dar el mismo peso a cada categoría; **accuracy, precisión, recall y F1 por clase**, junto con la **matriz de confusión**, para analizar aciertos y errores. Se registran **log loss y Brier multiclase** para evaluar las probabilidades.
+
+### Flujo de automatización
+
+El recorrido del correo hasta el ticket se organiza en diez etapas:
+
+1. **Leer buzón IMAP:** recibir el asunto, cuerpo y adjuntos del correo.
+2. **Normalizar y limpiar:** ordenar los campos, conservar los originales y limpiar firmas y datos sensibles dentro de n8n.
+3. **Consultar NexpAPI con el modelo de 300:** obtener la categoría Python, confianza y probabilidades; unir la predicción con el correo limpio, validar la respuesta y seleccionar los adjuntos permitidos para el agente.
+4. **Analizar con el agente OpenAI:** evaluar la relevancia, resumir la solicitud y proponer prioridad, tipo y proyecto consultando los catálogos de Redmine.
+5. **Decidir si corresponde a soporte:** continuar con la solicitud o registrar la omisión y preparar el aviso.
+6. **Aplicar la categoría de Python:** conservarla aunque el agente discrepe y marcar revisión ante baja confianza o desacuerdo.
+7. **Preparar y validar el ticket:** comprobar proyecto, tipo y categoría, y validar la membresía y el rol del responsable antes de asignarlo.
+8. **Recuperar y subir los adjuntos originales:** conservar los archivos para asociarlos al ticket en Redmine.
+9. **Crear el ticket en Redmine:** registrar la solicitud con los datos validados y la asignación correspondiente.
+10. **Preparar la notificación:** incluir el número y enlace del ticket; enviar el aviso cuando los filtros configurados lo permitan.
+
+![Flujo de automatización de referencia: del correo IMAP al ticket en Redmine y su notificación](python/documentacion/imagenes/flujo_automatizacion_referencia.png)
+
+La imagen muestra el esquema anterior. El flujo vigente incorpora la limpieza previa y aplica la categoría final de Python en la etapa denominada «Comparar clasificaciones». Si falla la limpieza, la API o la validación de la predicción, deriva a revisión antes del agente; un proyecto, tipo o categoría inválidos bloquean la creación del ticket.
+
+Ver el [diagrama completo y las responsabilidades de cada componente](python/docs/arquitectura.md#3-diagrama-de-flujo-del-sistema-completo) y el [proceso de automatización](PROCESO_AUTOMATIZACION.md).
 
 ## 6. Resultados
 
