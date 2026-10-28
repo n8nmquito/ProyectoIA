@@ -93,7 +93,7 @@ Después de corregirlos se repitieron solo los cuatro casos afectados: 4/4 crear
 su ticket. No es una nueva medición de accuracy ni una repetición completa de los
 24 con la versión corregida. Evidencia: `results/n8n_produccion/`.
 
-Pruebas actuales: **87 tests Python aprobados**, Ruff sin errores y las tres
+Pruebas actuales: **90 tests Python aprobados**, Ruff sin errores y las tres
 suites JavaScript de normalización, asignación y adjuntos aprobadas. Se verifican también la integridad de los cuatro artefactos, sus probabilidades
 en 25 entradas y la limitación de CV en la versión de 10.
 
@@ -281,6 +281,11 @@ las mismas muestras anidadas del corpus de 300; no agrega los 25 de prueba.
 guarda sus datasets. `src.export_datasets` solo exporta los datos exactos de los
 modelos actuales, sin reentrenarlos. `src.evaluate` reconstruye en memoria el
 modelo diagnóstico de 280 y repite sus métricas, sin guardar otro `.pkl`.
+
+El selector del portal descubre los archivos `models/modelo_clasificador_<cantidad>.pkl`
+al cargar la página. Ignora las subcarpetas de respaldo y desactiva la
+clasificación si no encuentra modelos. Recargar permite actualizar la lista
+después de entrenar, añadir o retirar archivos.
 
 La configuración central incluye `history_limit` (50 por defecto),
 `tfidf.ngram_range`, `tfidf.sublinear_tf`, `tfidf.strip_accents`,

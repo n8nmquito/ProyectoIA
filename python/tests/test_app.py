@@ -34,8 +34,8 @@ def test_app_loads_example():
     assert not app.exception
 
 
-def test_app_missing_model(monkeypatch):
-    """A missing model must produce a helpful UI error."""
+def test_app_unavailable_model_is_removed_from_the_selector(monkeypatch):
+    """A removed model must disappear and an available model must be used."""
     original_stat = Path.stat
 
     def guarded_stat(path, *args, **kwargs):
@@ -46,9 +46,36 @@ def test_app_missing_model(monkeypatch):
 
     app = open_app()
     app.button(key="load_example").click().run()
-    monkeypatch.setattr(Path, "stat", guarded_stat)
     app.button(key="classify").click().run()
-    assert any("Falta el modelo" in error.value for error in app.error)
+    assert app.session_state["result_model_size"] == 300
+    monkeypatch.setattr(Path, "stat", guarded_stat)
+    app.run()
+    assert "last_result" not in app.session_state
+    app.button(key="classify").click().run()
+    assert app.selectbox(key="model_size").options == [
+        "10 correos", "100 correos", "200 correos"
+    ]
+    assert app.selectbox(key="model_size").value == 200
+    assert app.session_state["result_model_size"] == 200
+    assert not app.error
+    assert not app.exception
+
+
+def test_app_no_models_disables_prediction_but_keeps_history(monkeypatch):
+    """An empty models directory must show guidance without crashing."""
+    original_glob = Path.glob
+
+    def without_models(path, pattern):
+        if path == ROOT / "models":
+            return iter(())
+        return original_glob(path, pattern)
+
+    monkeypatch.setattr(Path, "glob", without_models)
+    app = open_app()
+    assert app.selectbox(key="model_size").options == []
+    assert app.button(key="classify").disabled
+    assert any("No hay modelos" in message.value for message in app.info)
+    assert any("iniciar el historial" in message.value for message in app.info)
     assert not app.exception
 
 

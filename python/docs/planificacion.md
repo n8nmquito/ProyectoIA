@@ -86,7 +86,7 @@ académica, pero siguen pendientes según la documentación actual.
 | Guardar cuatro tamaños exactos | models/ y data/train/; cantidades verificadas |
 | Elegir modelo desde CMD | evaluar_nuevos.py --model 10/100/200/300 |
 | Mostrar dudas y texto del ticket | requiere_revision y detalle en consola |
-| Probar funciones críticas | 87 pruebas automatizadas aprobadas |
+| Probar funciones críticas | 90 pruebas automatizadas aprobadas |
 | Explicar resultados y límites | seis documentos requeridos y evaluación complementaria |
 
 ## Cronograma de desarrollo planificado vs real

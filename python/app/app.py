@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT))
 
 from app.browser_history import browser_history_token  # noqa: E402
 from app.excel_export import xlsx_bytes  # noqa: E402
+from app.model_catalog import available_model_sizes  # noqa: E402
 from app.persistent_history import (  # noqa: E402
     configured_store,
     history_token,
@@ -32,7 +33,6 @@ from src.model import load_model, predict_ticket  # noqa: E402
 from src.utils import file_hash, history_limit, load_config  # noqa: E402
 
 LOGGER = logging.getLogger(__name__)
-MODEL_SIZES = (10, 100, 200, 300)
 EXAMPLES = (
     (
         "Cuenta bloqueada al iniciar sesión en el sistema de gestión",
@@ -741,7 +741,26 @@ def main():
             "could not be opened."
         )
         return
-    st.session_state.setdefault("model_size", 300)
+    try:
+        model_sizes = available_model_sizes(ROOT / "models")
+    except OSError:
+        LOGGER.exception("No se pudo listar la carpeta models")
+        st.error(
+            tr(
+                "No se pudo leer la carpeta models.",
+                "The models folder could not be read.",
+            )
+        )
+        return
+    if st.session_state.get("model_size") not in model_sizes:
+        clear_prediction()
+        st.session_state["model_size"] = (
+            300
+            if 300 in model_sizes
+            else model_sizes[-1]
+            if model_sizes
+            else None
+        )
     # Keep user values when translated widget labels produce new widget IDs.
     for key in ("title", "body", "model_size", "theme"):
         if key in st.session_state:
@@ -799,11 +818,24 @@ def main():
             email_label = tr("correos", "emails")
             size = st.selectbox(
                 tr("Modelo de clasificación", "Classification model"),
-                MODEL_SIZES,
+                model_sizes,
                 key="model_size",
                 format_func=lambda value: f"{value} {email_label}",
                 on_change=clear_prediction,
+                disabled=not model_sizes,
+                placeholder=tr("Sin modelos disponibles", "No models found"),
             )
+            if size is None:
+                st.info(
+                    tr(
+                        "No hay modelos en models/. Entrena un modelo y "
+                        "recarga la página.",
+                        "No models found in models/. Train a model and "
+                        "reload the page.",
+                    )
+                )
+            else:
+                st.caption(f"models/modelo_clasificador_{size}.pkl")
             st.text_input(
                 tr("Título", "Title"),
                 key="title",
@@ -830,6 +862,7 @@ def main():
                 type="primary",
                 use_container_width=True,
                 icon=":material/arrow_forward:",
+                disabled=size is None,
             )
         with right, st.container(border=True, key="result-panel"):
             heading(tr("Resultado", "Result"), "chart")
@@ -979,7 +1012,15 @@ def main():
             elif not submitted:
                 empty_result(st.session_state.language)
     with about_tab:
-        render_about(size, config["confidence_threshold"])
+        if size is not None:
+            render_about(size, config["confidence_threshold"])
+        else:
+            st.info(
+                tr(
+                    "Selecciona un modelo disponible para ver sus datos.",
+                    "Select an available model to see its details.",
+                )
+            )
     with history_tab:
         render_history()
 

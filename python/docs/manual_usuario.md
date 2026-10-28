@@ -54,7 +54,7 @@ el navegador como pantalla. El procesamiento utiliza el modelo guardado en esta 
 
 ## Clasificar y comparar modelos
 
-1. En Clasificar, elige **10, 100, 200 o 300 correos** en el selector. Por defecto se usa 300.
+1. En Clasificar, elige uno de los modelos disponibles. El selector lee los archivos `models/modelo_clasificador_<cantidad>.pkl`, sin recorrer subcarpetas como `Respaldo`. Selecciona 300 por defecto si existe; de lo contrario, el mayor tamaño disponible. Recarga la página después de añadir o retirar archivos.
 2. Introduce Título y Descripción. Ambos deben contener letras.
 3. Prueba con ejemplo completa el formulario; cada pulsación recorre otro de los cuatro ejemplos.
 4. Pulsa Clasificar. En Resultado aparece el indicador de análisis mientras se procesa.
@@ -189,7 +189,7 @@ Anotaciones de lectura del formulario:
 |---|---|---|
 | Selector superior Clasificar / Acerca de | Cambiar de vista | Elegir clasificación o información del modelo |
 | Prueba con ejemplo, arriba a la derecha del formulario | Completar los campos con un caso precargado | Pulsar para probar sin escribir un ticket |
-| Modelo de clasificación | Seleccionar el archivo de 10, 100, 200 o 300 correos | Elegir la versión antes de clasificar |
+| Modelo de clasificación | Seleccionar un modelo existente en `models/` | Elegir la versión antes de clasificar |
 | Título y Descripción | Introducir los dos textos obligatorios | Describir el incidente con contexto suficiente |
 | Botón Clasificar, al pie del formulario | Ejecutar la predicción | Pulsar y esperar el indicador de análisis |
 | Panel Resultado, a la derecha | Consultar la salida | Leer categoría, confianza, probabilidades y advertencias |
