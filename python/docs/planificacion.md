@@ -58,10 +58,10 @@ Faltan los nombres del resto del equipo, el apartado de licencia del README y lo
 |---|---|---|---|---|
 | Exploración de Datos | 14/09/2026 al 20/09/2026 | 14/09/2026 al 20/09/2026 | Sin variación | Data Scientist + Experto Soporte TI |
 | Prototipo/MVP | 21/09/2026 al 27/09/2026 | 21/09/2026 al 27/09/2026 | Sin variación | Data Scientist |
-| Desarrollo | 28/09/2026 al 15/10/2026 | 28/09/2026 al 11/10/2026 | 4 días antes | Data Scientist / Desarrollador TI |
-| Testing | 16/10/2026 al 20/10/2026 | 12/10/2026 al 18/10/2026 | 2 días antes | Equipo IA + Soporte TI |
-| Deploy Piloto | 21/10/2026 al 23/10/2026 | 19/10/2026 al 22/10/2026 | 1 día antes | TI + Mesa de Ayuda |
-| Deploy Completo | 26/10/2026 al 30/10/2026 | 23/10/2026 al 25/10/2026 | 5 días antes | TI + Líder del Proyecto |
+| Desarrollo | 28/09/2026 al 11/10/2026 | 28/09/2026 al 15/10/2026 | 4 días después | Data Scientist / Desarrollador TI |
+| Testing | 12/10/2026 al 18/10/2026 | 16/10/2026 al 20/10/2026 | 2 días después | Equipo IA + Soporte TI |
+| Deploy Piloto | 19/10/2026 al 22/10/2026 | 21/10/2026 al 23/10/2026 | 1 día después | TI + Mesa de Ayuda |
+| Deploy Completo | 23/10/2026 al 25/10/2026 | 26/10/2026 al 30/10/2026 | 5 días después | TI + Líder del Proyecto |
 
 ### Entregables y correspondencia con la implementación
 
@@ -74,9 +74,9 @@ Faltan los nombres del resto del equipo, el apartado de licencia del README y lo
 | Deploy Piloto | Prueba controlada del agente | Ejecuciones diagnósticas con datos ficticios y controles que evitan crear tickets o enviar correos durante esas pruebas |
 | Deploy Completo | MVP final, documentación y monitoreo inicial | Portal, NexpAPI y flujo desplegados; código en main y seis documentos. El monitoreo automático de deriva no está implementado |
 
-El cronograma informa cierre el **25/10/2026**, cinco días antes del **30/10/2026** previsto, sin explicar los adelantos. Esa fecha no demuestra que se hayan implementado todos los entregables mencionados.
+El cronograma informa cierre real el **30/10/2026**, cinco días después del **25/10/2026** propuesto, sin explicar los retrasos. Esa fecha no demuestra que se hayan implementado todos los entregables mencionados.
 
-Hubo revisiones hasta el **28/10/2026**, después del cierre informado. La última comprobación registró **96 pruebas Python aprobadas**, más pruebas JavaScript y de n8n. Los videos y datos pendientes del equipo siguen por completar.
+Hubo revisiones hasta el **28/10/2026**, dentro del período de Deploy Completo informado. La última comprobación registró **96 pruebas Python aprobadas**, más pruebas JavaScript y de n8n. Los videos y datos pendientes del equipo siguen por completar.
 
 **María Quito Castillo** es Líder del Proyecto y Desarrollador TI (desarrolladora full stack). Los otros nombres quedan pendientes; se mantienen los roles del cronograma.
 
