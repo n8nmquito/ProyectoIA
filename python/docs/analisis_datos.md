@@ -2,7 +2,7 @@
 
 ## 1. Descripción detallada del dataset
 
-La fuente son **cuatro conjuntos de 10, 100, 200 y 300 correos simulados en español**, creados para entrenar y comparar clasificadores de soporte TI. El [corpus maestro](../data/raw/correos.json) contiene los 300 registros; las [muestras de entrenamiento](../data/train/) son anidadas y se seleccionaron con semilla 42. No representan una muestra aleatoria de correos reales de una organización.
+Trabajamos con **10, 100, 200 y 300 correos simulados en español**. El [corpus maestro](../data/raw/correos.json) contiene los 300 registros y las [muestras de entrenamiento](../data/train/) son anidadas, con semilla 42. No son correos reales de producción.
 
 | Variable | Tipo y contenido | Uso |
 |---|---|---|
@@ -11,11 +11,11 @@ La fuente son **cuatro conjuntos de 10, 100, 200 y 300 correos simulados en espa
 | `clasificacion` | Accesos, aplicaciones, infraestructura u otros | Etiqueta de entrenamiento y evaluación |
 | `texto` | Título y cuerpo normalizados y concatenados; variable derivada | Representación utilizada para calcular TF-IDF |
 
-La etiqueta nunca se incorpora al texto de entrada. Las categorías distinguen problemas de identidad/permisos (**accesos**), funcionamiento del software (**aplicaciones**), equipos/red/servicios base (**infraestructura**) y orientación, capacitación u otras solicitudes (**otros**). La causa descrita importa más que mencionar una aplicación: pedir capacitación sobre JDE puede corresponder a otros.
+La etiqueta no se incluye en la entrada del modelo. Las categorías cubren permisos y cuentas, fallos de software, infraestructura y otras consultas. Importa la necesidad descrita: pedir capacitación sobre JDE puede corresponder a **otros**.
 
-Los [25 correos de prueba](../data/test/correos_test_25.json) contienen título y cuerpo y no se usan para entrenar. Sirven para pruebas funcionales y revisión manual; su contenido permite reconocer el tipo de solicitud sin necesitar etiquetas para ejecutarlos. Calcular accuracy o F1 exigiría registrar categorías esperadas validadas. Son casos conocidos del desarrollo, no una evaluación externa independiente.
+Los [25 correos de prueba](../data/test/correos_test_25.json) tienen título y cuerpo y no se usan para entrenar. Sirven para probar el sistema y revisar sus respuestas. No necesitan etiquetas para esa tarea; para calcular accuracy o F1 sí harían falta categorías esperadas revisadas. Son casos conocidos, no una prueba externa independiente.
 
-No se ha declarado una licencia específica de los datos. La [licencia MIT del código](../LICENSE) no se extiende automáticamente al dataset.
+Los datos no tienen una licencia específica declarada. La [licencia MIT](../LICENSE) corresponde al código.
 
 ## 2. Estadísticas descriptivas
 
@@ -28,7 +28,7 @@ No se ha declarado una licencia específica de los datos. La [licencia MIT del c
 | 200 correos | 50 | 50 | 50 | 50 | 200 |
 | 300 correos | 70 | 90 | 70 | 70 | 300 |
 
-En el conjunto de 300, aplicaciones representa **30,00 %** y cada categoría restante **23,33 %**. La razón entre la clase mayor y una menor es **90/70 = 1,29**. Los conjuntos de 100 y 200 están balanceados; el de 10 contiene solo dos ejemplos en dos de sus clases.
+En el conjunto de 300, aplicaciones representa **30,00 %** y las demás categorías **23,33 %** cada una. La relación mayor/menor es **1,29**. Los conjuntos de 100 y 200 están balanceados; dos clases de la muestra de 10 tienen solo dos ejemplos.
 
 ### Longitudes y calidad del corpus de 300 correos
 
@@ -44,7 +44,7 @@ Las siguientes cifras corresponden al **texto limpio combinado**, según [eda.js
 | Tercer cuartil | 532 | 85 |
 | Máximo | 643 | 100 |
 
-Se cargaron **300 registros únicos**, con **0 valores faltantes** en los campos obligatorios. La correlación entre caracteres y palabras es **0,9788**. Se identificaron **0 outliers superiores de longitud** usando el criterio de 1,5 veces el rango intercuartílico.
+El corpus tiene **300 registros únicos y ningún campo obligatorio faltante**. La correlación caracteres-palabras es **0,9788** y no hay outliers superiores de longitud según el criterio de 1,5 IQR.
 
 ## 3. Visualizaciones del EDA (mínimo 5-6 gráficos relevantes)
 
@@ -54,37 +54,37 @@ Los seis gráficos se generan mediante la función de EDA de [src/train.py](../s
 
 ![Distribución de categorías](../documentacion/imagenes/01_class_distribution.png)
 
-Permite comprobar el desbalance moderado: 90 aplicaciones frente a 70 ejemplos de cada categoría restante. Estas proporciones pertenecen al corpus simulado y no representan frecuencias reales de incidentes.
+Hay 90 ejemplos de aplicaciones y 70 de cada categoría restante. Esta distribución describe el corpus simulado, no la frecuencia real de incidentes.
 
 ### Gráfico 2. Distribución de longitud del texto
 
 ![Distribución de caracteres del texto limpio](../documentacion/imagenes/02_text_lengths.png)
 
-Muestra la variación entre textos de 279 y 643 caracteres. Permite detectar concentraciones de longitudes y posibles diferencias de estilo entre ejemplos.
+Los textos tienen entre 279 y 643 caracteres. Las concentraciones de longitud pueden reflejar estilos repetidos.
 
 ### Gráfico 3. Cantidad de palabras por categoría
 
 ![Palabras por categoría](../documentacion/imagenes/03_words_by_class.png)
 
-El diagrama de cajas compara medianas, dispersión y valores extremos por clase. Ayuda a revisar si la longitud puede actuar como una pista de estilo en lugar de representar el problema técnico.
+Compara la cantidad de palabras por clase y ayuda a detectar diferencias de estilo que podrían facilitar la clasificación.
 
 ### Gráfico 4. Relación entre longitud del título y del cuerpo
 
 ![Longitud del título frente a longitud del cuerpo](../documentacion/imagenes/04_title_body.png)
 
-Compara los tamaños de los campos originales para observar su variación y complementariedad. Justifica conservar ambos como entrada en lugar de depender solo del asunto.
+Muestra cómo varían ambos campos. Conservarlos permite aprovechar el resumen del título y el detalle del cuerpo.
 
 ### Gráfico 5. Términos frecuentes
 
 ![Frecuencia de términos del corpus](../documentacion/imagenes/05_common_terms.png)
 
-Presenta las 18 palabras más frecuentes, incluidas palabras funcionales. Permite identificar vocabulario repetido y revisar posibles plantillas; la frecuencia por sí sola no demuestra capacidad predictiva.
+Muestra las 18 palabras más frecuentes, incluidas las funcionales. Ayuda a detectar vocabulario y plantillas repetidos.
 
 ### Gráfico 6. Correlaciones de longitud
 
 ![Correlaciones entre caracteres, palabras y longitud del título](../documentacion/imagenes/06_length_correlations.png)
 
-La matriz resume relaciones entre medidas de tamaño del texto. La alta correlación caracteres-palabras describe el corpus; no implica causalidad ni una relación entre causas de incidentes.
+Relaciona las medidas de longitud. Una correlación alta no explica la causa del incidente ni garantiza mejores predicciones.
 
 ## 4. Identificación de patrones, correlaciones, outliers
 
@@ -97,7 +97,7 @@ La matriz resume relaciones entre medidas de tamaño del texto. La alta correlac
 | Outliers de longitud | Q1=320, Q3=532 e IQR=212; límite superior **850 caracteres**; máximo observado 643 | No hay registros por encima de Q3 + 1,5×IQR; no se eliminan correos por este criterio |
 | Similitud entre conjuntos | Las muestras de 10, 100 y 200 están contenidas en la de 300 | Las comparaciones comparten registros y no son pruebas independientes |
 
-La ausencia de outliers por longitud no descarta anomalías semánticas, etiquetas discutibles o solicitudes con varias causas. No se calculan correlaciones numéricas arbitrarias entre las categorías, porque son etiquetas nominales. Los términos asociados se registran en [training_summary.json](../results/metrics/training_summary.json).
+No tener outliers de longitud no descarta errores de etiqueta o mensajes ambiguos. Las categorías son nominales: no se les asignan números para calcular correlaciones. Los términos asociados están en [training_summary.json](../results/metrics/training_summary.json).
 
 ## 5. Decisiones de preprocesamiento justificadas
 
@@ -112,18 +112,18 @@ La ausencia de outliers por longitud no descarta anomalías semánticas, etiquet
 | Representar con TF-IDF | Unigramas y bigramas, frecuencia sublineal, normalización de acentos y L2 | Capturar términos y expresiones cortas con una representación dispersa adecuada para SVM lineal |
 | Ajustar vocabulario en entrenamiento | Aprender TF-IDF dentro de cada partición externa de validación | Evitar aprender vocabulario de la partición externa de evaluación |
 
-Implementación: [data_processing.py](../src/data_processing.py) y [model.py](../src/model.py). La calibración interna de SVM reutiliza el vocabulario del entrenamiento externo; no se ajusta otro vocabulario por subpartición de calibración.
+El código está en [data_processing.py](../src/data_processing.py) y [model.py](../src/model.py). La calibración interna reutiliza el vocabulario del entrenamiento externo.
 
-En el flujo operativo, el nodo de código **Limpiar firma y datos** de n8n añade limpieza de firmas y redacción de datos sensibles antes de enviar el asunto/cuerpo a NexpAPI y OpenAI. Este paso no modifica los datasets de entrenamiento ni anonimiza los adjuntos.
+Antes de enviar el correo a NexpAPI y OpenAI, un nodo de código de n8n limpia firmas y datos sensibles. No modifica los datasets ni anonimiza adjuntos.
 
 ## 6. Manejo de datos faltantes o desbalanceados
 
 ### Datos faltantes e inválidos
 
-El corpus cargado tiene **cero campos obligatorios faltantes**. El cargador rechaza campos ausentes, nulos, no textuales, vacíos, sin letras, demasiado largos o etiquetas fuera de las cuatro categorías. No se imputan textos ni se inventan etiquetas: el registro debe corregirse en origen antes de entrenar. Si un texto duplicado presenta etiquetas contradictorias, la carga se detiene para revisión.
+No hay faltantes en el corpus actual. El cargador rechaza campos ausentes, nulos, vacíos, no textuales, sin letras, demasiado largos o con etiquetas inválidas. Los datos se corrigen en origen; no se inventan textos ni etiquetas. También se detiene la carga si un texto duplicado tiene etiquetas contradictorias.
 
 ### Datos desbalanceados
 
-Se conserva la distribución del conjunto de 300 y se utilizan particiones estratificadas y **F1 macro**, que da el mismo peso a cada categoría, además de métricas por clase. La optimización comparó `class_weight=None` y `balanced`; la combinación seleccionada usa **`None`**, según [config.yaml](../config.yaml) y la [optimización](optimizacion.md).
+Se conserva la distribución de los 300 correos y se usan particiones estratificadas, **F1 macro** y métricas por clase. Se probaron `class_weight=None` y `balanced`; se seleccionó **`None`**. Ver [config.yaml](../config.yaml) y [optimización](optimizacion.md).
 
-No se aplican sobremuestreo, submuestreo ni generación de registros durante el ajuste. Los conjuntos de 100 y 200 se seleccionaron balanceados por clase; esto es una decisión de construcción de muestras, no una técnica de reequilibrio aplicada al conjunto completo durante el entrenamiento. La muestra de 10 es demostrativa y sus clases con solo dos registros limitan la evaluación con calibración interna.
+No se aplican sobremuestreo, submuestreo ni generación de datos durante el ajuste. Las muestras de 100 y 200 se construyeron balanceadas. La de 10 es demostrativa: tener solo dos registros en algunas clases limita su evaluación.

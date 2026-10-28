@@ -4,11 +4,11 @@
 
 ### Definición del problema
 
-La mesa de ayuda recibe correos sobre cuentas, aplicaciones, equipos, redes y consultas generales. Leerlos, clasificarlos, preparar el ticket y derivarlo manualmente son tareas repetitivas que pueden producir asignaciones inconsistentes y demoras. El proyecto automatiza ese recorrido con un clasificador Python, un agente OpenAI y validaciones antes del registro en Redmine.
+La mesa de ayuda debe leer correos, clasificarlos y decidir a quién asignarlos. Son tareas repetitivas que pueden causar demoras o derivaciones inconsistentes. El proyecto automatiza ese recorrido con Python, n8n, OpenAI y Redmine.
 
 ### Objetivo general
 
-Desarrollar e integrar un sistema reproducible de clasificación de correos de soporte TI que determine su categoría y automatice la preparación, validación y registro de tickets en Redmine mediante n8n, con una interfaz para probar y revisar los modelos.
+Crear un sistema reproducible que clasifique correos de soporte TI y registre tickets validados en Redmine mediante n8n, con una interfaz para probar y revisar los modelos.
 
 ### Objetivos específicos
 
@@ -22,9 +22,9 @@ Desarrollar e integrar un sistema reproducible de clasificación de correos de s
 
 ## 2. Justificación de la relevancia del proyecto
 
-Una solicitud mal clasificada o derivada puede tardar más en llegar al equipo adecuado. Automatizar las tareas repetitivas y aplicar criterios uniformes permite organizar la atención y conservar la trazabilidad de categoría, análisis y asignación en Redmine.
+Una mala derivación retrasa la atención. El sistema busca reducir tareas repetitivas, aplicar criterios uniformes y dejar trazabilidad de categoría, análisis y asignación en Redmine.
 
-El portal facilita que operadores, técnicos y supervisores prueben las predicciones y revisen sus limitaciones. Comparar tamaños de dataset permite explorar el comportamiento del clasificador con pocos ejemplos. **La reducción de tiempos y la mejora de la atención son objetivos; todavía no se han medido con usuarios finales externos.** La utilidad en una organización requiere validación con datos autorizados y supervisión de soporte.
+El portal permite probar las respuestas y comparar modelos con pocos datos. **Todavía no se han medido ahorro de tiempo ni mejoras con usuarios externos.** El uso real requiere datos autorizados y supervisión de soporte.
 
 ## 3. Alcance (qué incluye y qué NO incluye)
 
@@ -48,11 +48,11 @@ El portal facilita que operadores, técnicos y supervisores prueben las predicci
 - Garantizar anonimización completa, fairness demográfica, exactitud o generalización a correos reales.
 - Monitoreo automático de deriva, aprendizaje en línea o aprobación humana obligatoria antes de cada ticket.
 
-Los nombres del resto del equipo, la licencia pendiente del README y los enlaces de videos permanecen por completar en sus espacios de entrega. La publicación de cambios en Git ya está realizada.
+Faltan los nombres del resto del equipo, el apartado de licencia del README y los enlaces de videos. El código ya está subido a Git.
 
 ## 4. Cronograma de desarrollo (planificado vs real)
 
-**Fuente: Cronograma.docx, proporcionado por el equipo.** Las fechas y roles siguientes corresponden a sus tablas de planificación y ejecución real. Todos los períodos son de **2026**; la variación compara las fechas de cierre en días calendario.
+**Fuente: Cronograma.docx, entregado por el equipo.** Se conservan sus fechas y roles. Los períodos son de **2026** y la variación se calcula en días calendario sobre la fecha de cierre.
 
 | Fase | Período planificado | Período real informado | Variación del cierre | Responsable del cronograma |
 |---|---|---|---|---|
@@ -74,11 +74,11 @@ Los nombres del resto del equipo, la licencia pendiente del README y los enlaces
 | Deploy Piloto | Prueba controlada del agente | Ejecuciones diagnósticas con datos ficticios y controles que evitan crear tickets o enviar correos durante esas pruebas |
 | Deploy Completo | MVP final, documentación y monitoreo inicial | Portal, NexpAPI y flujo desplegados; código en main y cinco documentos. El monitoreo automático de deriva no está implementado |
 
-El documento informa cierre de Deploy Completo el **25/10/2026**, cinco días antes del **30/10/2026** previsto. No registra causas adicionales para los adelantos. La tabla reproduce lo informado; no convierte en implementados los entregables que la evidencia técnica no demuestra.
+El cronograma informa cierre el **25/10/2026**, cinco días antes del **30/10/2026** previsto, sin explicar los adelantos. Esa fecha no demuestra que se hayan implementado todos los entregables mencionados.
 
-Las revisiones de documentación e integración continuaron hasta el **28/10/2026**, después del cierre informado. La última verificación de código registró **91 pruebas Python aprobadas**, además de suites JavaScript y pruebas aisladas de n8n. Los videos y datos pendientes del equipo no se consideran completados por el cierre del cronograma.
+Hubo revisiones hasta el **28/10/2026**, después del cierre informado. La última comprobación registró **91 pruebas Python aprobadas**, más pruebas JavaScript y de n8n. Los videos y datos pendientes del equipo siguen por completar.
 
-María Quito Castillo asume los roles **Líder del Proyecto y Desarrollador TI** (desarrolladora full stack). Los demás nombres de responsables quedan pendientes de completar; se conservan los roles originales del cronograma.
+**María Quito Castillo** es Líder del Proyecto y Desarrollador TI (desarrolladora full stack). Los otros nombres quedan pendientes; se mantienen los roles del cronograma.
 
 ## 5. Recursos necesarios (datos, hardware, software)
 
@@ -91,9 +91,9 @@ María Quito Castillo asume los roles **Líder del Proyecto y Desarrollador TI**
 
 ### Hardware
 
-Se necesita una computadora con CPU y almacenamiento para los datos, modelos, dependencias y resultados; **no se requiere GPU**. La integración necesita un VPS con Docker y conectividad con el buzón, OpenAI y los servicios del proyecto.
+Se necesita CPU y espacio para datos, modelos y dependencias; **no se usa GPU**. El flujo integrado requiere un VPS con Docker y conexión al buzón y a OpenAI.
 
-El Compose de NexpAPI asigna un límite de **1 CPU y 512 MiB de memoria a ese contenedor**. Es una configuración de despliegue, no un mínimo medido para todo el sistema. No se han determinado requisitos mínimos globales de RAM, CPU o disco. Los volúmenes persistentes almacenan PostgreSQL, adjuntos de Redmine e historial SQLite.
+NexpAPI tiene un límite de **1 CPU y 512 MiB**. No es un mínimo medido para todo el sistema: faltan requisitos globales de RAM, CPU y disco. Los volúmenes guardan PostgreSQL, adjuntos e historial SQLite.
 
 ### Software
 
@@ -103,7 +103,7 @@ El Compose de NexpAPI asigna un límite de **1 CPU y 512 MiB de memoria a ese co
 - **n8n, Redmine y PostgreSQL**, más acceso IMAP/SMTP al buzón y credencial del agente **OpenAI gpt-4.1-mini**.
 - **Git** para versionamiento; **pytest y Ruff** para pruebas y revisión del código.
 
-Las versiones están detalladas en [arquitectura](arquitectura.md). Se necesitan cuentas y permisos válidos para los servicios. El VPS y el consumo de OpenAI generan costes; no hay un presupuesto cuantificado registrado.
+Las versiones están en [arquitectura](arquitectura.md). Se requieren cuentas y permisos para los servicios. El VPS y OpenAI tienen costes; no hay un presupuesto registrado.
 
 ## 6. Riesgos identificados y mitigación
 
@@ -120,4 +120,4 @@ Las versiones están detalladas en [arquitectura](arquitectura.md). Se necesitan
 | Costes o dependencia del proveedor externo | El clasificador Python funciona sin OpenAI; la API y el portal ejecutan el modelo localmente | Definir presupuesto y revisar consumo; el análisis del agente depende del servicio externo |
 | Entrega académica incompleta | Código en main, cinco documentos ordenados y espacios identificados en el README | Completar integrantes, licencia pendiente y enlaces de los dos videos |
 
-El equipo debe acordar responsables de seguimiento y una revisión periódica de errores antes de operar con solicitudes reales. El plan de monitoreo y actualización está descrito como propuesta en [consideraciones éticas](consideraciones_eticas.md); no se presenta como una rutina automática implementada.
+Antes de operar con correos reales, hay que asignar responsables y acordar cómo revisar errores. El [plan de monitoreo](consideraciones_eticas.md) sigue siendo una propuesta, no una rutina automática.

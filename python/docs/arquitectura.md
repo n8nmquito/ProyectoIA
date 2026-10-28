@@ -2,11 +2,11 @@
 
 ## 1. Tipo de modelo seleccionado y justificación
 
-Se utiliza un clasificador supervisado multiclase formado por **TF-IDF y SVM lineal calibrada** (`TfidfVectorizer`, `LinearSVC` y `CalibratedClassifierCV`). Clasifica las solicitudes en **accesos, aplicaciones, infraestructura y otros**.
+El modelo combina **TF-IDF y SVM lineal calibrada** (`TfidfVectorizer`, `LinearSVC` y `CalibratedClassifierCV`). Predice cuatro categorías: **accesos, aplicaciones, infraestructura y otros**.
 
-Se comparó con un baseline de categoría mayoritaria y regresión logística. La SVM optimizada obtuvo el mayor F1 macro de la etapa de selección: **0.965000**, frente a **0.964939** de regresión logística optimizada. La diferencia es pequeña; no demuestra una superioridad estadística o en producción. La calibración sigmoide permite obtener probabilidades por categoría y señalar casos de baja confianza.
+Se comparó con un baseline mayoritario y regresión logística. La SVM optimizada obtuvo **F1 macro CV de 0.965000**, frente a **0.964939** de regresión logística. Se eligió por ese resultado y por sus probabilidades calibradas; la diferencia es pequeña y no prueba una ventaja en producción.
 
-Se conservan modelos entrenados con **10, 100, 200 y 300 correos simulados**, con la misma configuración y vocabularios aprendidos por separado. **NexpAPI utiliza el de 300 correos**; Streamlit permite elegir entre los archivos válidos de `models/`. El agente externo **OpenAI gpt-4.1-mini** analiza la solicitud y propone resumen, prioridad, tipo y proyecto; **Python determina la categoría final**. No se entrenó un LLM ni una red neuronal con estos correos.
+Hay modelos de **10, 100, 200 y 300 correos simulados**, con la misma configuración y vocabularios propios. **NexpAPI usa el de 300** y Streamlit carga los modelos válidos de `models/`. **Python fija la categoría final**; el agente **OpenAI gpt-4.1-mini** analiza el correo y propone resumen, prioridad, tipo y proyecto. No se entrenó una red neuronal ni un LLM.
 
 Ver el proceso de selección en [optimización](optimizacion.md).
 
@@ -14,7 +14,7 @@ Ver el proceso de selección en [optimización](optimizacion.md).
 
 ### Etapas del modelo
 
-Este modelo no tiene capas neuronales. Su arquitectura es un pipeline de representación del texto y clasificación calibrada:
+No hay capas neuronales. El modelo sigue estas etapas:
 
 | Etapa | Operación | Parámetros |
 |---|---|---|
@@ -24,7 +24,7 @@ Este modelo no tiene capas neuronales. Su arquitectura es un pipeline de represe
 | Calibración | Transformar las puntuaciones en probabilidades estimadas | Método sigmoide y `cv=2`; combinación de estimadores calibrados |
 | Decisión | Elegir la categoría de mayor probabilidad | Marcar `requiere_revision` si confianza `< 0.60` o no hay términos conocidos |
 
-Los valores configurables se definen en [config.yaml](../config.yaml). El umbral de revisión no garantiza acierto ni exige por sí solo aprobación humana. La búsqueda utiliza **4 particiones de validación cruzada**; estas son distintas de las **2 particiones internas de calibración**.
+Los ajustes están en [config.yaml](../config.yaml). El umbral de revisión no garantiza acierto ni obliga a aprobación humana. Las **4 particiones de evaluación** son distintas de las **2 de calibración**.
 
 ### Componentes y responsabilidades
 
@@ -41,11 +41,11 @@ Los valores configurables se definen en [config.yaml](../config.yaml). El umbral
 
 ### Despliegue y comunicación
 
-NexpAPI reside en `/mquito/mquito-ticket/nexpapi`, usa el contenedor `nexpapi` y comparte la red `correo-tickets_automatizacion`. n8n consulta **`POST http://nexpapi:8000/predict`**, con `X-API-Key`; **`GET /health`** comprueba disponibilidad. El puerto 8000 no se publica en Internet. La API carga una vez el modelo de 300 al iniciar; no reentrena ni llama a OpenAI.
+NexpAPI está en `/mquito/mquito-ticket/nexpapi`, dentro de `correo-tickets_automatizacion`. n8n llama a **`POST http://nexpapi:8000/predict`** con `X-API-Key`; **`GET /health`** comprueba su estado. No publica el puerto 8000. Carga el modelo una vez al iniciar, sin reentrenarlo ni llamar a OpenAI.
 
-Su Compose limita el contenedor a **1 CPU y 512 MiB**, utiliza sistema de archivos de solo lectura, usuario sin privilegios, directorio temporal y reinicio `unless-stopped`. La construcción reutiliza `python/src` y `python/config.yaml`. En producción conserva el modelo en `nexpapi/models`, seleccionado mediante `NEXPAPI_MODEL_DIR`.
+Compose limita NexpAPI a **1 CPU y 512 MiB**, con usuario sin privilegios, archivos de solo lectura, espacio temporal y reinicio `unless-stopped`. Reutiliza `python/src` y `python/config.yaml`; en producción carga `nexpapi/models` mediante `NEXPAPI_MODEL_DIR`.
 
-Streamlit se publica en el puerto **8501**, n8n en **5678**, Redmine en **3000** y Portainer en **9443**. El portal carga el modelo directamente en el proceso Python donde se ejecuta: en la computadora si se inicia localmente o en el contenedor del VPS si está desplegado. No utiliza NexpAPI ni OpenAI para sus predicciones. El historial persistente se guarda en SQLite mediante `HISTORY_DB_PATH`; sin esa configuración se conserva en memoria de sesión.
+Los puertos son **8501** para Streamlit, **5678** para n8n, **3000** para Redmine y **9443** para Portainer. Streamlit clasifica directamente en el equipo o contenedor donde se ejecuta, sin NexpAPI ni OpenAI. Con `HISTORY_DB_PATH` guarda el historial en SQLite; sin esa variable lo mantiene en memoria de sesión.
 
 ## 3. Diagrama de flujo del sistema completo
 
@@ -97,7 +97,7 @@ flowchart TD
     AG -. "Ejecuciones de n8n" .-> PG
 ```
 
-El diagrama representa el flujo vigente: **la limpieza se ejecuta en un nodo de código de n8n, sin endpoint adicional**, y NexpAPI realiza la clasificación. Los modelos se entrenan fuera del flujo de correo; no existe aprendizaje automático en línea.
+**La limpieza ocurre en un nodo de código de n8n, sin otra API**. NexpAPI clasifica. El entrenamiento se ejecuta aparte: el flujo de correo no aprende en línea.
 
 ## 4. Pipeline de datos (desde input hasta output)
 
@@ -113,9 +113,9 @@ El diagrama representa el flujo vigente: **la limpieza se ejecuta en un nodo de 
 | 6 | Análisis y predicción original | Reaplicar la categoría Python; resolver tipo por nombre, categoría y responsable con datos reales | Ticket validado o caso para revisión |
 | 7 | Ticket validado y adjuntos originales | Verificar membresía y rol; cargar archivos y crear el ticket en Redmine | Ticket registrado, asignación válida si existe y confirmación preparada |
 
-El agente puede recibir **PNG, JPEG, WebP y PDF**, hasta **4 archivos**, **4 MiB por archivo** y **8 MiB acumulados**. Los adjuntos no se anonimizan; los originales se conservan para Redmine. Si falla la limpieza o la clasificación, no se usa texto original ni una categoría del agente como respaldo para crear el ticket.
+El agente recibe **PNG, JPEG, WebP o PDF**: hasta **4 archivos**, **4 MiB cada uno** y **8 MiB en total**. No se anonimizan; los originales quedan para Redmine. Si falla la limpieza o la clasificación, no se crea un ticket usando el texto original o una categoría inventada por el agente.
 
-La categoría Python es obligatoria. Un responsable inválido puede dejar el ticket sin asignar y marcado para revisión; un proyecto, tipo o categoría inválidos impide el alta. La creación tras las validaciones es automática: no hay una aprobación humana obligatoria antes de cada ticket.
+La categoría de Python es obligatoria. Si el responsable no es válido, el ticket puede quedar sin asignar y marcado para revisión. Si falla proyecto, tipo o categoría, no se crea. Tras los controles, el alta es automática, sin aprobación humana obligatoria.
 
 ### Formulario Streamlit → modelo → resultado
 
@@ -124,7 +124,7 @@ La categoría Python es obligatoria. Un responsable inválido puede dejar el tic
 3. Muestra categoría, confianza, probabilidades, gráficos y advertencias.
 4. Guarda la predicción en el historial configurado y permite compararla y descargar resultados.
 
-El portal no envía estos datos al flujo de n8n ni al agente OpenAI. Las métricas de cada modelo solo se muestran cuando su hash coincide con el reporte registrado.
+Este recorrido no envía datos a n8n ni a OpenAI. El portal muestra métricas solo cuando el hash del modelo coincide con el reporte.
 
 ## 5. Tecnologías y librerías utilizadas con versiones
 
@@ -173,4 +173,4 @@ Versiones verificadas en el servidor y sus contenedores:
 | ipykernel | 6.29.5 | Kernel Python de notebooks |
 | Ruff | 0.9.10 | Estilo, importaciones y docstrings |
 
-Las dependencias se fijan en [requirements.txt](../requirements.txt), [dependencias de NexpAPI](../../nexpapi/requirements.txt) y [dependencias del portal](../deploy/requirements-streamlit.txt). Las versiones de herramientas de análisis son las fijadas para el entorno de desarrollo; no se afirma que estén instaladas en el contenedor de la API.
+Las versiones se fijan en [requirements.txt](../requirements.txt), [NexpAPI](../../nexpapi/requirements.txt) y [portal](../deploy/requirements-streamlit.txt). Las herramientas de análisis corresponden al desarrollo; no todas están instaladas en la API.
