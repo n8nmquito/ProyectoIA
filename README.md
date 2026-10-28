@@ -89,27 +89,11 @@ En n8n, **Python determina la categoría final**. El agente prepara el resumen y
 
 El servidor ejecuta los servicios con Docker Compose. n8n recibe el correo por IMAP, limpia firmas y redacta datos sensibles mediante Python (`/sanitize`) y después consulta el clasificador FastAPI de 300 correos y envía al agente OpenAI el texto, los adjuntos seleccionados y la categoría Python. El código fija esa categoría, resuelve el responsable por el catálogo de Redmine y valida los datos antes de crear el ticket. PostgreSQL guarda los datos de n8n y Redmine; Streamlit funciona como portal independiente, carga sus modelos desde `models/` y guarda el historial en SQLite.
 
-```mermaid
-flowchart LR
-    C["Correo IMAP"] --> N["n8n :5678"]
-    N --> L["Python /sanitize: firma y datos sensibles"]
-    L --> P["FastAPI interna :8000 / Modelo 300"]
-    P --> N
-    N --> A["OpenAI gpt-4.1-mini"]
-    A --> N
-    N --> V["Aplicar categoría Python y validar responsable"]
-    V --> R["Redmine :3000"]
-    N --> DB[("PostgreSQL")]
-    R --> DB
-    U["Portal Streamlit :8501"] --> M["Modelos .pkl disponibles"]
-    U --> H[("SQLite: historial")]
-```
-
 **Imagen de arquitectura general disponible en la documentación:**
 
 <img src="Documentacion/Imagenes/5590086a-6256-4f7c-a3a5-dd7c5bc3377b.png" alt="Arquitectura general de n8n, clasificador Python, Redmine y PostgreSQL" width="900">
 
-La imagen corresponde al esquema inicial de componentes; el diagrama anterior describe el despliegue actual e incluye OpenAI, Streamlit y la categoría final de Python.
+La imagen corresponde al esquema inicial de componentes. La descripción anterior detalla el despliegue actual con OpenAI, Streamlit y la categoría final de Python.
 
 Ver [arquitectura](python/docs/arquitectura.md), [optimización](python/docs/optimizacion.md) y [flujo n8n](workflows/README.md).
 
