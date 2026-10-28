@@ -207,8 +207,6 @@ Servidor de producción: **185.208.207.203**.
 | Redmine | [http://185.208.207.203:3000](http://185.208.207.203:3000) | Consultar y gestionar tickets |
 | Portainer | [https://185.208.207.203:9443](https://185.208.207.203:9443) | Administración de contenedores con cuenta autorizada |
 
-[Flujo principal de correo en n8n](http://185.208.207.203:5678/workflow/opxBwpGpRDrbQeHn). n8n, Redmine y Portainer requieren sus respectivas cuentas; no se incluyen contraseñas en el repositorio.
-
 **Servicios entre contenedores:** FastAPI recibe `POST /sanitize` antes de `POST http://clasificador-python:8000/predict` y expone `GET /health`, sin publicar el puerto 8000 del host. PostgreSQL se utiliza mediante `postgres:5432` y no tiene interfaz web propia.
 
 ### Descripción y acceso
