@@ -960,12 +960,12 @@
         -32
       ],
       "onError": "continueRegularOutput",
-      "notes": "API Python privada en Docker. Modelo real de 300 correos. Solo título y cuerpo; no envía adjuntos."
+      "notes": "Recibe exclusivamente el asunto y cuerpo limpiados por el nodo Python anterior."
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const original = $('Normalizar correo').item;\nconst response = $json;\nconst classes = ['accesos', 'aplicaciones', 'infraestructura', 'otros'];\nconst probabilities = response.probabilidades || {};\nconst valid = response.muestras_entrenamiento === 300\n  && response.modelo_version === 'modelo_clasificador_300'\n  && classes.includes(response.categoria)\n  && Number.isFinite(response.confianza)\n  && response.confianza >= 0 && response.confianza <= 1\n  && classes.every(c => Number.isFinite(probabilities[c]) && probabilities[c] >= 0 && probabilities[c] <= 1)\n  && Math.abs(classes.reduce((s,c) => s + probabilities[c],0) - 1) < 0.000001\n  && Math.abs(probabilities[response.categoria] - response.confianza) < 0.000001;\nconst clasificacion_ml = valid ? {\n  ...response, probabilidad: response.confianza, modo: 'categoria_final_ticket',\n  almacenamiento: 'API Python: modelo_clasificador_300.pkl',\n} : {\n  categoria: null, probabilidad: null, probabilidades: {},\n  estado: 'clasificacion_no_disponible', modelo_version: null,\n  requiere_revision: true, modo: 'categoria_final_ticket',\n  motivo: 'La API Python no respondió con una clasificación válida.',\n};\nreturn { json: { ...original.json, clasificacion_ml },\n  ...(original.binary ? { binary: original.binary } : {}) };\n"
+        "jsCode": "const original = $('Usar correo limpio - Python').item;\nconst response = $json;\nconst classes = ['accesos', 'aplicaciones', 'infraestructura', 'otros'];\nconst probabilities = response.probabilidades || {};\nconst valid = response.muestras_entrenamiento === 300\n  && response.modelo_version === 'modelo_clasificador_300'\n  && classes.includes(response.categoria)\n  && Number.isFinite(response.confianza)\n  && response.confianza >= 0 && response.confianza <= 1\n  && classes.every(c => Number.isFinite(probabilities[c]) && probabilities[c] >= 0 && probabilities[c] <= 1)\n  && Math.abs(classes.reduce((s,c) => s + probabilities[c],0) - 1) < 0.000001\n  && Math.abs(probabilities[response.categoria] - response.confianza) < 0.000001;\nconst clasificacion_ml = valid ? {\n  ...response, probabilidad: response.confianza, modo: 'categoria_final_ticket',\n  almacenamiento: 'API Python: modelo_clasificador_300.pkl',\n} : {\n  categoria: null, probabilidad: null, probabilidades: {},\n  estado: 'clasificacion_no_disponible', modelo_version: null,\n  requiere_revision: true, modo: 'categoria_final_ticket',\n  motivo: 'La API Python no respondió con una clasificación válida.',\n};\nreturn { json: { ...original.json, clasificacion_ml },\n  ...(original.binary ? { binary: original.binary } : {}) };\n"
       },
       "id": "ab75b52d-ab8e-4e0c-b1ad-52fe6250b7e6",
       "name": "Clasificar correo - Modelo 300",
@@ -1056,6 +1056,51 @@
       },
       "onError": "continueErrorOutput",
       "notes": "Prioriza assigned_to de la categoría real. Resuelve membresía y rol por IDs del catálogo, sin confiar en los propuestos por IA."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://clasificador-python:8000/sanitize",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ titulo: $json.asunto, cuerpo: $json.cuerpo }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "26c5d1f8-8a7f-40ba-88e3-a6e0228f5484",
+      "name": "Limpiar firma y datos - Python",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        390,
+        288
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "Código Python autenticado: quita firmas habituales y redacta identificadores y credenciales del asunto/cuerpo antes de clasificar."
+    },
+    {
+      "id": "1de93b67-64eb-4951-86b1-80a33a9afe73",
+      "name": "Usar correo limpio - Python",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        610,
+        288
+      ],
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// No fallback to the original text if the Python cleaning service fails.\nconst original = $('Normalizar correo').item;\nconst cleaned = $json;\nif (typeof cleaned.titulo !== 'string' || !cleaned.titulo.trim()\n    || typeof cleaned.cuerpo !== 'string' || !cleaned.cuerpo.trim()\n    || cleaned.limpieza?.version !== 1\n    || typeof cleaned.limpieza.firma_eliminada !== 'boolean'\n    || !cleaned.limpieza.datos_redactados\n    || typeof cleaned.limpieza.datos_redactados !== 'object') {\n  throw new Error('Python no devolvió un correo limpio válido. No se envía el texto original al clasificador ni al agente.');\n}\nreturn { json: { ...original.json,\n  asunto: cleaned.titulo, cuerpo: cleaned.cuerpo, limpieza: cleaned.limpieza,\n}, ...(original.binary ? { binary: original.binary } : {}) };\n"
+      },
+      "notes": "No permite continuar con texto original si la limpieza falla. Conserva originales y adjuntos para Redmine."
     }
   ],
   "connections": {
@@ -1074,7 +1119,7 @@
       "main": [
         [
           {
-            "node": "Consultar API - Modelo 300",
+            "node": "Limpiar firma y datos - Python",
             "type": "main",
             "index": 0
           }
@@ -1642,6 +1687,42 @@
         [
           {
             "node": "¿Propone responsable?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sin análisis IA - Revisión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar firma y datos - Python": {
+      "main": [
+        [
+          {
+            "node": "Usar correo limpio - Python",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sin análisis IA - Revisión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usar correo limpio - Python": {
+      "main": [
+        [
+          {
+            "node": "Consultar API - Modelo 300",
             "type": "main",
             "index": 0
           }

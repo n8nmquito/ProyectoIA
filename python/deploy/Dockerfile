@@ -3,6 +3,7 @@ WORKDIR /app
 COPY deploy/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 COPY src /app/src
+COPY config.yaml /app/config.yaml
 COPY models/modelo_clasificador_300.pkl /app/models/modelo_clasificador_300.pkl
 RUN useradd --create-home classifier
 USER classifier

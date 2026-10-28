@@ -158,17 +158,19 @@ y [calibración](https://scikit-learn.org/1.5/modules/generated/sklearn.calibrat
 ```mermaid
 flowchart TD
     M[Correo IMAP o prueba manual] --> N[Normalizar y conservar originales]
-    N --> P[API Python: modelo de 300]
+    N --> L[Python: quitar firma y redactar datos]
+    L --> P[API Python: modelo de 300]
     P --> B[Validar predicción y conservar adjuntos]
     B --> S[Seleccionar imágenes y PDF para el agente]
     S --> A[Agente OpenAI: decidir relevancia y analizar]
     R[Catálogos Redmine: consultas GET] -. herramientas .-> A
     A --> D{¿Solicitud de soporte?}
     D -->|No| O[Registrar omisión y aviso según configuración]
-    D -->|Sí| C[Comparar Python y agente]
+    D -->|Sí| C[Aplicar categoría final de Python]
     C --> T[Preparar ticket]
     T --> V[Resolver tipo por nombre y validar proyecto y categoría]
-    V --> U[Verificar membresía y rol del responsable]
+    V --> Q[Resolver responsable del catálogo de categorías]
+    Q --> U[Verificar membresía y rol del responsable]
     U --> F[Recuperar y subir adjuntos originales]
     F --> K[Crear ticket en Redmine]
     K --> E[Preparar confirmación al remitente]
@@ -256,3 +258,12 @@ interfaz solo muestra resultados por versión si la huella del modelo coincide.
 La sección de parámetros de la interfaz inspecciona el pipeline seleccionado
 y muestra vocabulario, clases, hiperparámetros TF-IDF/SVM, calibración y umbral
 de revisión. No reutiliza una ficha fija del modelo de 300 para otras versiones.
+
+## Limpieza previa de correo
+
+`src/email_privacy.py` implementa `/sanitize`, protegido por la misma clave
+de la API. n8n lo invoca después de normalizar, valida la respuesta y usa
+el título/cuerpo limpios tanto en `/predict` como en el prompt del agente.
+La detección usa firmas convencionales y patrones de datos sensibles; no
+reconoce necesariamente todos los nombres libres ni anonimiza adjuntos.
+El correo original se conserva en el flujo y en el ticket de Redmine.

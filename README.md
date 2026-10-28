@@ -87,12 +87,13 @@ En n8n, **Python determina la categoría final**. El agente prepara el resumen y
 
 ### Arquitectura desplegada
 
-El servidor ejecuta los servicios con Docker Compose. n8n recibe el correo por IMAP, consulta la API FastAPI de 300 correos y envía al agente OpenAI el texto, los adjuntos seleccionados y la categoría Python. El código fija esa categoría, resuelve el responsable por el catálogo de Redmine y valida los datos antes de crear el ticket. PostgreSQL guarda los datos de n8n y Redmine; Streamlit funciona como portal independiente, carga sus modelos desde `models/` y guarda el historial en SQLite.
+El servidor ejecuta los servicios con Docker Compose. n8n recibe el correo por IMAP, limpia firmas y redacta datos sensibles mediante Python (`/sanitize`) y después consulta el clasificador FastAPI de 300 correos y envía al agente OpenAI el texto, los adjuntos seleccionados y la categoría Python. El código fija esa categoría, resuelve el responsable por el catálogo de Redmine y valida los datos antes de crear el ticket. PostgreSQL guarda los datos de n8n y Redmine; Streamlit funciona como portal independiente, carga sus modelos desde `models/` y guarda el historial en SQLite.
 
 ```mermaid
 flowchart LR
     C["Correo IMAP"] --> N["n8n :5678"]
-    N --> P["FastAPI interna :8000 / Modelo 300"]
+    N --> L["Python /sanitize: firma y datos sensibles"]
+    L --> P["FastAPI interna :8000 / Modelo 300"]
     P --> N
     N --> A["OpenAI gpt-4.1-mini"]
     A --> N
@@ -224,7 +225,7 @@ Servidor de producción: **185.208.207.203**.
 
 [Flujo principal de correo en n8n](http://185.208.207.203:5678/workflow/opxBwpGpRDrbQeHn). n8n, Redmine y Portainer requieren sus respectivas cuentas; no se incluyen contraseñas en el repositorio.
 
-**Servicios entre contenedores:** FastAPI recibe `POST http://clasificador-python:8000/predict` y expone `GET /health`, sin publicar el puerto 8000 del host. PostgreSQL se utiliza mediante `postgres:5432` y no tiene interfaz web propia.
+**Servicios entre contenedores:** FastAPI recibe `POST /sanitize` antes de `POST http://clasificador-python:8000/predict` y expone `GET /health`, sin publicar el puerto 8000 del host. PostgreSQL se utiliza mediante `postgres:5432` y no tiene interfaz web propia.
 
 ### Descripción y acceso
 

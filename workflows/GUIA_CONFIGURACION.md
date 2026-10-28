@@ -21,6 +21,13 @@ servicio. Ver python/deploy/DESPLIEGUE_REALIZADO.md para operación y reversión
 
 ## Entrada y salida de Python
 
+Antes de `/predict`, el nodo Limpiar firma y datos - Python envía título y
+cuerpo a `/sanitize`. Ambos endpoints requieren la misma clave. El nodo
+siguiente exige el texto limpio y los contadores de limpieza; no permite
+continuar con los originales si hay error. Los originales y adjuntos se
+conservan para Redmine. Las reglas de texto no anonimizan archivos adjuntos.
+
+
 El cuerpo JSON del nodo HTTP contiene solo titulo y cuerpo del correo
 normalizado. La respuesta debe identificar modelo_clasificador_300 y 300 muestras,
 además de categoría, confianza y probabilidades. El adaptador comprueba esos

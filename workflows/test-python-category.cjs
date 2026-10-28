@@ -9,6 +9,25 @@ function run(name, input, previous) {
     $json: input, $: name => ({ item: { json: previous[name] } }),
   }, { timeout: 1000 }).json;
 }
+const originalEmail = { asunto: 'Error private@example.test',
+  cuerpo: 'No guarda. Firma privada', remitente: 'requester@example.test',
+  message_id: 'fixture-privacy' };
+const cleanInput = { titulo: 'Error [CORREO]', cuerpo: 'No guarda.',
+  limpieza: { version: 1, firma_eliminada: true, datos_redactados: { correo: 1 } } };
+const cleanEmail = run('Usar correo limpio - Python', cleanInput, {
+  'Normalizar correo': originalEmail,
+});
+assert.equal(cleanEmail.cuerpo, 'No guarda.');
+assert.equal(cleanEmail.asunto, 'Error [CORREO]');
+assert.equal(cleanEmail.remitente, originalEmail.remitente);
+assert.equal(originalEmail.cuerpo, 'No guarda. Firma privada');
+assert.throws(() => run('Usar correo limpio - Python', { error: 'API caída' }, {
+  'Normalizar correo': originalEmail,
+}), /No se envía el texto original/);
+assert.equal(workflow.connections['Normalizar correo'].main[0][0].node, 'Limpiar firma y datos - Python');
+assert.equal(workflow.connections['Usar correo limpio - Python'].main[0][0].node, 'Consultar API - Modelo 300');
+assert.match(nodes['Limpiar firma y datos - Python'].parameters.url, /\/sanitize$/);
+assert.match(nodes['Clasificar correo - Modelo 300'].parameters.jsCode, /Usar correo limpio - Python/);
 const ml = { categoria: 'otros', confianza: 0.9986, requiere_revision: false,
   muestras_entrenamiento: 300, modelo_version: 'modelo_clasificador_300',
   datos_entrenamiento: 'correos_300.json', estado: 'clasificado' };

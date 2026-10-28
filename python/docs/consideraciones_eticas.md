@@ -47,11 +47,11 @@ informes o paquetes debe revisarse que no reproduzcan registros no autorizados.
 | Resultados locales | Texto y predicciones de consola; evitar compartir información sensible |
 
 Python reemplaza ciertos emails, enlaces, IP, archivos y números largos al
-clasificar. **Esa limpieza no anonimiza el correo original que n8n envía a OpenAI.**
-No existe un filtro general previo al agente que elimine nombres, contraseñas,
-secretos o documentos sensibles. Seleccionar adjuntos por tamaño/formato no
-constituye anonimización. La API minimiza campos, pero el cuerpo puede contener
-datos personales escritos dentro del texto.
+clasificar. **El flujo ahora ejecuta además `/sanitize` antes de clasificar y envía al agente el título/cuerpo limpiados.** La redacción por patrones no garantiza anonimización completa; los adjuntos y las respuestas de herramientas pueden contener datos personales.
+El filtro previo usa reglas para firmas, contactos, credenciales y campos
+etiquetados; puede omitir nombres libres o datos con formatos no previstos.
+Seleccionar adjuntos por tamaño/formato tampoco constituye anonimización.
+Los originales siguen almacenados en n8n y Redmine.
 
 La API requiere X-API-Key, no tiene puerto publicado y se comunica dentro de la
 red Docker. Las credenciales permanecen fuera del código y de las exportaciones.

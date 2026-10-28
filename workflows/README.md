@@ -7,7 +7,7 @@ PostgreSQL. OpenAI analiza el correo y consulta Redmine; Gemini está desconecta
 
 ## Recorrido
 
-Correo → normalizar → API Python → validar predicción → seleccionar adjuntos →
+Correo → normalizar → limpiar firma/datos en Python → validar texto limpio → API Python → validar predicción → seleccionar adjuntos →
 agente OpenAI → decidir relevancia → aplicar categoría Python → preparar ticket →
 validar proyecto/tipo/categoría → consultar categorías y miembros → resolver y validar responsable → subir originales → crear
 ticket → preparar confirmación.
@@ -80,3 +80,23 @@ Pruebas locales sin crear tickets: desacuerdo Otros/Aplicaciones, baja confianza
 API inválida, responsable configurado por categoría, rechazo de rol no asignable
 y conexiones de la plantilla. El ticket histórico #49 conserva su categoría
 anterior; la política nueva se aplica a las siguientes ejecuciones.
+
+## Limpieza de texto antes del clasificador
+
+El nodo **Limpiar firma y datos - Python** llama a `POST /sanitize` usando la
+misma credencial `X-API-Key` del clasificador. El código vive en
+`python/src/email_privacy.py`; no requiere instalar runners Python en n8n.
+**Usar correo limpio - Python** valida la respuesta y pasa solo título y cuerpo
+limpios a `/predict`; ese mismo texto llega al agente. Si falla la limpieza,
+la rama deriva a revisión sin enviar el texto original como respaldo.
+
+Se quitan firmas habituales, bloques de firma HTML y avisos de confidencialidad.
+Se redactan correos, teléfonos/números largos, IP, enlaces, credenciales y
+campos personales etiquetados. Las reglas no garantizan reconocer todos los
+nombres libres ni toda información sensible. Los adjuntos no se anonimizan.
+El original sigue disponible para el ticket y en los registros de n8n; esta
+limpieza no elimina los datos de esos almacenamientos.
+
+El disparador IMAP usa UNSEEN y conserva `lastMessageUid`: mensajes antiguos
+que sigan sin leer no se reprocesan automáticamente. Para comprobar el flujo
+debe entrar un correo nuevo; reiniciar el cursor puede duplicar tickets.

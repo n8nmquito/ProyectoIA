@@ -213,7 +213,7 @@ de haber inspeccionado esos casos.
 
 ## Pruebas automatizadas
 
-Última ejecución verificada: **90 pruebas aprobadas, cero fallos o errores**.
+Última ejecución verificada: **102 pruebas aprobadas, cero fallos o errores**.
 Evidencia legible por herramientas: results/metrics/pytest.xml.
 
 | Archivo | Comportamientos comprobados |
@@ -339,3 +339,23 @@ y vocabulario; no una métrica agregada ni una etiqueta humana de los 25.
 La descarga CSV se comprobó en el navegador integrado. La descarga XLSX quedó pendiente en ese navegador; se verificaron la generación del archivo, sus datos y su presentación mediante renderizado.
 
 La revisión estricta de `src` y `app` usa `pyproject.toml`: Ruff comprueba estilo, importaciones y docstrings con líneas de hasta 79 caracteres. Los ajustes nuevos conservan los valores de los modelos existentes; las pruebas no los reentrenan.
+
+## Limpieza previa y comprobación de n8n
+
+Se verifican firmas de texto/HTML, correos, números de contacto, IP, enlaces,
+credenciales y campos personales etiquetados; se conserva el contexto de
+soporte. `/sanitize` exige autenticación y sus errores no repiten el contenido
+privado recibido. Una respuesta inválida no permite usar los originales como
+respaldo hacia el clasificador o el agente.
+
+La ejecución diagnóstica n8n **28834** usó exclusivamente un correo ficticio en
+un flujo inactivo con los nodos de creación Redmine y SMTP sustituidos por
+nodos de comprobación. Pasó limpieza, clasificación, agente y validación de
+asignación; obtuvo Otros/Soporte General. No creó ticket ni envió correo.
+El flujo diagnóstico se archivó; el flujo principal quedó publicado y activo.
+La comprobación de IMAP fue de solo lectura: conectaba correctamente y los
+UID no leídos no superaban el cursor 20 ya procesado; no se reinició el cursor.
+
+La limpieza no reentrena el modelo ni constituye una medición nueva de accuracy
+o F1. Los resultados registrados anteriormente no evalúan por sí solos los
+efectos de este nuevo paso sobre todos los correos reales.

@@ -79,3 +79,30 @@ def test_requires_key():
     with pytest.raises(RuntimeError, match="CLASSIFIER_API_KEY"):
         with TestClient(create_app(api_key="")):
             pass
+
+
+def test_sanitizer_requires_authentication(client):
+    response = client.post("/sanitize", json={
+        "titulo": "Ayuda", "cuerpo": "No puedo entrar al sistema"
+    })
+    assert response.status_code == 401
+
+
+def test_sanitizer_returns_only_clean_text_and_counts(client):
+    response = client.post("/sanitize", headers={"X-API-Key": TEST_KEY}, json={
+        "titulo": "Error maria@example.test", "cuerpo": "No puedo entrar a JDE.\n\nSaludos cordiales,\nMaría Prueba"
+    })
+    assert response.status_code == 200
+    result = response.json()
+    assert result["cuerpo"] == "No puedo entrar a JDE."
+    assert result["limpieza"]["firma_eliminada"]
+    assert "maria@example.test" not in response.text
+    assert "María Prueba" not in response.text
+
+
+def test_sanitizer_validation_does_not_echo_private_input(client):
+    response = client.post("/sanitize", headers={"X-API-Key": TEST_KEY}, json={
+        "titulo": "Error", "cuerpo": 123, "password": "private-demo"
+    })
+    assert response.status_code == 422
+    assert "private-demo" not in response.text
