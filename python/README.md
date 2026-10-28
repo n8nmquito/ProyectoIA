@@ -158,8 +158,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 
-# Crear los cuatro modelos desde cero; los .pkl no se incluyen en Git
-python -m src.train_versions
+# Los cuatro modelos entrenados ya están incluidos en models/
 
 # Iniciar la interfaz
 python -m streamlit run app/app.py
@@ -178,7 +177,7 @@ python -m src.train_versions --size 200
 python -m src.train_versions --size 300
 ```
 
-Cada comando reemplaza solo el modelo y el dataset de ese tamaño; no necesita un modelo previo. La fuente y los parámetros se definen en [config.yaml](config.yaml).
+Los [modelos entrenados y sus hashes](models/README.md) ya se descargan con el repositorio. El reentrenamiento es opcional: cada comando reemplaza solo el modelo y el dataset de ese tamaño; no necesita un modelo previo. La fuente y los parámetros se definen en [config.yaml](config.yaml).
 
 Probar un modelo con los 25 correos incluidos y actualizar la comparación por tamaños:
 
@@ -191,7 +190,7 @@ El primer comando muestra título, categoría, confianza y revisión; guarda el 
 
 ### Ejecutar con Docker
 
-Después de generar los modelos, desde la carpeta `python`:
+Los modelos ya están incluidos. Desde la carpeta `python`:
 
 ```bash
 docker compose up -d --build --wait
@@ -292,7 +291,7 @@ Mensaje de error al intentar clasificar sin completar el título.
 | `python/src/` | Procesamiento, modelos, entrenamiento, evaluación y API |
 | `python/app/` | Interfaz Streamlit, estilos, exportación e historial |
 | `python/data/` | Corpus, muestras de entrenamiento y correos de prueba |
-| `python/models/` | Modelos `.pkl` generados, excluidos de Git |
+| `python/models/` | Modelos entrenados de 10, 100, 200 y 300, copias de producción y hashes |
 | `python/results/` | Métricas, predicciones e informes |
 | `python/tests/` | Pruebas automatizadas |
 | `python/notebooks/` | Análisis y experimentos reproducibles |

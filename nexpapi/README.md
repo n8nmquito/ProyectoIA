@@ -27,7 +27,7 @@ El contexto de construcción es la raíz del repositorio. Por defecto copia
 `python/models/modelo_clasificador_300.pkl` y `python/config.yaml`. Para conservar
 un modelo desplegado por separado, `NEXPAPI_MODEL_DIR` permite indicar otra
 carpeta dentro del repositorio; en producción se utiliza `nexpapi/models`.
-Los modelos y `.env` de esta carpeta quedan fuera de Git.
+Solo la copia de `nexpapi/models/` y el `.env` del despliegue quedan fuera de Git. Los modelos de entrega están versionados en [python/models/](../python/models/README.md).
 
 ## Integración y producción
 

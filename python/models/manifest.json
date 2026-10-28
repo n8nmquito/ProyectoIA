@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "collected_on": "2026-10-28",
+  "algorithm": "TF-IDF + LinearSVC with sigmoid calibration",
+  "reference_final_model": "modelo_clasificador_300.pkl",
+  "production_api_model": "modelo_clasificador_300.pkl",
+  "production_portal_series": "reentrenados_produccion/",
+  "files": [
+    {
+      "path": "modelo_clasificador_10.pkl",
+      "series": "referencia_evaluada",
+      "training_samples": 10,
+      "sha256": "27e9b667bf4d32199f7631dbd51c4716e0659cd5e1f7c2ab552ce5903c75bd6d",
+      "size_bytes": 81677,
+      "dataset": "python/data/train/correos_10.json",
+      "evaluation_report": "python/results/metrics/version_evaluation.json",
+      "evaluation_status": "registered"
+    },
+    {
+      "path": "modelo_clasificador_100.pkl",
+      "series": "referencia_evaluada",
+      "training_samples": 100,
+      "sha256": "e0776da695c3a85496133382bcb995d3833465915cdf0d487c6018eab877c34a",
+      "size_bytes": 558787,
+      "dataset": "python/data/train/correos_100.json",
+      "evaluation_report": "python/results/metrics/version_evaluation.json",
+      "evaluation_status": "registered"
+    },
+    {
+      "path": "modelo_clasificador_200.pkl",
+      "series": "referencia_evaluada",
+      "training_samples": 200,
+      "sha256": "af4ee9435b4be26cb5583e2e3eba543e8d31ac22796cb96cceb8a676e1465b15",
+      "size_bytes": 961891,
+      "dataset": "python/data/train/correos_200.json",
+      "evaluation_report": "python/results/metrics/version_evaluation.json",
+      "evaluation_status": "registered"
+    },
+    {
+      "path": "modelo_clasificador_300.pkl",
+      "series": "referencia_evaluada",
+      "training_samples": 300,
+      "sha256": "2905ce4167d90281106ff7a37f6211114eccf459c1764d8ac5c61f0b81bf6a87",
+      "size_bytes": 1327052,
+      "dataset": "python/data/train/correos_300.json",
+      "evaluation_report": "python/results/metrics/version_evaluation.json",
+      "evaluation_status": "registered"
+    },
+    {
+      "path": "reentrenados_produccion/modelo_clasificador_10.pkl",
+      "series": "portal_reentrenado",
+      "training_samples": 10,
+      "sha256": "e4e985546945113f5fecd53e3aac97a3237f7c851176c128ba888bf970122124",
+      "size_bytes": 81656,
+      "dataset": "python/data/train/correos_10.json",
+      "evaluation_report": null,
+      "evaluation_status": "pending"
+    },
+    {
+      "path": "reentrenados_produccion/modelo_clasificador_100.pkl",
+      "series": "portal_reentrenado",
+      "training_samples": 100,
+      "sha256": "8fb15ca66a72e173f806418d06296983582a4a2dd232a40429a6f6bee573211f",
+      "size_bytes": 558787,
+      "dataset": "python/data/train/correos_100.json",
+      "evaluation_report": null,
+      "evaluation_status": "pending"
+    },
+    {
+      "path": "reentrenados_produccion/modelo_clasificador_200.pkl",
+      "series": "portal_reentrenado",
+      "training_samples": 200,
+      "sha256": "1c2b2c0c6b984a9d860879fbfc57703d6efb36c1b5490f9fcc86a06a5d5bd1b4",
+      "size_bytes": 961891,
+      "dataset": "python/data/train/correos_200.json",
+      "evaluation_report": null,
+      "evaluation_status": "pending"
+    },
+    {
+      "path": "reentrenados_produccion/modelo_clasificador_300.pkl",
+      "series": "portal_reentrenado",
+      "training_samples": 300,
+      "sha256": "bd745b50ccb4884dcb110ab381c4b2250d4745dee60663a3a177c100efe6988e",
+      "size_bytes": 1327052,
+      "dataset": "python/data/train/correos_300.json",
+      "evaluation_report": null,
+      "evaluation_status": "pending"
+    }
+  ]
+}

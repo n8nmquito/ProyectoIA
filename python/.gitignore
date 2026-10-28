@@ -7,12 +7,21 @@ __pycache__/
 venv/
 .env
 .streamlit/secrets.toml
-# Los datos y modelos necesitan revisión antes de publicarse.
+# Los datos procesados y artefactos no entregados quedan fuera de Git.
 data/raw/*
 !data/raw/README.md
 !data/raw/correos.json
 data/processed/*
-models/*.pkl
+models/**/*.pkl
+# Modelos autorizados para la entrega y sus copias de producción.
+!models/modelo_clasificador_10.pkl
+!models/modelo_clasificador_100.pkl
+!models/modelo_clasificador_200.pkl
+!models/modelo_clasificador_300.pkl
+!models/reentrenados_produccion/modelo_clasificador_10.pkl
+!models/reentrenados_produccion/modelo_clasificador_100.pkl
+!models/reentrenados_produccion/modelo_clasificador_200.pkl
+!models/reentrenados_produccion/modelo_clasificador_300.pkl
 *.log
 
 data/train/*

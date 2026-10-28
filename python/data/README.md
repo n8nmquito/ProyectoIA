@@ -32,8 +32,8 @@ test no contiene README, etiquetas ni metadatos adicionales.
 
 Los datos son simulados. Por indicación de la responsable del proyecto se
 incluyen en Git el [corpus maestro](raw/correos.json) y los cuatro datasets
-de [entrenamiento](train/). Las particiones procesadas, la hoja de revisión
-y los modelos `.pkl` continúan excluidos. La licencia MIT del código no se
+de [entrenamiento](train/). Las particiones procesadas y la hoja de revisión continúan excluidas. Los
+[modelos entrenados y sus hashes](../models/README.md) están incluidos en Git. La licencia MIT del código no se
 extiende automáticamente al dataset. Revisar privacidad y permisos antes de
 usar datos reales. Más detalle en [análisis de datos](../docs/analisis_datos.md).
 

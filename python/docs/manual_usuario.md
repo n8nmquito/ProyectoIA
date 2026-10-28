@@ -72,7 +72,7 @@ La categoría es la de mayor probabilidad. El umbral actual de revisión es **60
 | Problema | Qué hacer |
 |---|---|
 | El portal no abre | Comprueba la conexión y la dirección. Si el problema continúa, informa a soporte; el servicio puede estar detenido |
-| No aparecen modelos | Pide al responsable que compruebe `models/`. Los `.pkl` no vienen en Git: deben generarse siguiendo el README. Recarga después de añadirlos |
+| No aparecen modelos | Pide al responsable que compruebe `models/`. Los `.pkl` ya están incluidos en Git: actualiza el repositorio o consulta la guía de modelos. Recarga después de añadirlos |
 | Se muestra un error al cargar el modelo | Comunica el nombre del archivo a soporte. No descargues modelos de una fuente desconocida ni cambies su nombre para forzar la carga |
 | El formulario rechaza el correo | Completa ambos campos con letras y respeta los límites de 255 y 16.000 caracteres |
 | La confianza es baja o la categoría parece incorrecta | Revisa el caso completo. Prueba una descripción más clara sin inventar datos; no uses la predicción como decisión definitiva |
