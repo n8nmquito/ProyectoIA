@@ -170,6 +170,53 @@ superior recuerda que el modelo se entrenó con texto español.
 En móvil las columnas se apilan y la navegación ocupa dos filas; el resultado
 aparece debajo del formulario.
 
+### Capturas adicionales del portal
+
+Las siguientes capturas se tomaron con correos ficticios. Documentan las vistas
+del sistema desplegado; las probabilidades mostradas no son métricas de accuracy.
+
+**1. Predicción y probabilidades**
+
+Clasificación de un correo de ejemplo con categoría, confianza y gráfico.
+
+<img src="../documentacion/imagenes/app/clasificador_resultado_actual.jpg" alt="Predicción y probabilidades" width="760">
+
+**2. Información del modelo**
+
+Archivo seleccionado, explicación del modelo y variables de entrada y salida.
+
+<img src="../documentacion/imagenes/app/clasificador_acerca_actual.jpg" alt="Información del modelo" width="760">
+
+**3. Parámetros del modelo**
+
+Tamaño del corpus, vocabulario TF-IDF y parámetros del modelo cargado.
+
+<img src="../documentacion/imagenes/app/clasificador_parametros_actual.jpg" alt="Parámetros del modelo" width="760">
+
+**4. Historial de predicciones**
+
+Predicciones de ejemplo guardadas y opciones de descarga del historial.
+
+<img src="../documentacion/imagenes/app/clasificador_historial_actual.jpg" alt="Historial de predicciones" width="760">
+
+**5. Comparación entre modelos**
+
+El mismo correo clasificado con modelos de 100 y 300 correos; se comparan probabilidades, no aciertos.
+
+<img src="../documentacion/imagenes/app/clasificador_comparacion_actual.jpg" alt="Comparación entre modelos" width="760">
+
+**6. Idioma inglés y tema claro**
+
+Controles de idioma y apariencia con el resultado de un ejemplo en español.
+
+<img src="../documentacion/imagenes/app/clasificador_ingles_claro_actual.jpg" alt="Idioma inglés y tema claro" width="760">
+
+**7. Validación de entradas**
+
+Mensaje de error al intentar clasificar sin completar el título.
+
+<img src="../documentacion/imagenes/app/clasificador_validacion_actual.jpg" alt="Validación de entradas" width="760">
+
 ### Capturas históricas
 
 Las capturas siguientes documentan la versión del 26 de octubre. La versión
