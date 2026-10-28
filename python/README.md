@@ -1,6 +1,6 @@
 # Sistema de Clasificación de Tickets de Soporte TI
 
-![Python 3.10](https://img.shields.io/badge/Python-3.10-blue)
+![Python 3.10.22](https://img.shields.io/badge/Python-3.10.22-blue)
 [![Licencia MIT del código](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 ![Streamlit](https://img.shields.io/badge/Interfaz-Streamlit-red)
 ![Estado](https://img.shields.io/badge/Estado-piloto%20implementado-blue)
@@ -64,6 +64,31 @@ Más detalle en el [análisis de datos](docs/analisis_datos.md).
 
 En n8n, **Python determina la categoría final**. El agente prepara el resumen y propone prioridad, tipo y proyecto; el código consulta el responsable configurado de la categoría y valida membresía y rol. Si Python no devuelve una categoría válida, no se crea el ticket y el caso deriva a revisión.
 
+### Arquitectura desplegada
+
+El servidor ejecuta los servicios con Docker Compose. n8n recibe el correo por IMAP, consulta la API FastAPI de 300 correos y envía al agente OpenAI el texto, los adjuntos seleccionados y la categoría Python. El código fija esa categoría, resuelve el responsable por el catálogo de Redmine y valida los datos antes de crear el ticket. PostgreSQL guarda los datos de n8n y Redmine; Streamlit funciona como portal independiente, carga sus modelos desde `models/` y guarda el historial en SQLite.
+
+```mermaid
+flowchart LR
+    C["Correo IMAP"] --> N["n8n :5678"]
+    N --> P["FastAPI interna :8000 / Modelo 300"]
+    P --> N
+    N --> A["OpenAI gpt-4.1-mini"]
+    A --> N
+    N --> V["Aplicar categoría Python y validar responsable"]
+    V --> R["Redmine :3000"]
+    N --> DB[("PostgreSQL")]
+    R --> DB
+    U["Portal Streamlit :8501"] --> M["Modelos .pkl disponibles"]
+    U --> H[("SQLite: historial")]
+```
+
+**Imagen de arquitectura general disponible en la documentación:**
+
+<img src="../Documentacion/Imagenes/5590086a-6256-4f7c-a3a5-dd7c5bc3377b.png" alt="Arquitectura general de n8n, clasificador Python, Redmine y PostgreSQL" width="900">
+
+La imagen corresponde al esquema inicial de componentes; el diagrama anterior describe el despliegue actual e incluye OpenAI, Streamlit y la categoría final de Python.
+
 Ver [arquitectura](docs/arquitectura.md), [optimización](docs/optimizacion.md) y [flujo n8n](../workflows/README.md).
 
 ## Resultados
@@ -92,6 +117,26 @@ El diagnóstico histórico del modelo entrenado con 280 correos sobre 20 reserva
 - Git y Python **3.10**, la versión utilizada por las imágenes Docker; entorno virtual y dependencias de `requirements.txt`.
 - CPU; **no requiere GPU**. No se han establecido mínimos medidos de RAM y disco.
 - Docker con Compose para ejecutar los contenedores. Para el flujo completo se necesitan además Redmine, n8n y credenciales IMAP, SMTP y OpenAI.
+
+### Versiones utilizadas en producción
+
+Versiones verificadas en los contenedores y en el servidor:
+
+| Componente | Versión |
+|---|---|
+| Python — portal y API | 3.10.22 |
+| Streamlit | 1.41.1 |
+| scikit-learn | 1.5.2 |
+| pandas / NumPy | 2.2.3 / 1.26.4 |
+| Altair | 5.5.0 |
+| FastAPI / Uvicorn | 0.115.6 / 0.34.0 |
+| n8n | 2.40.5 |
+| Redmine | 6.1.4 |
+| PostgreSQL | 16.15 |
+| Docker Engine / Compose | 29.8.1 / 5.5.1 |
+| Portainer CE | 2.45.1 |
+
+El agente usa el identificador de modelo **`gpt-4.1-mini`** de OpenAI. Es una configuración del proveedor externo, no una dependencia Python instalada. Los paquetes del clasificador se fijan en `requirements.txt` y en los archivos de dependencias de `deploy/`.
 
 ### Instalación paso a paso en Linux
 
@@ -144,6 +189,21 @@ docker compose up -d --build --wait
 El portal queda en el puerto 8501 y conserva el historial en un volumen SQLite. Para desplegar la automatización completa, seguir la [guía de integración](../workflows/GUIA_CONFIGURACION.md) y el [despliegue de la API](deploy/README.md); configurar las credenciales antes de activar el flujo, que puede crear tickets y enviar avisos.
 
 ## Interfaz de usuario
+
+### URL de los servicios desplegados
+
+Servidor de producción: **185.208.207.203**.
+
+| Servicio | URL | Uso |
+|---|---|---|
+| Portal de clasificación | [http://185.208.207.203:8501](http://185.208.207.203:8501) | Probar modelos, consultar resultados e historial |
+| n8n | [http://185.208.207.203:5678](http://185.208.207.203:5678) | Administrar los flujos y consultar ejecuciones |
+| Redmine | [http://185.208.207.203:3000](http://185.208.207.203:3000) | Consultar y gestionar tickets |
+| Portainer | [https://185.208.207.203:9443](https://185.208.207.203:9443) | Administración de contenedores con cuenta autorizada |
+
+[Flujo principal de correo en n8n](http://185.208.207.203:5678/workflow/opxBwpGpRDrbQeHn). n8n, Redmine y Portainer requieren sus respectivas cuentas; no se incluyen contraseñas en el repositorio.
+
+**Servicios entre contenedores:** FastAPI recibe `POST http://clasificador-python:8000/predict` y expone `GET /health`, sin publicar el puerto 8000 del host. PostgreSQL se utiliza mediante `postgres:5432` y no tiene interfaz web propia.
 
 ### Descripción y acceso
 
