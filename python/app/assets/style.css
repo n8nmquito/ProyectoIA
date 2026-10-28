@@ -219,3 +219,52 @@ button:focus-visible { outline: 2px solid #86baff; outline-offset: 3px; }
   .st-key-preferences [data-testid="stHorizontalBlock"] { flex-wrap: wrap; gap: 8px; }
   .st-key-preferences [data-testid="stColumn"] { min-width: 100% !important; }
 }
+
+/* Guided empty state for the result panel. */
+.empty-result {
+  min-height: 450px; padding: 28px 8px 20px; box-sizing: border-box;
+  gap: 0;
+}
+.empty-illustration { position: relative; margin: 0 0 25px; }
+.empty-result .empty-icon {
+  width: 100px; height: 100px; margin: 0;
+  border: 1px solid #3c5779; border-radius: 28px;
+  background: linear-gradient(145deg, #263d5b, #1b293c);
+  box-shadow: 0 12px 35px #07101e30, inset 0 1px 0 #ffffff0b;
+}
+.empty-result .empty-icon svg { width: 44px; height: 48px; color: #9fc8ff; }
+.empty-spark {
+  position: absolute; right: -9px; top: -9px;
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; background: #213b59;
+  border: 3px solid #171f28; border-radius: 50%;
+}
+.empty-spark svg { width: 19px; height: 19px; color: #b0d2ff; }
+.empty-result .empty-title {
+  font-size: 23px; font-weight: 650; color: #edf4ff;
+  letter-spacing: -.35px; margin: 0 0 10px; line-height: 1.35;
+}
+.empty-result .empty-description {
+  font-size: 15px; line-height: 1.75; color: #aebed2;
+  max-width: 325px; margin: 0 auto;
+}
+.empty-features {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 17px; margin: 27px 0 25px; width: 100%;
+}
+.empty-feature {
+  display: flex; align-items: center; flex-direction: column;
+  gap: 8px; color: #a8bdd6; font-size: 12px;
+}
+.empty-feature svg { width: 21px; height: 21px; color: #739bc9; }
+.empty-result .empty-tip {
+  max-width: 300px; margin: 0 auto; padding-top: 20px;
+  border-top: 1px solid #2f4054; font-size: 13px;
+  color: #98abc2; line-height: 1.7;
+}
+.empty-tip strong { color: #b9d6ff; font-weight: 600; font-size: inherit; }
+@media (max-width: 760px) {
+  .empty-result { min-height: 390px; padding: 24px 0 18px; }
+  .empty-result .empty-title { font-size: 21px; }
+  .empty-features { gap: 15px; }
+}

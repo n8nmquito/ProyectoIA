@@ -14,7 +14,7 @@ if str(ROOT) in sys.path:
     sys.path.remove(str(ROOT))
 sys.path.insert(0, str(ROOT))
 
-from app.presentation import apply_style, heading  # noqa: E402
+from app.presentation import apply_style, empty_result, heading  # noqa: E402
 from app.session_results import (  # noqa: E402
     HISTORY_LIMIT, csv_bytes, remember_prediction,
 )
@@ -475,8 +475,7 @@ def main():
                                    csv_bytes([st.session_state.last_entry]),
                                    "prediccion.csv", "text/csv", key="download_prediction")
             elif not submitted:
-                st.info(tr("Completa los campos y pulsa Clasificar, o usa Prueba con ejemplo.",
-                           "Fill in the fields and click Classify, or try an example."))
+                empty_result(st.session_state.language)
     with about_tab:
         render_about(size, config["confidence_threshold"])
     with history_tab:

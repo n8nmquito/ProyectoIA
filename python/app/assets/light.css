@@ -77,3 +77,17 @@ label[data-baseweb="radio"]:last-of-type:has(input:checked) {
 label[data-baseweb="radio"]:last-of-type:has(input:checked) p {
   color: #82580a;
 }
+
+.stApp .empty-result .empty-icon {
+  background: linear-gradient(145deg, #e7f0ff, #f3f7ff);
+  border-color: #c3d6f0; box-shadow: 0 10px 28px #2a54871a;
+}
+.stApp .empty-result .empty-icon svg { color: #3b79cb; }
+.stApp .empty-spark { background: #dceaff; border-color: #ffffff; }
+.stApp .empty-spark svg { color: #2868be; }
+.stApp .empty-result .empty-title { color: #203854; }
+.stApp .empty-result .empty-description { color: #526b87; }
+.stApp .empty-feature { color: #49627d; }
+.stApp .empty-feature svg { color: #4e7eb9; }
+.stApp .empty-result .empty-tip { border-color: #d4e0ee; color: #536b86; }
+.stApp .empty-tip strong { color: #1d5fae; }
