@@ -936,7 +936,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://clasificador-python:8000/predict",
+        "url": "http://nexpapi:8000/predict",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,

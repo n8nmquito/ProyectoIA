@@ -1,10 +1,10 @@
 # Usar junto con docker-compose.yml desde la raíz del proyecto.
 services:
-  clasificador-python:
+  nexpapi:
     build:
-      context: ./python
-      dockerfile: deploy/Dockerfile
-    env_file: ./.secrets/clasificador.env
+      context: .
+      dockerfile: nexpapi/Dockerfile
+    env_file: ./nexpapi/.env
     restart: unless-stopped
     networks: [automatizacion]
     healthcheck:

@@ -5,7 +5,7 @@
 | Nodo o servicio | Configuración |
 |---|---|
 | Leer buzón IMAP | Credencial del buzón, host/puerto/TLS según proveedor, INBOX y formato Resolved |
-| Consultar API - Modelo 300 | POST http://clasificador-python:8000/predict; Header Auth con Name X-API-Key |
+| Consultar API - Modelo 300 | POST http://nexpapi:8000/predict; Header Auth con Name X-API-Key |
 | OpenAI - Cargar API key | Credencial OpenAI del agente, sin escribirla en código |
 | Nodos HTTP y herramientas Redmine | Header Auth con Name X-Redmine-API-Key y clave real de Redmine |
 | Avisos de correo | Credencial SMTP y remitente autorizado |

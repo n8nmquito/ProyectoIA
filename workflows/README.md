@@ -44,7 +44,7 @@ No importar una copia sobre un flujo activo sin guardar antes su versión.
 Ver [configuración](GUIA_CONFIGURACION.md), [proyecto Python](../python/README.md)
 y [arquitectura completa](../python/docs/arquitectura.md).
 
-La API interna usa http://clasificador-python:8000/predict con X-API-Key en una
+La API interna usa http://nexpapi:8000/predict con X-API-Key en una
 credencial Header Auth de n8n. La clave permanece en .env del servicio y en la
 credencial cifrada; no debe copiarse en documentos, exportaciones ni capturas.
 

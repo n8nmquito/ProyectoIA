@@ -1,0 +1,14 @@
+**
+!python/
+!python/src/
+!python/src/**
+!python/config.yaml
+!python/models/
+!python/models/modelo_clasificador_300.pkl
+!nexpapi/
+!nexpapi/app.py
+!nexpapi/__init__.py
+!nexpapi/requirements.txt
+!nexpapi/models/
+!nexpapi/models/modelo_clasificador_300.pkl
+**/__pycache__/

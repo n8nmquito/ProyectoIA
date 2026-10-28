@@ -197,7 +197,7 @@ Después de generar los modelos, desde la carpeta `python`:
 docker compose up -d --build --wait
 ```
 
-El portal queda en el puerto 8501 y conserva el historial en un volumen SQLite. Para desplegar la automatización completa, seguir la [guía de integración](../workflows/GUIA_CONFIGURACION.md) y el [despliegue de la API](deploy/README.md); configurar las credenciales antes de activar el flujo, que puede crear tickets y enviar avisos.
+El portal queda en el puerto 8501 y conserva el historial en un volumen SQLite. Para desplegar la automatización completa, seguir la [guía de integración](../workflows/GUIA_CONFIGURACION.md) y el [despliegue de la API](../nexpapi/README.md); configurar las credenciales antes de activar el flujo, que puede crear tickets y enviar avisos.
 
 ## 8. Interfaz de usuario
 
@@ -212,7 +212,7 @@ Servidor de producción: **185.208.207.203**.
 | Redmine | [http://185.208.207.203:3000](http://185.208.207.203:3000) | Consultar y gestionar tickets |
 | Portainer | [https://185.208.207.203:9443](https://185.208.207.203:9443) | Administración de contenedores con cuenta autorizada |
 
-**Servicios entre contenedores:** n8n limpia el texto con un nodo de código local; FastAPI recibe `POST http://clasificador-python:8000/predict` y expone `GET /health`, sin publicar el puerto 8000 del host. PostgreSQL se utiliza mediante `postgres:5432` y no tiene interfaz web propia.
+**Servicios entre contenedores:** n8n limpia el texto con un nodo de código local; FastAPI recibe `POST http://nexpapi:8000/predict` y expone `GET /health`, sin publicar el puerto 8000 del host. PostgreSQL se utiliza mediante `postgres:5432` y no tiene interfaz web propia.
 
 ### Descripción y acceso
 
@@ -297,7 +297,8 @@ Mensaje de error al intentar clasificar sin completar el título.
 | `python/tests/` | Pruebas automatizadas |
 | `python/notebooks/` | Análisis y experimentos reproducibles |
 | `python/docs/` | Planificación, datos, arquitectura, optimización, ética y manual |
-| `python/deploy/` | Dockerfiles, dependencias y operación del despliegue |
+| `python/deploy/` | Dockerfile y dependencias del portal Streamlit |
+| `nexpapi/` | API interna de clasificación, Dockerfile, dependencias y Compose |
 | `python/workshop/` | Material de referencia del taller |
 | `workflows/` | Flujos n8n, validaciones JavaScript y pruebas |
 | `n8n/`, `redmine/`, `postgres/` | Configuración de n8n, Redmine e inicialización de bases, respectivamente |

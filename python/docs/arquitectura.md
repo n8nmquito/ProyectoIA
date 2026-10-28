@@ -176,16 +176,15 @@ flowchart TD
     K --> E[Preparar confirmación al remitente]
 ```
 
-La API está en `/mquito/mquito-ticket/clasificador-python`, conectada a la red
+La API está en `/mquito/mquito-ticket/nexpapi`, conectada a la red
 Docker `correo-tickets_automatizacion`. Su dirección desde n8n es
-`http://clasificador-python:8000/predict`. No tiene puerto publicado en Internet.
+`http://nexpapi:8000/predict`. No tiene puerto publicado en Internet.
 Exige `X-API-Key`, configurada fuera del código. Carga una vez al iniciar el
 archivo `modelo_clasificador_300.pkl` y comprueba sus 300 muestras.
 
 Python recibe solo título y cuerpo. Devuelve categoría, cuatro probabilidades,
 confianza y señales de revisión. Si no responde o su respuesta no es válida,
-el adaptador conserva el correo y registra clasificación no disponible; continúa
-el agente existente. Python no llama a OpenAI y no concede permisos a usuarios.
+el flujo deriva a revisión sin crear un ticket con una categoría de respaldo. Python no llama a OpenAI y no concede permisos a usuarios.
 
 El prompt del agente recibe la categoría final Python, asunto, cuerpo e inventario de adjuntos. Se pueden
 enviar PNG/JPEG/WebP/PDF: hasta 4 archivos, 4 MiB por archivo y 8 MiB acumulados.

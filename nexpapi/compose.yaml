@@ -1,0 +1,41 @@
+name: mquito-nexpapi
+
+services:
+  nexpapi:
+    container_name: nexpapi
+    build:
+      context: ..
+      dockerfile: nexpapi/Dockerfile
+      args:
+        MODEL_DIR: ${NEXPAPI_MODEL_DIR:-python/models}
+    restart: unless-stopped
+    env_file: .env
+    networks: [automatizacion]
+    mem_limit: 512m
+    cpus: 1.0
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).close()"
+      interval: 20s
+      timeout: 6s
+      retries: 5
+      start_period: 30s
+
+networks:
+  automatizacion:
+    external: true
+    name: ${NEXPAPI_NETWORK:-correo-tickets_automatizacion}
