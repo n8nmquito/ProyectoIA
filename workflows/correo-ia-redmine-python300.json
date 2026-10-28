@@ -73,7 +73,7 @@
         },
         "responsesApiEnabled": false,
         "options": {
-          "maxTokens": 1800,
+          "maxTokens": 4000,
           "temperature": 0.1,
           "timeout": 60000,
           "maxRetries": 2

@@ -9,7 +9,7 @@ Usar [correo-ia-redmine-python300.json](correo-ia-redmine-python300.json), la pl
 | Leer buzón IMAP | Credencial del buzón, host/puerto/TLS del proveedor, INBOX y formato Resolved |
 | Limpiar firma y datos | Nodo Code JavaScript local; no requiere servicio ni credencial adicional |
 | Consultar API - Modelo 300 | `POST http://nexpapi:8000/predict`; Header Auth con nombre `X-API-Key` |
-| Agente OpenAI | Credencial del proveedor y modelo `gpt-4.1-mini` |
+| Agente OpenAI | Credencial del proveedor, modelo `gpt-4.1-mini` y límite de salida de 4.000 tokens |
 | Herramientas y nodos Redmine | Header Auth con nombre `X-Redmine-API-Key` |
 | Avisos de correo | Credencial SMTP y remitente autorizado |
 
