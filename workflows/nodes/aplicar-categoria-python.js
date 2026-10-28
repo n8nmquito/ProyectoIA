@@ -1,5 +1,5 @@
 // The normalized API result is authoritative, never the agent's category.
-const ml = $('Clasificar correo - Modelo 300').item.json.clasificacion_ml;
+const ml = $('Consultar API - Modelo 300').item.json;
 const classes = ['accesos', 'aplicaciones', 'infraestructura', 'otros'];
 if (!ml || ml.estado !== 'clasificado' || !classes.includes(ml.categoria)
     || ml.muestras_entrenamiento !== 300

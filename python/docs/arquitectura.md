@@ -261,9 +261,11 @@ de revisión. No reutiliza una ficha fija del modelo de 300 para otras versiones
 
 ## Limpieza previa de correo
 
-`src/email_privacy.py` implementa `/sanitize`, protegido por la misma clave
-de la API. n8n lo invoca después de normalizar, valida la respuesta y usa
-el título/cuerpo limpios tanto en `/predict` como en el prompt del agente.
+El nodo de código **Limpiar firma y datos** ejecuta
+`workflows/nodes/limpiar-correo.js` localmente en n8n después de normalizar.
+El título/cuerpo limpios se envían a `/predict` y al prompt del agente, sin
+endpoint de limpieza. Un nodo Merge une la respuesta de la API con el correo
+limpio y sus adjuntos; el selector valida la predicción antes del agente.
 La detección usa firmas convencionales y patrones de datos sensibles; no
 reconoce necesariamente todos los nombres libres ni anonimiza adjuntos.
 El correo original se conserva en el flujo y en el ticket de Redmine.

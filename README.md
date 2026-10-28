@@ -212,7 +212,7 @@ Servidor de producción: **185.208.207.203**.
 | Redmine | [http://185.208.207.203:3000](http://185.208.207.203:3000) | Consultar y gestionar tickets |
 | Portainer | [https://185.208.207.203:9443](https://185.208.207.203:9443) | Administración de contenedores con cuenta autorizada |
 
-**Servicios entre contenedores:** FastAPI recibe `POST /sanitize` antes de `POST http://clasificador-python:8000/predict` y expone `GET /health`, sin publicar el puerto 8000 del host. PostgreSQL se utiliza mediante `postgres:5432` y no tiene interfaz web propia.
+**Servicios entre contenedores:** n8n limpia el texto con un nodo de código local; FastAPI recibe `POST http://clasificador-python:8000/predict` y expone `GET /health`, sin publicar el puerto 8000 del host. PostgreSQL se utiliza mediante `postgres:5432` y no tiene interfaz web propia.
 
 ### Descripción y acceso
 
@@ -305,7 +305,7 @@ Mensaje de error al intentar clasificar sin completar el título.
 
 ## 10. Consideraciones éticas
 
-- **Privacidad:** usamos correos simulados. El nodo **Limpiar firma y datos - Python** elimina firmas habituales y redacta datos sensibles del título y cuerpo antes de enviarlos al clasificador Python y a OpenAI. La limpieza es parcial y no anonimiza los adjuntos.
+- **Privacidad:** usamos correos simulados. El nodo **Limpiar firma y datos** elimina firmas habituales y redacta datos sensibles del título y cuerpo antes de enviarlos al clasificador Python y a OpenAI. La limpieza es parcial y no anonimiza los adjuntos.
 - **Sesgos y límites:** los datos están en español y cubren escenarios limitados. El modelo puede fallar con otros idiomas o casos diferentes; no se evaluó equidad entre grupos demográficos.
 - **Transparencia:** mostramos categoría, confianza y avisos de revisión. Una confianza alta no garantiza un acierto.
 - **Responsabilidad:** el equipo debe supervisar los resultados y corregir errores que puedan retrasar o desviar solicitudes.

@@ -83,12 +83,13 @@ anterior; la política nueva se aplica a las siguientes ejecuciones.
 
 ## Limpieza de texto antes del clasificador
 
-El nodo **Limpiar firma y datos - Python** llama a `POST /sanitize` usando la
-misma credencial `X-API-Key` del clasificador. El código vive en
-`python/src/email_privacy.py`; no requiere instalar runners Python en n8n.
-**Usar correo limpio - Python** valida la respuesta y pasa solo título y cuerpo
-limpios a `/predict`; ese mismo texto llega al agente. Si falla la limpieza,
-la rama deriva a revisión sin enviar el texto original como respaldo.
+El nodo de código **Limpiar firma y datos** ejecuta JavaScript dentro de n8n,
+sin llamadas HTTP para limpiar el correo. Su código está en
+`nodes/limpiar-correo.js`. Envía asunto/cuerpo limpios a `/predict` y al agente;
+si no queda texto útil, deriva a revisión sin usar el original como respaldo.
+**Unir correo y predicción** conserva el texto y los adjuntos junto con la
+respuesta de la API. El selector de adjuntos valida esa respuesta antes del
+agente; no existe un segundo nodo que vuelva a clasificar el correo.
 
 Se quitan firmas habituales, bloques de firma HTML y avisos de confidencialidad.
 Se redactan correos, teléfonos/números largos, IP, enlaces, credenciales y

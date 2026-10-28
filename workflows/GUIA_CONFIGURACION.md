@@ -21,17 +21,16 @@ servicio. Ver python/deploy/DESPLIEGUE_REALIZADO.md para operación y reversión
 
 ## Entrada y salida de Python
 
-Antes de `/predict`, el nodo Limpiar firma y datos - Python envía título y
-cuerpo a `/sanitize`. Ambos endpoints requieren la misma clave. El nodo
-siguiente exige el texto limpio y los contadores de limpieza; no permite
-continuar con los originales si hay error. Los originales y adjuntos se
-conservan para Redmine. Las reglas de texto no anonimizan archivos adjuntos.
+Antes de `/predict`, el nodo de código Limpiar firma y datos limpia título y
+cuerpo localmente en n8n. No hay endpoint de limpieza. Si no queda texto útil,
+deriva a revisión. Los originales y adjuntos se conservan para Redmine; las
+reglas de texto no anonimizan archivos adjuntos.
 
 
 El cuerpo JSON del nodo HTTP contiene solo titulo y cuerpo del correo
 normalizado. La respuesta debe identificar modelo_clasificador_300 y 300 muestras,
-además de categoría, confianza y probabilidades. El adaptador comprueba esos
-campos y recupera los adjuntos originales. La categoría válida es definitiva.
+además de categoría, confianza y probabilidades. El selector de adjuntos valida esos
+campos después de unir la predicción con el correo limpio. La categoría válida es definitiva.
 Si la API falla, el agente puede decidir la relevancia del correo, pero el
 nodo Aplicar categoría Python impide crear un ticket sin categoría Python
 válida y deriva a revisión; no adopta la categoría del agente como respaldo.

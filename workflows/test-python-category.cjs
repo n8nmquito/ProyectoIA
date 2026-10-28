@@ -9,25 +9,13 @@ function run(name, input, previous) {
     $json: input, $: name => ({ item: { json: previous[name] } }),
   }, { timeout: 1000 }).json;
 }
-const originalEmail = { asunto: 'Error private@example.test',
-  cuerpo: 'No guarda. Firma privada', remitente: 'requester@example.test',
-  message_id: 'fixture-privacy' };
-const cleanInput = { titulo: 'Error [CORREO]', cuerpo: 'No guarda.',
-  limpieza: { version: 1, firma_eliminada: true, datos_redactados: { correo: 1 } } };
-const cleanEmail = run('Usar correo limpio - Python', cleanInput, {
-  'Normalizar correo': originalEmail,
-});
-assert.equal(cleanEmail.cuerpo, 'No guarda.');
-assert.equal(cleanEmail.asunto, 'Error [CORREO]');
-assert.equal(cleanEmail.remitente, originalEmail.remitente);
-assert.equal(originalEmail.cuerpo, 'No guarda. Firma privada');
-assert.throws(() => run('Usar correo limpio - Python', { error: 'API caída' }, {
-  'Normalizar correo': originalEmail,
-}), /No se envía el texto original/);
-assert.equal(workflow.connections['Normalizar correo'].main[0][0].node, 'Limpiar firma y datos - Python');
-assert.equal(workflow.connections['Usar correo limpio - Python'].main[0][0].node, 'Consultar API - Modelo 300');
-assert.match(nodes['Limpiar firma y datos - Python'].parameters.url, /\/sanitize$/);
-assert.match(nodes['Clasificar correo - Modelo 300'].parameters.jsCode, /Usar correo limpio - Python/);
+assert.equal(nodes['Limpiar firma y datos'].type, 'n8n-nodes-base.code');
+assert.equal(nodes['Clasificar correo - Modelo 300'], undefined);
+assert.equal(nodes['Usar correo limpio - Python'], undefined);
+assert.equal(workflow.connections['Normalizar correo'].main[0][0].node, 'Limpiar firma y datos');
+assert.equal(workflow.connections['Consultar API - Modelo 300'].main[0][0].node, 'Unir correo y predicción');
+assert.equal(workflow.connections['Unir correo y predicción'].main[0][0].node, 'Seleccionar adjuntos para IA');
+assert.match(nodes['Seleccionar adjuntos para IA'].parameters.jsCode, /clasificación válida/);
 const ml = { categoria: 'otros', confianza: 0.9986, requiere_revision: false,
   muestras_entrenamiento: 300, modelo_version: 'modelo_clasificador_300',
   datos_entrenamiento: 'correos_300.json', estado: 'clasificado' };
@@ -36,7 +24,7 @@ const agent = { categoria: 'aplicaciones', requiere_revision: false,
   membership_id: 110, role_id: 5, motivo_asignacion: 'Aplicaciones' };
 function apply(prediction = ml, analysis = agent) {
   return run('Aplicar categoría Python', { output: analysis }, {
-    'Clasificar correo - Modelo 300': { clasificacion_ml: prediction },
+    'Consultar API - Modelo 300': prediction,
   });
 }
 const applied = apply();

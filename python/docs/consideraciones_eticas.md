@@ -47,7 +47,7 @@ informes o paquetes debe revisarse que no reproduzcan registros no autorizados.
 | Resultados locales | Texto y predicciones de consola; evitar compartir información sensible |
 
 Python reemplaza ciertos emails, enlaces, IP, archivos y números largos al
-clasificar. **El flujo ahora ejecuta además `/sanitize` antes de clasificar y envía al agente el título/cuerpo limpiados.** La redacción por patrones no garantiza anonimización completa; los adjuntos y las respuestas de herramientas pueden contener datos personales.
+clasificar. **Un nodo de código de n8n limpia firmas y datos sensibles localmente antes de enviar el título/cuerpo al clasificador y al agente.** La redacción por patrones no garantiza anonimización completa; los adjuntos y las respuestas de herramientas pueden contener datos personales.
 El filtro previo usa reglas para firmas, contactos, credenciales y campos
 etiquetados; puede omitir nombres libres o datos con formatos no previstos.
 Seleccionar adjuntos por tamaño/formato tampoco constituye anonimización.

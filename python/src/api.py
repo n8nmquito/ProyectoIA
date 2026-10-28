@@ -10,7 +10,6 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.email_privacy import sanitize_ticket
 from src.model import load_model, predict_ticket
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -98,14 +97,6 @@ def create_app(model_path=None, api_key=None):
             "datos_entrenamiento": "correos_300.json",
             "modo": "categoria_final_ticket",
         }
-
-    @app.post("/sanitize", dependencies=[Depends(authenticate)])
-    def sanitize(ticket: Ticket):
-        """Clean text before inference without storing originals or secrets."""
-        try:
-            return sanitize_ticket(ticket.titulo, ticket.cuerpo)
-        except ValueError as exc:
-            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     return app
 

@@ -344,17 +344,21 @@ La revisión estricta de `src` y `app` usa `pyproject.toml`: Ruff comprueba esti
 
 Se verifican firmas de texto/HTML, correos, números de contacto, IP, enlaces,
 credenciales y campos personales etiquetados; se conserva el contexto de
-soporte. `/sanitize` exige autenticación y sus errores no repiten el contenido
-privado recibido. Una respuesta inválida no permite usar los originales como
-respaldo hacia el clasificador o el agente.
+soporte. La limpieza se ejecuta localmente en el nodo de código de n8n, sin
+endpoint de limpieza. Si no queda texto útil, el flujo deriva a revisión sin
+enviar el original al clasificador ni al agente.
 
-La ejecución diagnóstica n8n **28834** usó exclusivamente un correo ficticio en
-un flujo inactivo con los nodos de creación Redmine y SMTP sustituidos por
-nodos de comprobación. Pasó limpieza, clasificación, agente y validación de
-asignación; obtuvo Otros/Soporte General. No creó ticket ni envió correo.
-El flujo diagnóstico se archivó; el flujo principal quedó publicado y activo.
-La comprobación de IMAP fue de solo lectura: conectaba correctamente y los
-UID no leídos no superaban el cursor 20 ya procesado; no se reinició el cursor.
+La ejecución diagnóstica n8n **28842** verificó dos correos ficticios con
+adjuntos: limpieza local, consulta `/predict`, unión del correo con la
+predicción y selección de adjuntos. No usó IMAP, OpenAI, creación de tickets
+ni SMTP. Las comprobaciones exigieron ausencia de los datos sensibles de
+prueba y conservación de los adjuntos. El diagnóstico terminó correctamente
+y se archivó; el flujo principal quedó publicado y activo con 44 nodos.
+
+Tras retirar el endpoint de limpieza, pasaron **91 pruebas Python** en el
+servidor y las suites JavaScript de limpieza, categoría final, adjuntos,
+asignación y flujo. La API desplegada responde 200 en `/health` y `/predict`;
+el endpoint retirado devuelve 404.
 
 La limpieza no reentrena el modelo ni constituye una medición nueva de accuracy
 o F1. Los resultados registrados anteriormente no evalúan por sí solos los
