@@ -1,195 +1,93 @@
-# Consideraciones éticas y uso responsable
+# Consideraciones éticas
 
-El sistema incluye el clasificador Python de 300 correos, consola/Streamlit,
-una API en Docker y un flujo n8n con OpenAI y Redmine. Estas medidas describen
-la versión entregada; las mejoras propuestas se distinguen de lo implementado.
+## 1. Análisis de sesgos
 
-## 1. Sesgos del dataset
+### ¿El dataset tiene sesgos demográficos, culturales o de otro tipo?
 
-Los 300 correos son simulados, en español y de un dominio limitado. Los 100
-iniciales fueron aportados por el usuario y los 200 posteriores se elaboraron
-como ejemplos ficticios para ampliar el corpus. El estilo puede repetirse por categoría y facilitar las
-métricas sin representar la variedad de mensajes reales. Hay 70 accesos,
-90 aplicaciones, 70 infraestructura y 70 otros.
+Se utilizan conjuntos de **10, 100, 200 y 300 correos simulados en español**. Pueden tener sesgos de idioma, estilo de redacción y situaciones representadas. El conjunto de 300 incluye 90 correos de aplicaciones y 70 de cada categoría restante. No contiene atributos demográficos para analizar sesgos entre grupos de personas.
 
-Pueden perjudicarse usuarios con abreviaturas, redacción breve, variantes del
-idioma o problemas poco representados. Los ejemplos ya inspeccionados orientaron
-refuerzos posteriores: no son una prueba ciega de generalización. La asociación
-del término «referencia omitida» con aplicaciones es una posible señal espuria;
-no se ha demostrado su influencia causal. Se conservan los cuatro tamaños y los
-errores para revisión; falta validación diversa con personas del área.
+### ¿Cómo podrían afectar estos sesgos las predicciones?
+
+El modelo puede asociar palabras o estilos repetidos con una categoría y equivocarse ante mensajes reales, abreviaturas, variantes del español u otros idiomas. Las métricas sobre datos simulados no garantizan el mismo rendimiento en producción.
+
+### ¿Qué grupos podrían ser perjudicados?
+
+Solicitantes que escriben en otros idiomas, usan términos poco frecuentes o presentan problemas escasamente representados. Una clasificación incorrecta puede derivar su solicitud al equipo equivocado y retrasar su atención.
 
 ## 2. Equidad y fairness
 
-No hay atributos demográficos ni una muestra suficiente para medir equidad
-entre grupos de personas. F1 macro y métricas por categoría ayudan a observar
-el desempeño entre tipos de ticket, pero no demuestran fairness demográfica.
-Se exploró class_weight y el prompt indica no descartar soporte por faltas de
-ortografía o mensajes incompletos. Son mitigaciones limitadas, no garantías.
-No se debe denegar atención por una categoría o confianza automática.
+### ¿El modelo trata a todos los grupos de forma equitativa?
 
-## 3. Privacidad, servicios externos y redistribución
+No se ha demostrado equidad entre grupos de personas. Aplicar el mismo modelo a todos los correos no garantiza resultados equitativos.
 
-La responsable del proyecto indicó incluir en Git el corpus maestro y los
-cuatro datasets de entrenamiento. La licencia MIT del código no se extiende
-automáticamente al corpus ni sus derivados. El .gitignore mantiene excluidos
-las particiones procesadas, la hoja de revisión y los modelos; también
-resultados que contienen texto original. Antes de publicar notebooks, capturas,
-informes o paquetes debe revisarse que no reproduzcan registros no autorizados.
+### Métricas de fairness evaluadas (si aplica)
 
-| Destino | Información que puede recibir |
-|---|---|
-| API Python dentro de Docker | Título y cuerpo; no adjuntos ni remitente como campos separados |
-| OpenAI, a través del agente n8n | Asunto, cuerpo, inventario/nombres de adjuntos y PNG/JPEG/WebP/PDF seleccionados |
-| OpenAI mediante herramientas | Respuestas de Redmine sobre proyectos, miembros, nombres, roles y categorías |
-| Redmine | Texto original conservado, análisis, remitente, asignación y adjuntos originales |
-| Historial de n8n y backups | Entradas, salidas y respuestas de herramientas según la configuración de guardado |
-| Resultados locales | Texto y predicciones de consola; evitar compartir información sensible |
+No se calcularon métricas de fairness demográfica porque no se dispone de atributos ni muestras adecuados. Se utilizan **F1 macro, precisión, recall y F1 por categoría** para observar diferencias entre tipos de solicitud; estas métricas no demuestran equidad demográfica.
 
-Python reemplaza ciertos emails, enlaces, IP, archivos y números largos al
-clasificar. **Un nodo de código de n8n limpia firmas y datos sensibles localmente antes de enviar el título/cuerpo al clasificador y al agente.** La redacción por patrones no garantiza anonimización completa; los adjuntos y las respuestas de herramientas pueden contener datos personales.
-El filtro previo usa reglas para firmas, contactos, credenciales y campos
-etiquetados; puede omitir nombres libres o datos con formatos no previstos.
-Seleccionar adjuntos por tamaño/formato tampoco constituye anonimización.
-Los originales siguen almacenados en n8n y Redmine.
+### Estrategias implementadas para mitigar inequidades
 
-La API requiere X-API-Key, no tiene puerto publicado y se comunica dentro de la
-red Docker. Las credenciales permanecen fuera del código y de las exportaciones.
-Los accesos públicos actualmente documentados para n8n y Redmine son HTTP; no
-se afirma que exista cifrado TLS externo. No se debe introducir información real
-confidencial hasta revisar transporte, permisos, retención, acceso a ejecuciones
-y condiciones del proveedor. No se ha validado una política de eliminación ni
-una auditoría de privacidad del sistema completo.
+Se comparan resultados por categoría y se marcan para revisión predicciones con confianza inferior al **60 %** o sin vocabulario conocido. El prompt del agente indica no descartar solicitudes por faltas de ortografía o información incompleta. Se exploró la ponderación de clases, aunque la configuración final no la utiliza. Las señales de revisión no obligan por sí solas a una intervención humana.
 
-No se ha demostrado cumplimiento de GDPR, CCPA u otras regulaciones. No se
-certifica cumplimiento por tener una API privada o utilizar datos simulados.
-Deben determinarse las obligaciones aplicables antes de operar con datos reales.
+## 3. Privacidad
+
+### ¿Se utilizan datos personales o sensibles?
+
+Los datasets del proyecto contienen correos simulados. En la operación, los correos, remitentes, adjuntos y consultas a Redmine pueden contener nombres, contactos, credenciales u otra información sensible.
+
+### ¿Cómo se protege la privacidad de los usuarios?
+
+El nodo de código **Limpiar firma y datos** de n8n elimina firmas habituales y redacta datos sensibles del asunto y cuerpo **antes de enviarlos a NexpAPI y al agente OpenAI**. La limpieza usa patrones, puede omitir datos y no anonimiza adjuntos ni respuestas de las herramientas. Los originales se conservan en n8n y Redmine.
+
+NexpAPI exige `X-API-Key` y funciona dentro de la red Docker sin publicar el puerto 8000. Las claves se mantienen fuera de Git. El portal Streamlit procesa con Python sin llamar a OpenAI; su historial persistente guarda textos en SQLite y utiliza un enlace privado, que no equivale a autenticación. Las descargas también contienen textos y requieren cuidado al compartirlas.
+
+### Cumplimiento con regulaciones (GDPR, CCPA, etc.)
+
+No se ha realizado una auditoría ni se ha demostrado cumplimiento de GDPR, CCPA u otras regulaciones. El uso de datos simulados y la limpieza de texto no acreditan ese cumplimiento. Para operar con datos personales debe revisarse la normativa aplicable, el transporte seguro, los permisos, la retención y el tratamiento por proveedores externos.
 
 ## 4. Transparencia y explicabilidad
 
-TF-IDF y SVM calibrada aprenden asociaciones de términos, no comprenden el
-incidente como una persona. Se muestran probabilidades y términos asociados,
-con límites explícitos. SHAP/LIME no están implementados. Los PDP S5 explican
-el rendimiento estimado frente a hiperparámetros, no las palabras de un ticket.
+### ¿El modelo es interpretable?
 
-OpenAI resume y propone prioridad y otros datos del ticket. Python determina
-la categoría final y el código consulta el responsable configurado para ella.
-El agente conoce esa categoría; su coincidencia no es una comparación
-independiente ni demuestra exactitud. Baja confianza o desacuerdo requieren
-revisión. Si la API Python no devuelve una categoría válida, no se crea ticket.
-El esquema valida formato y catálogos, no la veracidad completa del resumen.
+El clasificador utiliza **TF-IDF y SVM lineal calibrada**. Sus coeficientes permiten inspeccionar términos asociados a cada categoría; no representan una comprensión humana del correo ni una explicación completa de cada predicción.
+
+### ¿Los usuarios entienden cómo funciona?
+
+La sección **Acerca de** del portal describe el modelo, sus parámetros, métricas disponibles y limitaciones. Los resultados muestran categoría, confianza, probabilidades y avisos de revisión. Python determina la categoría final; OpenAI prepara el análisis y propone prioridad, tipo y proyecto. Una confianza alta no garantiza un acierto.
+
+### Técnicas de explicabilidad implementadas (SHAP, LIME, etc.)
+
+Se inspeccionan coeficientes y términos asociados a las categorías mediante `top_terms`. **SHAP y LIME no están implementados**. Los gráficos de sensibilidad de hiperparámetros analizan el rendimiento, no explican individualmente cada correo.
 
 ## 5. Impacto social
 
-El beneficio esperado es reducir tareas de lectura y clasificación de soporte.
-No se han medido ahorros de tiempo ni satisfacción. Los errores pueden retrasar
-la atención, asignar mal una solicitud o crear una falsa sensación de seguridad.
-Las consultas de capacitación, planificación o permisos pueden ser ambiguas.
-Debe conservarse una vía de atención humana y de corrección de tickets.
+### ¿Qué impacto positivo puede tener el proyecto?
 
-Se beneficiarían operadores de mesa de ayuda, personal TI y solicitantes si la
-clasificación facilita la derivación. Podrían verse perjudicados solicitantes
-con problemas poco representados o mensajes ambiguos, así como personas cuyos
-datos aparezcan en correos o adjuntos enviados a servicios externos. Estos
-beneficios y perjuicios son potenciales; no se midió su magnitud.
+Puede reducir tareas repetitivas de lectura, clasificación y registro, uniformar la derivación de solicitudes y facilitar su seguimiento en Redmine. El ahorro de tiempo y la satisfacción de los usuarios todavía no se han medido.
 
-## 6. Responsabilidad, revisión y seguimiento
+### ¿Qué impactos negativos podrían surgir?
 
-El equipo de soporte responde por la atención y corrección del ticket. El
-responsable funcional define categorías; el equipo técnico mantiene datos,
-modelos y flujo. María Quito Castillo es la líder del proyecto y desarrolladora
-full stack, correspondiente a los roles Líder del Proyecto y Desarrollador TI
-del cronograma. Los demás responsables nominales siguen por completar.
+Una categoría, prioridad o asignación incorrecta puede retrasar la atención. También pueden producirse resúmenes inexactos, exposición de información sensible o confianza excesiva en la automatización. El sistema no debe ser el único criterio para cerrar tickets, conceder accesos o resolver incidentes críticos.
 
-| Rol del cronograma | Responsabilidad ante fallos | Integrante |
-|---|---|---|
-| Líder del Proyecto | Coordinar revisión, correcciones y decisión de continuidad | María Quito Castillo |
-| Desarrollador TI | Revisar integración, errores y versiones del código | María Quito Castillo |
-| Data Scientist y Equipo IA | Revisar etiquetas, métricas y propuestas de actualización | &nbsp; |
-| Experto Soporte TI y Soporte TI | Validar categorías y revisar derivaciones incorrectas | &nbsp; |
-| TI y Mesa de Ayuda | Observar la operación y corregir la atención de tickets | &nbsp; |
+### ¿Quiénes se benefician? ¿Quiénes podrían ser perjudicados?
 
-Python marca revisión bajo 60 % o sin vocabulario conocido. **En n8n esa señal
-no bloquea el alta ni obliga a una revisión humana.** Si el agente marca revisión,
-el título lleva [REVISAR] y se aplica prioridad normal. La validación de un
-responsable puede dejar el ticket sin asignar. No existe una aprobación humana
-obligatoria antes de crear cada ticket ni un aprendizaje automático en línea.
+Pueden beneficiarse operadores de mesa de ayuda, técnicos de soporte TI, supervisores y solicitantes. Pueden resultar perjudicados quienes reciban una derivación incorrecta, presenten casos poco representados o tengan datos personales en correos y adjuntos procesados.
 
-Se conservan hashes, versiones, datasets y ejecuciones. No hay monitoreo
-automático de deriva ni una política de auditoría y retención validada. Se
-propone revisar semanalmente errores, bloqueos, discrepancias y casos de baja
-confianza; la frecuencia y responsables deben confirmarse según el servicio.
-Las correcciones deben revisarse antes de incorporarlas a futuros entrenamientos.
+## 6. Responsabilidad
 
-### Plan de monitoreo y actualización propuesto
+### ¿Quién es responsable si el modelo falla?
 
-1. Revisar semanalmente una muestra de tickets y los bloqueos, discrepancias
-   y avisos de revisión; registrar fecha, versión y corrección humana.
-2. Separar problemas de clasificación de fallos de integración y de asignación;
-   escalar los incidentes al rol correspondiente de la tabla anterior.
-3. Crear un conjunto nuevo autorizado y etiquetado por personas para evaluar
-   cambios. Mantener los casos conocidos como regresión, separados del nuevo test.
-4. Comparar F1 macro, métricas por clase y baseline antes de promover una versión.
-   Conservar modelo, datos, hashes y configuración anteriores para poder revertir.
-5. La líder del proyecto coordina la revisión con soporte y desarrollo antes de
-   actualizar. La frecuencia y asignación al resto del equipo deben confirmarse.
+El equipo de soporte debe revisar y corregir la atención de los tickets; el equipo técnico mantiene el modelo y la integración. **María Quito Castillo**, líder del proyecto y desarrolladora full stack, coordina la revisión y las correcciones. Los demás responsables nominales están pendientes de completar.
 
-Este plan no es un monitor automático implementado ni una actividad cuya
-ejecución periódica se haya demostrado.
+### ¿Qué mecanismos de accountability existen?
 
-## 7. Uso dual y controles implementados
+Git registra cambios del código y se conservan configuraciones, hashes de modelos, reportes de evaluación y ejecuciones de n8n para investigar errores. El flujo valida categorías, proyectos, responsables, membresías y roles contra Redmine. Si Python no devuelve una clasificación válida, deriva a revisión sin crear el ticket. No existe aprobación humana obligatoria antes de cada alta ni monitoreo automático de deriva del modelo.
 
-El sistema podría usarse para ocultar reclamos, vigilar trabajadores o automatizar
-decisiones sin revisión. Esos usos no están justificados. El contenido de correos
-y adjuntos se trata como entrada no confiable; el prompt prohíbe seguir órdenes
-que cambien reglas o permisos. Esto reduce el riesgo, pero no prueba inmunidad
-a prompt injection ni evita todas las filtraciones por el agente.
+### Plan de monitoreo y actualización del modelo
 
-Las herramientas del agente consultan Redmine por GET. El código verifica
-proyecto activo, categoría real, membresía y rol asignable. El tipo de ticket se
-resuelve por nombre contra el catálogo habilitado; el agente no impone un ID.
-El flujo sí crea y asigna tickets y puede enviar avisos; no concede permisos,
-revoca cuentas, borra documentos ni resuelve automáticamente el incidente.
-Los archivos pickle deben provenir de fuentes confiables.
+**Plan propuesto; todavía no es una rutina periódica implementada:**
 
-## 8. Casos en los que no debe usarse
-
-No usar como único criterio para seguridad, incidentes críticos, sanciones,
-concesión/revocación de acceso o cierre automático de solicitudes. No asumir
-fiabilidad en otros idiomas, dominios, mensajes incompletos o múltiples problemas.
-No enviar secretos, datos personales innecesarios o adjuntos confidenciales al
-agente sin controles adicionales y autorización.
-
-La evaluación 280/20 no mide de forma independiente el modelo final de 300.
-Los mismos 25 casos se utilizan para regresión;
-sus etiquetas requieren revisión humana. No permiten afirmar ausencia de
-sobreajuste ni generalización a producción. Una confianza alta puede ser errónea.
-
-## Privacidad de la interfaz principal local
-
-La misma interfaz también puede desplegarse con `python/compose.yaml`. En ese
-caso el navegador envía el título y cuerpo al VPS para procesarlos; las
-afirmaciones siguientes sobre procesamiento en esta computadora corresponden
-solo a la ejecución local. El portal Docker publica HTTP en el puerto 8501 y
-no incorpora autenticación. Utilizar ejemplos sin información sensible; las
-credenciales y el corpus no se incluyen en su imagen y los modelos se montan
-en modo solo lectura. Esto no modifica los riesgos del flujo de correo/n8n.
-
-Streamlit carga el modelo en esta computadora y se inicia ligado a 127.0.0.1.
-El título y cuerpo no se envían a OpenAI, n8n ni a la API del servidor desde
-esta aplicación. El historial conserva hasta 50 predicciones con sus textos
-por historial. En Docker se guardan en SQLite sobre un volumen persistente,
-con separación mediante un identificador privado recordado por el navegador
-y presente en el enlace. Quien tenga ese enlace puede ver ese historial: no
-equivale a autenticación de usuarios. El identificador se almacena como hash
-en la base, pero los textos no están cifrados. Borrar historial elimina sus
-filas; el volumen debe incluirse en la política de respaldo y retención. En
-modo local sin almacenamiento configurado solo se conserva memoria. Descargar
-un CSV genera una copia que incluye los textos y requiere el mismo cuidado
-que el correo original. La limpieza no
-es anonimización y deben evitarse datos personales y secretos. Las advertencias
-son recomendaciones: no garantizan supervisión humana ni una categoría correcta.
-
-El flujo separado de correo/n8n sí puede enviar texto
-y adjuntos seleccionados al agente externo y crear tickets. Sus riesgos y
-responsabilidades siguen siendo los descritos en las secciones anteriores.
+1. Revisar semanalmente una muestra de tickets, errores y avisos de baja confianza; registrar la versión y la corrección humana.
+2. Separar fallos del modelo de problemas de integración o asignación y derivarlos a soporte o desarrollo.
+3. Preparar datos nuevos autorizados y etiquetados por personas, con un conjunto de evaluación separado del entrenamiento.
+4. Comparar F1 macro, accuracy, métricas por categoría y baseline antes de aprobar una actualización.
+5. Coordinar la aprobación con la líder del proyecto y soporte; conservar el modelo y la configuración anteriores para poder revertir.
