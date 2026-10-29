@@ -17,6 +17,14 @@ Las claves se administran en n8n y en los archivos privados del servicio. `X-API
 
 NexpAPI comparte la red Docker de n8n y no publica el puerto 8000. El host interno es `nexpapi`, no `localhost`. Consultar [NexpAPI](../nexpapi/README.md) y [operación del despliegue](../python/deploy/DESPLIEGUE_REALIZADO.md).
 
+### URL interna de Redmine y acceso del usuario
+
+Los nodos y herramientas de n8n se conectan a **`http://redmine:3000`** dentro de la red Docker **`correo-tickets_automatizacion`**. Por ejemplo, el alta utiliza `POST http://redmine:3000/issues.json`. El nombre `redmine` lo resuelve Docker para los contenedores de esa red.
+
+El usuario abre **[http://185.208.207.203:3000/](http://185.208.207.203:3000/)** en el navegador; un enlace al ticket tiene la forma `http://185.208.207.203:3000/issues/54`. Es el mismo servicio mediante el puerto publicado del servidor. Los enlaces de las notificaciones deben usar la dirección accesible al usuario, no el nombre interno `redmine`.
+
+No sustituir `redmine` por `localhost` en los nodos: dentro de n8n, `localhost` apunta al propio contenedor de n8n. Para el recorrido del solicitante y una tabla de direcciones, consultar el [manual de usuario](../python/docs/manual_usuario.md#8-direcciones-de-acceso-y-red-interna).
+
 ## Credenciales de n8n: para qué sirven y cómo se usan
 
 Los nombres siguientes corresponden a la lista de credenciales de la instalación. Cada credencial guarda los datos de acceso de un servicio; los nodos que la seleccionan pueden utilizarla sin escribir la clave en el código. Las plantillas exportadas no incluyen esas credenciales: hay que seleccionarlas nuevamente al importar.

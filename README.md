@@ -263,6 +263,24 @@ Servidor de producción: **185.208.207.203**.
 
 **Servicios entre contenedores:** n8n limpia el texto con un nodo de código local; FastAPI recibe `POST http://nexpapi:8000/predict` y expone `GET /health`, sin publicar el puerto 8000 del host. PostgreSQL se utiliza mediante `postgres:5432` y no tiene interfaz web propia.
 
+### Direcciones del navegador y red interna de Docker
+
+Para consultar tickets desde tu computadora, abre [Redmine en el servidor](http://185.208.207.203:3000/). Las direcciones con nombres como `redmine`, `nexpapi` o `postgres` que aparecen en las capturas corresponden a la comunicación entre contenedores del servidor.
+
+| Dirección | Quién la utiliza | Para qué sirve |
+|---|---|---|
+| `http://185.208.207.203:3000` | Usuario desde su navegador | Abrir Redmine y consultar tickets |
+| `http://185.208.207.203:5678` | Operador autorizado desde su navegador | Administrar n8n y revisar ejecuciones |
+| `http://redmine:3000` | Nodos y herramientas de n8n dentro de Docker | Consultar la API de Redmine, subir adjuntos y crear tickets |
+| `http://nexpapi:8000/predict` | Nodo de clasificación de n8n dentro de Docker | Consultar el modelo Python de 300 correos |
+| `postgres:5432` | Servicios y nodos de base de datos autorizados | Conectar con PostgreSQL; no es una página web |
+
+Los servicios de automatización comparten la red Docker **`correo-tickets_automatizacion`**. Docker resuelve sus nombres de servicio y permite que se comuniquen dentro de esa red. Redmine es el mismo servicio tanto si n8n lo consulta por `redmine:3000` como si el usuario entra por la IP del servidor y el puerto publicado `3000`.
+
+Por ejemplo, `POST http://redmine:3000/issues.json` es la operación interna para crear una petición. Para ver el ticket creado, el usuario abre un enlace como `http://185.208.207.203:3000/issues/54`. No debe copiar `http://redmine:3000` en el navegador de su computadora: normalmente ese nombre solo se resuelve dentro de Docker. Tampoco debe sustituirlo por `localhost` en el nodo de n8n, porque allí `localhost` apunta al propio contenedor de n8n.
+
+El acceso del usuario a Redmine sigue requiriendo una cuenta con permisos. NexpAPI no publica el puerto 8000 al exterior y se consulta desde n8n. Ver el [manual de usuario](python/docs/manual_usuario.md#8-direcciones-de-acceso-y-red-interna) para identificar qué dirección usar en cada caso.
+
 ### Descripción y acceso
 
 [**Aplicación desplegada**](http://185.208.207.203:8501) con tres vistas: **Clasificar**, **Acerca de** e **Historial y comparación**. Ofrece validación de entradas, indicador de procesamiento, mensajes de error, categoría, confianza, gráfico interactivo, ejemplos precargados, idioma español/inglés, tema claro/oscuro y descarga CSV/Excel. El selector lee los modelos existentes en `models/` y muestra su archivo.
