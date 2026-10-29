@@ -224,7 +224,7 @@ Servidor de producción: **185.208.207.203**.
 
 ### Direcciones del navegador y red interna de Docker
 
-Para consultar tickets desde tu computadora, abre [Redmine en el servidor](http://185.208.207.203:3000/). Las direcciones con nombres como `redmine`, `nexpapi` o `postgres` que aparecen en las capturas corresponden a la comunicación entre contenedores del servidor.
+Para ver tus tickets, abre [Redmine](http://185.208.207.203:3000/) e inicia sesión con tu cuenta.
 
 | Dirección | Quién la utiliza | Para qué sirve |
 |---|---|---|
@@ -234,11 +234,11 @@ Para consultar tickets desde tu computadora, abre [Redmine en el servidor](http:
 | `http://nexpapi:8000/predict` | Nodo de clasificación de n8n dentro de Docker | Consultar el modelo Python de 300 correos |
 | `postgres:5432` | Servicios y nodos de base de datos autorizados | Conectar con PostgreSQL; no es una página web |
 
-Los servicios de automatización comparten la red Docker **`correo-tickets_automatizacion`**. Docker resuelve sus nombres de servicio y permite que se comuniquen dentro de esa red. Redmine es el mismo servicio tanto si n8n lo consulta por `redmine:3000` como si el usuario entra por la IP del servidor y el puerto publicado `3000`.
+En las capturas también aparece `http://redmine:3000`. Es la dirección que usa n8n para hablar con Redmine dentro del servidor. Ambos están conectados a la red Docker **`correo-tickets_automatizacion`**. Es el mismo Redmine, pero se accede de otra manera.
 
-Por ejemplo, `POST http://redmine:3000/issues.json` es la operación interna para crear una petición. Para ver el ticket creado, el usuario abre un enlace como `http://185.208.207.203:3000/issues/54`. No debe copiar `http://redmine:3000` en el navegador de su computadora: normalmente ese nombre solo se resuelve dentro de Docker. Tampoco debe sustituirlo por `localhost` en el nodo de n8n, porque allí `localhost` apunta al propio contenedor de n8n.
+Usa la IP del servidor en tu navegador. Los nombres `redmine`, `nexpapi` y `postgres` se usan dentro de Docker. `localhost` significa «este equipo» o «este contenedor», según desde dónde te conectes.
 
-El acceso del usuario a Redmine sigue requiriendo una cuenta con permisos. NexpAPI no publica el puerto 8000 al exterior y se consulta desde n8n. Ver el [manual de usuario](docs/manual_usuario.md#8-direcciones-de-acceso-y-red-interna) para identificar qué dirección usar en cada caso.
+No necesitas cambiar esas direcciones para consultar un ticket. Hay más ejemplos en el [manual de usuario](docs/manual_usuario.md#8-direcciones-de-acceso-y-red-interna).
 
 ### Descripción y acceso
 

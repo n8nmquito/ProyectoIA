@@ -19,11 +19,11 @@ NexpAPI comparte la red Docker de n8n y no publica el puerto 8000. El host inter
 
 ### URL interna de Redmine y acceso del usuario
 
-Los nodos y herramientas de n8n se conectan a **`http://redmine:3000`** dentro de la red Docker **`correo-tickets_automatizacion`**. Por ejemplo, el alta utiliza `POST http://redmine:3000/issues.json`. El nombre `redmine` lo resuelve Docker para los contenedores de esa red.
+En los nodos de n8n se usa **`http://redmine:3000`** para consultar Redmine y crear tickets. Esa dirección funciona dentro de la red Docker **`correo-tickets_automatizacion`**.
 
-El usuario abre **[http://185.208.207.203:3000/](http://185.208.207.203:3000/)** en el navegador; un enlace al ticket tiene la forma `http://185.208.207.203:3000/issues/54`. Es el mismo servicio mediante el puerto publicado del servidor. Los enlaces de las notificaciones deben usar la dirección accesible al usuario, no el nombre interno `redmine`.
+Para entrar desde el navegador, se usa **[http://185.208.207.203:3000/](http://185.208.207.203:3000/)**. Los correos de confirmación también deben llevar esta dirección; por ejemplo, `http://185.208.207.203:3000/issues/54`.
 
-No sustituir `redmine` por `localhost` en los nodos: dentro de n8n, `localhost` apunta al propio contenedor de n8n. Para el recorrido del solicitante y una tabla de direcciones, consultar el [manual de usuario](../python/docs/manual_usuario.md#8-direcciones-de-acceso-y-red-interna).
+En los nodos, conserva `redmine` como servidor. Si lo cambias por `localhost`, n8n intentará conectarse a sí mismo. Consulta el [manual de usuario](../python/docs/manual_usuario.md#8-direcciones-de-acceso-y-red-interna) para ver qué dirección usar.
 
 ## Credenciales de n8n: para qué sirven y cómo se usan
 

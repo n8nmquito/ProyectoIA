@@ -1,6 +1,6 @@
 # Manual de usuario
 
-Este manual cubre las pruebas del clasificador Python y el recorrido de una solicitud de soporte por correo hasta su seguimiento en Redmine. Para probar modelos, sigue los apartados 1 a 5; para enviar y consultar una solicitud, ve al [apartado 7](#7-enviar-una-solicitud-y-seguir-el-ticket). El [apartado 8](#8-direcciones-de-acceso-y-red-interna) explica las direcciones del navegador y las conexiones internas que aparecen en las capturas.
+Aquí puedes ver cómo probar el clasificador y cómo enviar una solicitud de soporte. Los apartados 1 a 5 explican el portal Python. El [apartado 7](#7-enviar-una-solicitud-y-seguir-el-ticket) muestra cómo enviar un correo y consultar su ticket, y el [apartado 8](#8-direcciones-de-acceso-y-red-interna) aclara las direcciones de acceso.
 
 ## 1. Guía paso a paso para usar la interfaz
 
@@ -138,49 +138,49 @@ Al escribir, indica el problema, los pasos para reproducirlo, el modelo seleccio
 
 ### Enviar el correo
 
-Envía la solicitud a **n8n.mquito@gmail.com**. Escribe un asunto que identifique el problema, el sistema afectado, qué ocurre y qué ayuda necesitas. Por ejemplo: «Usuario bloqueado en JDE» y «No puedo iniciar sesión con mi usuario; aparece un mensaje de bloqueo. Solicito revisar el acceso». Adjunta una captura o un archivo útil para el diagnóstico si corresponde.
+Envía un correo a **n8n.mquito@gmail.com**. Indica qué problema tienes, en qué sistema ocurre y qué ayuda necesitas. Por ejemplo: «Usuario bloqueado en JDE» y «No puedo iniciar sesión; aparece un mensaje de bloqueo. Solicito revisar el acceso». Puedes adjuntar una captura o un archivo que ayude a explicar el problema.
 
 ![Ejemplo de solicitud enviada al buzón de soporte](../documentacion/imagenes/flujo/01_enviar_correo.png)
 
-El workflow publicado recibe el correo por IMAP y lo procesa automáticamente. El solicitante no necesita entrar en n8n. El flujo limpia el texto, consulta la categoría Python, analiza la solicitud con OpenAI y valida los datos antes de crear la petición. Los adjuntos seleccionados pueden enviarse al agente y los originales se conservan para Redmine; no se anonimizan automáticamente.
+El sistema procesa el correo automáticamente. No necesitas entrar en n8n. Primero limpia el texto, lo clasifica con Python y lo analiza con OpenAI. Después comprueba los datos y crea el ticket si corresponde. Algunos adjuntos pueden enviarse a OpenAI y los originales se guardan en Redmine; su contenido no se anonimiza.
 
 ### Leer la respuesta
 
-Si se crea el ticket y los filtros permiten el envío, recibirás un correo con su número y enlace. Conserva ese número para consultar el caso.
+Cuando se crea el ticket, el sistema prepara un correo con su número y enlace. Lo recibirás si pasa los filtros de envío. Guarda el número para consultar tu solicitud.
 
 ![Confirmación de ejemplo con el número y enlace del ticket](../documentacion/imagenes/flujo/14_confirmacion_ticket.png)
 
-Si el mensaje informa que no se pudo completar el procesamiento, consulta con soporte si ya existe un ticket antes de reenviar. Un aviso de correo omitido indica que el flujo consideró que el contenido no correspondía a soporte; si necesitas ayuda técnica, envía una solicitud concreta con el sistema afectado y el problema.
+Si recibes un aviso de error, pregunta a soporte si ya existe un ticket antes de reenviar el correo. Si recibes un aviso de correo omitido, revisa que tu mensaje explique claramente qué ayuda técnica necesitas.
 
 ### Consultar Redmine
 
 1. Abre el enlace recibido o entra en [Redmine](http://185.208.207.203:3000/).
-2. Inicia sesión con la cuenta autorizada para consultar tus tickets.
-3. Selecciona el proyecto **Tickets de novedades**, si tu cuenta tiene acceso.
-4. En **Peticiones**, busca por el número de ticket o el asunto. Puedes consultar los tipos **Soporte** y **Errores** y ajustar los filtros.
-5. Abre el ticket para revisar estado, prioridad, categoría, responsable, descripción y adjuntos. El equipo de soporte gestiona su atención y actualiza el estado.
+2. Inicia sesión con tu cuenta.
+3. Entra al proyecto **Tickets de novedades**. Si no aparece, pide a soporte que revise tus permisos.
+4. En **Peticiones**, busca el número o el asunto. Puedes filtrar por **Soporte** o **Errores**.
+5. Abre el ticket para ver su estado, prioridad, categoría, responsable, descripción y adjuntos.
 
 ![Lista de peticiones en Redmine](../documentacion/imagenes/flujo/18_lista_tickets.png)
 
-Los números y resultados de las capturas corresponden a distintas pruebas. La [documentación completa de la interfaz](../../README.md#uso-del-flujo-completo-de-correo-a-redmine) incluye las pantallas de n8n, la configuración de los nodos y una captura histórica con una discrepancia de categoría. El flujo vigente conserva la categoría final de Python.
+Las capturas son de distintas pruebas, por eso cambian los números de ticket. Puedes ver el recorrido completo en la [documentación de la interfaz](../../README.md#uso-del-flujo-completo-de-correo-a-redmine). Allí se señala una captura antigua con categorías diferentes; el flujo actual conserva la categoría de Python.
 
 ### Recibir cambios de estado
 
-El workflow **Mquito | Avisos de cambios de estado Redmine** consulta cada minuto los tickets del proyecto configurado y compara su estado con el último observado. Utiliza la dirección del campo **Correo del solicitante**. La primera observación se guarda sin enviar un aviso; cuando después detecta un cambio y la dirección es válida, prepara la notificación.
+El flujo **Mquito | Avisos de cambios de estado Redmine** revisa los tickets cada minuto. La primera vez guarda su estado sin enviar correo. Si después detecta un cambio, prepara un aviso para la dirección indicada en **Correo del solicitante**, siempre que sea válida.
 
 ![Aviso de ejemplo con el cambio de estado de Nueva a Resuelta](../documentacion/imagenes/flujo/20_aviso_cambio_estado.png)
 
-El aviso incluye número, asunto, estado anterior, nuevo estado y enlace. Este proceso no utiliza IA ni modifica los tickets. Los cambios que ocurran y se reviertan entre dos consultas pueden no detectarse. Ver los [detalles del seguimiento](../../workflows/status-notifications/README.md).
+El correo muestra el número del ticket, el asunto, el estado anterior, el nuevo y el enlace. El equipo de soporte cambia el estado; este flujo solo avisa. Si un estado cambia y vuelve al anterior entre dos revisiones, el aviso puede no enviarse. Hay más información en los [detalles del seguimiento](../../workflows/status-notifications/README.md).
 
 ### Revisar una ejecución como operador
 
-Si tienes una cuenta autorizada, abre [n8n](http://185.208.207.203:5678) y entra en **Executions**. Localiza la ejecución por su fecha y workflow, revisa los nodos con errores y comprueba **Resultado del ticket**. El estado `success` también puede incluir una omisión controlada y no demuestra por sí solo que se haya creado una petición. Antes de reintentar, verifica el número en Redmine.
+Si administras el sistema, abre [n8n](http://185.208.207.203:5678) y entra en **Executions**. Busca la ejecución por fecha y nombre del flujo. Revisa los errores y el nodo **Resultado del ticket**. Aunque aparezca `success`, comprueba que haya un número de ticket: el flujo también puede haber terminado descartando el correo. Antes de reintentar, busca el ticket en Redmine.
 
-Consulta la [guía de configuración](../../workflows/GUIA_CONFIGURACION.md) para credenciales, validaciones y diagnóstico. El acceso a n8n corresponde al operador; el solicitante utiliza el correo y Redmine según sus permisos.
+La [guía de configuración](../../workflows/GUIA_CONFIGURACION.md) explica las credenciales y las comprobaciones del flujo.
 
 ## 8. Direcciones de acceso y red interna
 
-Las capturas muestran dos formas de acceder a los mismos servicios: desde el navegador del usuario y desde los contenedores del servidor. Usa la dirección correspondiente al lugar desde el que te conectas.
+Para abrir los servicios en tu navegador, usa las direcciones con la IP del servidor. Los nombres como `redmine` o `nexpapi` que aparecen en las capturas se usan dentro de Docker.
 
 | Servicio | Dirección para el usuario | Conexión dentro de Docker |
 |---|---|---|
@@ -190,10 +190,10 @@ Las capturas muestran dos formas de acceder a los mismos servicios: desde el nav
 | NexpAPI | Sin dirección pública para el usuario | `http://nexpapi:8000/predict`; n8n consulta el clasificador con su credencial |
 | PostgreSQL | Sin interfaz web propia | `postgres:5432`; conexión de los servicios o nodos autorizados a la base de datos |
 
-Los servicios de automatización comparten la red Docker **`correo-tickets_automatizacion`**. En esa red, Docker reconoce nombres de servicio como `redmine`, `n8n`, `nexpapi` y `postgres`. La red interna permite la comunicación entre contenedores; el acceso desde el navegador usa la IP del servidor y el puerto publicado.
+Los servicios se comunican entre sí por la red Docker **`correo-tickets_automatizacion`**. Por eso n8n encuentra Redmine con el nombre `redmine`, sin usar la IP pública.
 
-**Ejemplo:** el nodo de n8n utiliza `POST http://redmine:3000/issues.json` para crear la petición. El usuario consulta el resultado con una dirección como `http://185.208.207.203:3000/issues/54`. Ambas se refieren al mismo Redmine desde lugares distintos. No escribas `http://redmine:3000` en el navegador de tu computadora: normalmente ese nombre solo funciona dentro de la red Docker.
+Por ejemplo, n8n crea un ticket usando `http://redmine:3000/issues.json`. Tú lo consultas con un enlace como `http://185.208.207.203:3000/issues/54`. Es el mismo Redmine, pero la dirección depende de quién se conecta.
 
-`localhost` siempre se refiere al entorno desde el que se usa. En el navegador de tu computadora es tu propio equipo; en el contenedor de n8n es ese contenedor. Por eso `http://localhost:8501` sirve para el portal si lo ejecutaste localmente, pero no abre el portal remoto del servidor. Dentro del nodo de n8n, utiliza `redmine:3000` para conectarte a Redmine, sin reemplazarlo por `localhost`.
+`localhost` significa «este equipo». Si lo escribes en tu navegador, apunta a tu computadora; si se usa dentro de n8n, apunta a su contenedor. Usa `http://localhost:8501` solo cuando hayas iniciado el portal en tu computadora.
 
-La red interna no reemplaza las credenciales: n8n necesita la clave API de Redmine, NexpAPI requiere su propia clave y el usuario necesita permisos para consultar tickets. No hace falta modificar los nodos ni las direcciones internas para seguir el recorrido como solicitante.
+Para consultar tus tickets solo necesitas tu cuenta de Redmine y la dirección del servidor. No hace falta cambiar los nodos ni la red interna.
