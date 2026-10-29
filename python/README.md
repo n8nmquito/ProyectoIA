@@ -349,10 +349,6 @@ La captura muestra un ejemplo de clasificación, no una medida de precisión del
 
 El agente evalúa si corresponde a soporte, resume el problema y propone prioridad, tipo, proyecto y responsable. La categoría final procede de Python y se reaplica antes de crear el ticket. La propuesta del agente pasa por las validaciones del flujo; sus IDs no se aceptan sin comprobarlos contra Redmine.
 
-<img src="documentacion/imagenes/flujo/10_analisis_agente.png" alt="Entrada del agente con la predicción Python, instrucciones y salida estructurada del análisis de una solicitud" width="1200">
-
-La captura incluye un aviso sobre el formato de salida del agente. El formato estructurado y las validaciones forman parte de la configuración que debe comprobarse antes de publicar una instalación; la imagen no sustituye esa comprobación.
-
 #### 5. Crear el ticket y revisar la respuesta al solicitante
 
 Después de validar proyecto, tipo, categoría y asignación, el flujo recupera los adjuntos originales y reúne los tokens de los archivos subidos cuando corresponde. **Crear ticket en Redmine** registra la petición y **Resultado del ticket** prepara su resultado.
