@@ -178,6 +178,8 @@ Si administras el sistema, abre [n8n](http://185.208.207.203:5678) y entra en **
 
 La [guía de configuración](../../workflows/GUIA_CONFIGURACION.md) explica las credenciales y las comprobaciones del flujo.
 
+Si necesitas copiar los flujos a otra instalación, descarga los JSON desde la [carpeta de exportaciones de n8n](../../n8n/README.md). Allí se explica cómo importarlos y revisar sus credenciales.
+
 ## 8. Direcciones de acceso y red interna
 
 Para abrir los servicios en tu navegador, usa las direcciones con la IP del servidor. Los nombres como `redmine` o `nexpapi` que aparecen en las capturas se usan dentro de Docker.

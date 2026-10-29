@@ -32,6 +32,8 @@ Corregir un correo no reenvía cambios antiguos suprimidos; se aplicará al sigu
 
 ## Configuración
 
+La [exportación del flujo de avisos de 10 nodos](../../n8n/Mquito%20_%20Avisos%20de%20cambios%20de%20estado%20Redmine.json) está en `n8n/`. Conserva las referencias a las credenciales de origen. Para importarla, sigue la [guía de exportaciones](../../n8n/README.md). La plantilla `workflows/notificar-estados-redmine.json` se conserva por separado, desactivada y sin credenciales.
+
 - Redmine: la credencial Header Auth existente, `X-Redmine-API-Key`.
 - Gmail: la credencial SMTP existente, `smtp.gmail.com:465` con TLS.
 - PostgreSQL: credencial dedicada de seguimiento; secreto en `.secrets/status-notifications-postgres.json`, excluido de Git.

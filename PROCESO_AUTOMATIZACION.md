@@ -41,6 +41,8 @@ Las herramientas del agente son GET. La creación y asignación posteriores son 
 
 ## Plantilla vigente
 
+Las [exportaciones de los dos flujos](n8n/README.md) están en `n8n/`: el principal tiene **41 nodos** y el de avisos, **10**. Conservan las referencias a credenciales de la instalación de origen; revisarlas antes de importar en otro servidor.
+
 Importar [correo-ia-redmine-python300.json](workflows/correo-ia-redmine-python300.json), la plantilla actual de **41 nodos**, desactivada y sin credenciales. Consultar la [guía de configuración](workflows/GUIA_CONFIGURACION.md) antes de publicarla.
 
 `workflows/correo-ia-redmine.json` conserva una versión histórica de 47 nodos. No representa la política actual de categoría final y limpieza; se mantiene como referencia de etapas anteriores.

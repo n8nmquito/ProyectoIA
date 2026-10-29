@@ -313,6 +313,13 @@ Mensaje de error al intentar clasificar sin completar el título.
 
 ### Uso del flujo completo de correo a Redmine
 
+Los archivos de ambos flujos están disponibles para descargar:
+
+- [Correo → IA → Ticket Redmine — 41 nodos](../n8n/Mquito%20_%20Correo%20%E2%86%92%20IA%20%E2%86%92%20Ticket%20Redmine.json).
+- [Avisos de cambios de estado Redmine — 10 nodos](../n8n/Mquito%20_%20Avisos%20de%20cambios%20de%20estado%20Redmine.json).
+
+La [guía de los archivos exportados](../n8n/README.md) explica cómo importarlos y qué revisar antes de usarlos en otra instalación.
+
 Este recorrido muestra cómo enviar una solicitud, revisar su procesamiento en n8n, consultar el ticket en Redmine y recibir los avisos por correo. Complementa las pruebas del portal Python descritas arriba. Las capturas documentan ejemplos de distintas ejecuciones; sus números de ticket, categorías y resultados no pertenecen necesariamente a una misma prueba.
 
 #### 1. Enviar una solicitud de soporte por correo
@@ -433,7 +440,7 @@ En este ejemplo el ticket **#55** pasa de **Nueva** a **Resuelta**. La primera o
 | `nexpapi/` | API interna de clasificación, Dockerfile, dependencias y Compose |
 | `python/workshop/` | Material de referencia del taller |
 | `workflows/` | Flujos n8n, validaciones JavaScript y pruebas |
-| `n8n/`, `redmine/`, `postgres/` | Configuración de n8n, Redmine e inicialización de bases, respectivamente |
+| `n8n/`, `redmine/`, `postgres/` | Exportaciones y configuración de n8n, configuración de Redmine e inicialización de bases, respectivamente |
 
 ## 10. Consideraciones éticas
 

@@ -12,6 +12,8 @@ El responsable configurado en la categoría de Redmine tiene prioridad. Se consu
 
 ## Qué archivo importar
 
+Las [copias exportadas de la instalación](../n8n/README.md) están en `n8n/`. Incluyen el flujo principal de 41 nodos y el de avisos de 10 nodos, con referencias a las credenciales de origen. Las plantillas de esta carpeta se mantienen aparte para configurar nuevas instalaciones.
+
 | Archivo | Estado y uso |
 |---|---|
 | [correo-ia-redmine-python300.json](correo-ia-redmine-python300.json) | **Plantilla vigente: 41 nodos**, limpieza local y categoría Python obligatoria. Usar para nuevas instalaciones |

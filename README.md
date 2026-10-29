@@ -120,6 +120,13 @@ La captura muestra ambos como **Published**. Las plantillas del repositorio se e
 
 #### Etapas del flujo principal
 
+Los archivos de ambos flujos están disponibles para descargar:
+
+- [Correo → IA → Ticket Redmine — 41 nodos](n8n/Mquito%20_%20Correo%20%E2%86%92%20IA%20%E2%86%92%20Ticket%20Redmine.json).
+- [Avisos de cambios de estado Redmine — 10 nodos](n8n/Mquito%20_%20Avisos%20de%20cambios%20de%20estado%20Redmine.json).
+
+La [guía de los archivos exportados](n8n/README.md) explica cómo importarlos y qué revisar antes de usarlos en otra instalación.
+
 El recorrido del correo hasta el ticket se organiza en diez etapas:
 
 1. **Leer buzón IMAP:** recibir el asunto, cuerpo y adjuntos del correo.
@@ -474,7 +481,7 @@ En este ejemplo el ticket **#55** pasa de **Nueva** a **Resuelta**. La primera o
 | `nexpapi/` | API interna de clasificación, Dockerfile, dependencias y Compose |
 | `python/workshop/` | Material de referencia del taller |
 | `workflows/` | Flujos n8n, validaciones JavaScript y pruebas |
-| `n8n/`, `redmine/`, `postgres/` | Configuración de n8n, Redmine e inicialización de bases, respectivamente |
+| `n8n/`, `redmine/`, `postgres/` | Exportaciones y configuración de n8n, configuración de Redmine e inicialización de bases, respectivamente |
 
 ## 10. Consideraciones éticas
 

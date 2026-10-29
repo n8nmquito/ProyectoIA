@@ -1,0 +1,364 @@
+{
+  "name": "Mquito | Avisos de cambios de estado Redmine",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "53fe27d6-3bd9-4b42-827c-14f32deef9d4",
+      "name": "Cada minuto",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        160
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "ce72beb8-9560-446d-b10a-8ba294cc5369",
+      "name": "Prueba manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://redmine:3000/issues.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "project_id",
+              "value": "1"
+            },
+            {
+              "name": "status_id",
+              "value": "*"
+            },
+            {
+              "name": "limit",
+              "value": "100"
+            },
+            {
+              "name": "sort",
+              "value": "id:asc"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "offset",
+                    "value": "={{ $pageCount * 100 }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.offset + $response.body.issues.length >= $response.body.total_count }}"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "3420da8c-8cbb-4c9c-a1da-7dd51e29979a",
+      "name": "Consultar tickets de Redmine",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        256,
+        208
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "VeBr81i6BXGeioAR",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate the entire paginated response before updating PostgreSQL.\nconst rows=[]; const seen=new Set();\nfor(const item of $input.all()) {\n const page=item.json;\n if(!Array.isArray(page.issues)) throw new Error('Redmine no devolvió una página válida de tickets. No se actualizó el seguimiento.');\n for(const issue of page.issues) {\n  if(!Number.isSafeInteger(issue.id)||!Number.isSafeInteger(issue.status?.id)||!issue.status.name||!issue.updated_on||!Number.isFinite(Date.parse(issue.updated_on)))throw new Error('Ticket con estado o fecha inválidos.');\n  if(seen.has(issue.id))continue; seen.add(issue.id);\n  const field=(issue.custom_fields||[]).find(f=>f.id===1 && f.name==='Correo del solicitante');\n  const email=typeof field?.value==='string'?field.value.trim():'';\n  const valid=email.length<=254 && /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)+$/.test(email);\n  const blocked= /@(?:example\\.(?:com|net|org)|[^@]*\\.invalid)$|@localhost$/i.test(email) || email.toLowerCase()==='n8n.mquito@gmail.com' || /^(no[._-]?reply|mailer-daemon|postmaster)@/i.test(email);\n  rows.push({ticket_id:issue.id,status_id:issue.status.id,status_name:issue.status.name,subject:issue.subject||'(Sin asunto)',updated_on:issue.updated_on,\n   email,email_valid:valid&&!blocked,email_reason:!valid?'Correo del solicitante vacío o con formato inválido':blocked?'Dirección de ejemplo, automática o del propio buzón':null,\n   url:'http://185.208.207.203:3000/issues/'+issue.id});\n }\n}\nreturn [{json:{tickets:rows}}];\r\n"
+      },
+      "id": "c86bc79c-8d05-4da3-96d6-c5b6cacfa06c",
+      "name": "Validar correos y preparar estados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT ticket_notify.observe($1::jsonb) AS cambios;",
+        "options": {
+          "connectionTimeout": 10,
+          "queryBatching": "independently",
+          "queryReplacement": "={{ [JSON.stringify($json.tickets)] }}"
+        }
+      },
+      "id": "3436561b-61e3-49c7-b584-34f0141360d9",
+      "name": "Comparar y registrar cambios",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        768,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "AoB8qSAvjKbg225I",
+          "name": "Mquito - Seguimiento de tickets PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH candidates AS (SELECT id FROM ticket_notify.notifications WHERE state='pending' ORDER BY id FOR UPDATE SKIP LOCKED LIMIT 50)\nUPDATE ticket_notify.notifications n SET state='sending',attempted_at=now() FROM candidates c WHERE n.id=c.id RETURNING n.*;",
+        "options": {
+          "connectionTimeout": 10,
+          "queryBatching": "independently"
+        }
+      },
+      "id": "9382380b-d885-484b-949c-c7e444bf6614",
+      "name": "Reservar avisos pendientes",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        960,
+        208
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "AoB8qSAvjKbg225I",
+          "name": "Mquito - Seguimiento de tickets PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "Mquito Soporte <n8n.mquito@gmail.com>",
+        "toEmail": "={{ $json.recipient }}",
+        "subject": "={{ \"[Mquito] Ticket #\" + $json.ticket_id + \" - \" + $json.new_status }}",
+        "emailFormat": "text",
+        "text": "={{ [\"Hola,\", \"\", \"El estado de tu ticket cambió.\", \"\", \"Número: #\" + $json.ticket_id, \"Asunto: \" + $json.subject, \"Estado anterior: \" + $json.previous_status, \"Estado nuevo: \" + $json.new_status, \"Enlace: \" + $json.url, \"\", \"Mesa de soporte TI - Mquito\"].join(\"\\n\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "d224ee32-7479-44cc-8f53-a1a69f1ea0a5",
+      "name": "Notificar cambio al solicitante",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1264,
+        208
+      ],
+      "webhookId": "79daefb1-f823-41dc-b8d4-defcc0e1afa8",
+      "credentials": {
+        "smtp": {
+          "id": "mixpa12o1OwXRlYO",
+          "name": "Gmail soporte - Notificaciones SMTP"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE ticket_notify.notifications SET state=CASE WHEN $2::boolean THEN 'sent' ELSE 'failed' END,sent_at=CASE WHEN $2::boolean THEN now() ELSE NULL END,smtp_message_id=$3,reason=CASE WHEN $2::boolean THEN NULL ELSE 'SMTP no confirmó aceptación del destinatario' END WHERE id=$1::bigint AND state='sending' RETURNING id,ticket_id,state;",
+        "options": {
+          "connectionTimeout": 10,
+          "queryBatching": "independently",
+          "queryReplacement": "={{ [$(\"Reservar avisos pendientes\").item.json.id, Array.isArray($json.accepted) && $json.accepted.length > 0, $json.messageId || null] }}"
+        }
+      },
+      "id": "6f0fef74-d4ae-49a6-a52c-b4e78b9d4088",
+      "name": "Registrar envío aceptado",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        1520,
+        112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "AoB8qSAvjKbg225I",
+          "name": "Mquito - Seguimiento de tickets PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE ticket_notify.notifications SET state='failed',reason='Error SMTP; revisar ejecución n8n antes de reintentar' WHERE id=$1::bigint AND state='sending' RETURNING id,ticket_id,state;",
+        "options": {
+          "connectionTimeout": 10,
+          "queryBatching": "independently",
+          "queryReplacement": "={{ [$(\"Reservar avisos pendientes\").item.json.id] }}"
+        }
+      },
+      "id": "b2949a1d-2dc8-4cb4-bd9b-d1b3a00038ba",
+      "name": "Registrar fallo de envío",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        1520,
+        384
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "AoB8qSAvjKbg225I",
+          "name": "Mquito - Seguimiento de tickets PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().flatMap((item,index) => item.json.id && item.json.state === 'sending' && item.json.recipient ? [{json:item.json,pairedItem:{item:index}}] : []);"
+      },
+      "id": "039a81b7-55e0-425d-a6d3-74b8728d8c74",
+      "name": "Continuar solo con avisos reservados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        208
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prueba manual": {
+      "main": [
+        [
+          {
+            "node": "Consultar tickets de Redmine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar tickets de Redmine": {
+      "main": [
+        [
+          {
+            "node": "Validar correos y preparar estados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar correos y preparar estados": {
+      "main": [
+        [
+          {
+            "node": "Comparar y registrar cambios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comparar y registrar cambios": {
+      "main": [
+        [
+          {
+            "node": "Reservar avisos pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reservar avisos pendientes": {
+      "main": [
+        [
+          {
+            "node": "Continuar solo con avisos reservados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificar cambio al solicitante": {
+      "main": [
+        [
+          {
+            "node": "Registrar envío aceptado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar fallo de envío",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continuar solo con avisos reservados": {
+      "main": [
+        [
+          {
+            "node": "Notificar cambio al solicitante",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cada minuto": {
+      "main": [
+        [
+          {
+            "node": "Consultar tickets de Redmine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "executionTimeout": 240
+  },
+  "versionId": "d2299ed8-82f0-4f4f-8750-9373a883de77",
+  "meta": {
+    "instanceId": "6fb6bcc7010664bc9df845f5010e270048d85d95b006d0a9a69f12229b24fec1"
+  },
+  "nodeGroups": [],
+  "id": "5Cga0y295UooA5nI",
+  "tags": []
+}

@@ -2,6 +2,8 @@
 
 ## Plantilla y servicios
 
+Si vas a importar los archivos agregados en `n8n/`, consulta la [guía de exportaciones](../n8n/README.md). Conservan las referencias a las credenciales de origen, que debes revisar en tu instalación.
+
 Usar [correo-ia-redmine-python300.json](correo-ia-redmine-python300.json), la plantilla vigente de 41 nodos. `correo-ia-redmine.json` es una referencia histórica con otra lógica de clasificación.
 
 | Nodo o servicio | Configuración |
