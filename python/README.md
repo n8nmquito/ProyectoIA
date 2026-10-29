@@ -293,6 +293,116 @@ Mensaje de error al intentar clasificar sin completar el título.
 
 </details>
 
+### Uso del flujo completo de correo a Redmine
+
+Este recorrido muestra cómo enviar una solicitud, revisar su procesamiento en n8n, consultar el ticket en Redmine y recibir los avisos por correo. Complementa las pruebas del portal Python descritas arriba. Las capturas documentan ejemplos de distintas ejecuciones; sus números de ticket, categorías y resultados no pertenecen necesariamente a una misma prueba.
+
+#### 1. Enviar una solicitud de soporte por correo
+
+Enviar un correo a **n8n.mquito@gmail.com** con un asunto concreto y una descripción del problema o de la ayuda solicitada. Por ejemplo: «Usuario bloqueado en JDE» y «No puedo ingresar con mi usuario; aparece un mensaje de bloqueo. Solicito revisar el acceso». Adjuntar una captura o un archivo cuando ayude a explicar el caso.
+
+<img src="documentacion/imagenes/flujo/01_enviar_correo.png" alt="Ejemplo de correo enviado al buzón de soporte para solicitar ayuda con un usuario bloqueado" width="760">
+
+La recepción por IMAP inicia el flujo automáticamente cuando está publicado y configurado. Enviar esta solicitud puede crear un ticket real y generar notificaciones.
+
+#### 2. Acceder a n8n y reconocer sus pantallas
+
+Abrir [n8n](http://185.208.207.203:5678) e iniciar sesión con la cuenta autorizada para administrar o revisar el sistema. El solicitante puede enviar su correo sin acceder a n8n.
+
+<img src="documentacion/imagenes/flujo/02_acceso_n8n.png" alt="Pantalla de inicio de sesión de n8n" width="760">
+
+En **Credentials** se administran los accesos a los servicios. La [guía de credenciales](../workflows/GUIA_CONFIGURACION.md#credenciales-de-n8n-para-qué-sirven-y-cómo-se-usan) explica la función, configuración y uso de cada una.
+
+<img src="documentacion/imagenes/flujo/03_credenciales_n8n.png" alt="Lista de credenciales de NexpAPI, OpenAI, PostgreSQL, SMTP, Redmine e IMAP en n8n" width="1000">
+
+En **Executions** se revisan la fecha, duración y estado de cada ejecución. Abrir la ejecución correspondiente al correo y comprobar sus nodos y resultados. Un estado `success` también puede corresponder a una omisión controlada: confirmar el ID de ticket en **Resultado del ticket** o en Redmine.
+
+<img src="documentacion/imagenes/flujo/04_ejecuciones_n8n.png" alt="Historial de ejecuciones de n8n con sus estados y tiempos" width="1000">
+
+En **Workflows** aparecen los dos procesos publicados: **Mquito | Correo → IA → Ticket Redmine**, que procesa las solicitudes, y **Mquito | Avisos de cambios de estado Redmine**, que notifica su evolución.
+
+<img src="documentacion/imagenes/flujo/05_workflows_n8n.png" alt="Los dos workflows de procesamiento de correo y avisos de cambios de estado" width="1000">
+
+#### 3. Revisar el flujo principal y la clasificación Python
+
+Abrir el [workflow principal](http://185.208.207.203:5678/workflow/opxBwpGpRDrbQeHn). La plantilla documentada tiene **41 nodos**: recepción y limpieza, consulta del modelo, análisis del agente, validaciones, tratamiento de adjuntos, creación del ticket y notificaciones.
+
+<img src="documentacion/imagenes/flujo/06_flujo_completo.png" alt="Vista completa del workflow n8n con la línea principal y sus ramas de herramientas y validación" width="1200">
+
+La vista general permite reconocer el recorrido. Abrir la imagen en su tamaño original o consultar los detalles siguientes para leer los nodos.
+
+El nodo **Consultar API - Modelo 300** conecta n8n con **NexpAPI**. Recibe el texto del nodo **Limpiar firma y datos** y devuelve la predicción, que se reúne con el correo en **Unir correo y predicción**.
+
+<img src="documentacion/imagenes/flujo/07_nodo_clasificador.png" alt="Conexión entre limpieza, consulta del clasificador Python de 300 correos y unión de la predicción" width="760">
+
+La consulta utiliza `POST http://nexpapi:8000/predict`, autenticación Header Auth y un JSON con `titulo` y `cuerpo` limpios. Los adjuntos no se incluyen en ese JSON. La respuesta contiene categoría, confianza, probabilidades e indicadores como `requiere_revision` y `sin_vocabulario`.
+
+<img src="documentacion/imagenes/flujo/08_consulta_nexpapi.png" alt="Configuración de la consulta a NexpAPI y respuesta de ejemplo con categoría infraestructura y confianza del 63,54 por ciento" width="1200">
+
+La captura muestra un ejemplo de clasificación, no una medida de precisión del sistema. La salida de error permite continuar hacia la rama de revisión; un fallo de la API no autoriza a crear un ticket sin una predicción válida.
+
+#### 4. Comprender el análisis de OpenAI
+
+**Agente IA - Analizar solicitud** recibe el correo limpio y la clasificación Python. El nodo del modelo OpenAI proporciona el modelo de lenguaje y las herramientas realizan consultas de solo lectura a Redmine para obtener proyectos, miembros, roles, tipos y categorías con sus responsables.
+
+<img src="documentacion/imagenes/flujo/09_agente_herramientas.png" alt="Agente de OpenAI conectado al modelo de lenguaje y a las herramientas de consulta de Redmine" width="1200">
+
+El agente evalúa si corresponde a soporte, resume el problema y propone prioridad, tipo, proyecto y responsable. La categoría final procede de Python y se reaplica antes de crear el ticket. La propuesta del agente pasa por las validaciones del flujo; sus IDs no se aceptan sin comprobarlos contra Redmine.
+
+<img src="documentacion/imagenes/flujo/10_analisis_agente.png" alt="Entrada del agente con la predicción Python, instrucciones y salida estructurada del análisis de una solicitud" width="1200">
+
+La captura incluye un aviso sobre el formato de salida del agente. El formato estructurado y las validaciones forman parte de la configuración que debe comprobarse antes de publicar una instalación; la imagen no sustituye esa comprobación.
+
+#### 5. Crear el ticket y revisar la respuesta al solicitante
+
+Después de validar proyecto, tipo, categoría y asignación, el flujo recupera los adjuntos originales y reúne los tokens de los archivos subidos cuando corresponde. **Crear ticket en Redmine** registra la petición y **Resultado del ticket** prepara su resultado.
+
+<img src="documentacion/imagenes/flujo/11_nodo_crear_ticket.png" alt="Nodos de reunión de adjuntos, creación del ticket en Redmine y preparación del resultado" width="760">
+
+La creación utiliza `POST http://redmine:3000/issues.json` con la credencial de Redmine. En la captura se observa el ticket de ejemplo **#54**, de tipo **Soporte**, categoría **Accesos**, prioridad **Normal** y responsable **Soporte Accesos**. Son datos de esa ejecución, no valores fijos para todas las solicitudes.
+
+<img src="documentacion/imagenes/flujo/12_creacion_redmine.png" alt="Petición de creación y respuesta de Redmine con el ticket 54 y sus datos validados" width="1200">
+
+Si el procesamiento falla, el aviso informa que el caso quedó registrado para revisión. Antes de reenviar el correo, comprobar si ya existe un ticket para evitar duplicados. Este mensaje de error es distinto del aviso de omisión de contenido ajeno a soporte.
+
+<img src="documentacion/imagenes/flujo/13_aviso_error.png" alt="Correo que informa que no se pudo completar el procesamiento y solicita comprobar si existe un ticket antes de reenviar" width="1000">
+
+Cuando se crea el ticket y los filtros permiten la notificación, el solicitante recibe una confirmación con el número y el enlace. La captura siguiente corresponde al ticket **#53**, de otra ejecución.
+
+<img src="documentacion/imagenes/flujo/14_confirmacion_ticket.png" alt="Correo de confirmación de creación del ticket 53 con enlace a Redmine" width="760">
+
+#### 6. Consultar el ticket en Redmine
+
+Abrir [Redmine](http://185.208.207.203:3000/) e iniciar sesión con la cuenta autorizada. La pantalla de acceso del ejemplo muestra el formulario de identificación; utilizar la cuenta asignada a cada usuario.
+
+<img src="documentacion/imagenes/flujo/15_acceso_redmine.png" alt="Pantalla de acceso a Redmine" width="1000">
+
+Seleccionar el proyecto **Tickets de novedades** desde el selector de proyectos.
+
+<img src="documentacion/imagenes/flujo/16_seleccionar_proyecto.png" alt="Selector de proyectos de Redmine con Tickets de novedades" width="760">
+
+En la vista del proyecto, consultar las peticiones de tipo **Soporte** o **Errores**, según la solicitud registrada.
+
+<img src="documentacion/imagenes/flujo/17_tipos_peticiones.png" alt="Resumen del proyecto con peticiones abiertas y cerradas de tipo Errores y Soporte" width="1000">
+
+Buscar el ticket por el número recibido en la confirmación o por su asunto. Si se ordena por ID descendente, los números mayores aparecen primero; los filtros y el orden de la lista pueden cambiar esa presentación.
+
+<img src="documentacion/imagenes/flujo/18_lista_tickets.png" alt="Lista de peticiones en Redmine con número, tipo, estado, prioridad y asunto" width="1200">
+
+Abrir el ticket para revisar estado, prioridad, responsable, categoría, correo del solicitante, descripción y adjuntos disponibles. La descripción reúne los datos del correo y el análisis de la solicitud.
+
+<img src="documentacion/imagenes/flujo/19_detalle_ticket_historico.png" alt="Detalle histórico del ticket 47 con datos del correo, análisis y una discrepancia entre la categoría Python y la guardada" width="1200">
+
+**La captura del ticket #47 documenta una discrepancia anterior:** muestra **Aplicaciones** en el resultado Python y **Otros** en la categoría guardada. Se conserva como evidencia de esa prueba. En el flujo vigente la categoría final de Python es obligatoria; esta diferencia no representa el resultado esperado. Consultar la [arquitectura](docs/arquitectura.md) para la regla actual.
+
+#### 7. Recibir avisos de cambios de estado
+
+Cuando un técnico cambia el estado en Redmine, el workflow **Mquito | Avisos de cambios de estado Redmine** lo detecta en sus consultas periódicas. Si ya existe una observación anterior y el campo **Correo del solicitante** contiene una dirección válida, prepara el aviso con número, asunto, estado anterior, nuevo estado y enlace.
+
+<img src="documentacion/imagenes/flujo/20_aviso_cambio_estado.png" alt="Correo de ejemplo del ticket 55 que informa el cambio de estado de Nueva a Resuelta" width="1000">
+
+En este ejemplo el ticket **#55** pasa de **Nueva** a **Resuelta**. La primera observación de un ticket no envía correo; establece el estado de referencia. El seguimiento no utiliza IA ni cambia el estado del ticket. Ver [funcionamiento y límites del seguimiento](../workflows/status-notifications/README.md).
+
 ## 9. Estructura del proyecto
 
 | Carpeta | Contenido principal |
