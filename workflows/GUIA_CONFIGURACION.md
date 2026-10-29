@@ -19,6 +19,8 @@ Las claves se administran en n8n y en los archivos privados del servicio. `X-API
 
 NexpAPI comparte la red Docker de n8n y no publica el puerto 8000. El host interno es `nexpapi`, no `localhost`. Consultar [NexpAPI](../nexpapi/README.md) y [operación del despliegue](../python/deploy/DESPLIEGUE_REALIZADO.md).
 
+En **Leer buzón IMAP → Options**, configurar **Force Reconnect Every Minutes = 1**. El nodo escucha los correos nuevos y renueva la conexión cada minuto para volver a comprobar el buzón. Mantener **Fetch Only New Emails** activado y la regla `["UNSEEN"]`. Es una reconexión del disparador IMAP, no un horario de ejecución: si no hay correos nuevos, no inicia el resto del flujo.
+
 ### URL interna de Redmine y acceso del usuario
 
 En los nodos de n8n se usa **`http://redmine:3000`** para consultar Redmine y crear tickets. Esa dirección funciona dentro de la red Docker **`correo-tickets_automatizacion`**.

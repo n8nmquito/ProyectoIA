@@ -7,7 +7,7 @@
         "format": "resolved",
         "options": {
           "customEmailConfig": "[\"UNSEEN\"]",
-          "forceReconnect": 60,
+          "forceReconnect": 1,
           "trackLastMessageId": true
         }
       },
