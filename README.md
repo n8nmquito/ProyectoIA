@@ -509,7 +509,15 @@ Ver las [consideraciones éticas completas](python/docs/consideraciones_eticas.m
 
 ## 12. Licencia
 
-<br><br>
+<br>SmartTicket AI es un proyecto académico desarrollado en el marco de la Maestría de la Universidad Espíritu Santo (UEES), con fines educativos, de investigación y demostración tecnológica.
+
+El código desarrollado específicamente para este proyecto se distribuye bajo la Licencia MIT, que permite su uso, modificación y distribución, siempre que se conserven los avisos de derechos de autor y las condiciones de dicha licencia.
+
+El conjunto de datos utilizado para entrenar y evaluar los modelos está compuesto por correos electrónicos sintéticos, creados para este proyecto. Actualmente, estos datos no cuentan con una licencia de distribución específica.
+
+Las herramientas y servicios externos utilizados, como Python, n8n, Redmine y OpenAI, se rigen por sus respectivas licencias y condiciones de uso.
+
+Los resultados del modelo corresponden a pruebas realizadas con datos simulados y no constituyen una garantía de rendimiento en entornos empresariales reales.<br>
 
 ## 13. Agradecimientos y referencias
 
