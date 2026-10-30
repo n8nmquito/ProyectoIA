@@ -513,7 +513,7 @@ Ver las [consideraciones éticas completas](python/docs/consideraciones_eticas.m
 
 ## 13. Agradecimientos y referencias
 
-<br><br>
+<br>Agradezco a Dios en primer lugar que me ha permitido poder seguir en este aprendizaje continuo y seguir cosechando conocimiento en estas nuevas tecnologías, asi mismo a mi familia que me ha apoyado e incentivado a que siga aprendiendo en esta hermosa carrera del conocimiento, a la universidad que ha creado esta maestria para que podamos seguir contribuyendo con el aprendizaje a muchos que realizamos esta hermosa actividad de la tecnologia disruptiva<br>
 
 ## 14. Videos
 
