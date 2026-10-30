@@ -521,7 +521,7 @@ Ver las [consideraciones éticas completas](python/docs/consideraciones_eticas.m
 
 Enlace:
 
-<br><br>
+<br>https://drive.google.com/file/d/1tKZ1n_Mc38Pch80v-iqbOwhYl1WVEFam/view<br>
 
 ### Video de respuestas a las preguntas
 
